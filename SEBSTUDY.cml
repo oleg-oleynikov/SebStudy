@@ -1,0 +1,111 @@
+BoundedContext SEBSTUDY {
+    domainVisionStatement "SEBSTUDY realizes the following subdomains: Resume"
+    type FEATURE
+
+    Aggregate ResumeAggreate {
+
+        ValueObject FirstName {
+            String firstName
+            // Не должно быть: [0-9], ъ ь в начале, спец символов, латиница   
+        }
+
+        ValueObject LastName {
+            String lastName
+            // Не должно быть: [0-9], ъ ь в начале, спец символов, латиница   
+        }
+
+        ValueObject MidleName {
+            String midleName
+            // Не должно быть: [0-9], ъ ь в начале, спец символов, латиница   
+        }
+
+        ValueObject PhoneNumber {
+            String phoneNumber
+            // Только цифры, не более 11
+        }
+
+        ValueObject Education {
+            String education
+        }
+
+        ValueObject Educations {
+            - List<Education> educations
+        }
+
+        ValueObject AboutMe {
+            String aboutMe
+            // Не более 350 символов
+        }
+
+        ValueObject Skill {
+            String skill
+            // Не более 30 символов 
+        }
+        
+        ValueObject Skills {
+            - List<Skill> skills
+        }
+
+        ValueObject Photo {
+            String photo
+        }
+        
+        ValueObject Direction {
+            String direction
+            // Не более 50 символов
+        }
+
+        ValueObject Directions {
+            - List<Direction> directions
+        }
+
+        ValueObject AboutProjects {
+            String aboutProjects
+            // Не более 400 символов
+        }
+
+        ValueObject Portfolio {
+            String portfolio
+            // Проверка на ссылку
+        }
+
+        ValueObject StudentGroup {
+            String studentGroup
+            // Не более 15
+        }
+
+        ValueObject ResumeId {
+            int resumeId
+            // Целочисленное значение
+        }
+
+        abstract
+        CommandEvent AbstractResumeCommand {
+            - Resume resume
+        }
+
+        CommandEvent SendResume extends @AbstractResumeCommand
+        DomainEvent ResumeSended {
+            Date timestamp
+            - Resume resume
+        }
+
+        Entity Resume {
+            aggregateRoot 
+
+            - ResumeId resumeId
+            - FirstName firstName
+            - LastName lastName
+            - MidleName midleName
+            - PhoneNumber phoneNumber
+            - Educations educations
+            - AboutMe aboutMe
+            - Skills skills
+            - Photo photo
+            - Directions directions
+            - AboutProjects aboutProjects
+            - Portfolio portfolio
+            - StudentGroup studentGroup
+        }
+    }
+}
