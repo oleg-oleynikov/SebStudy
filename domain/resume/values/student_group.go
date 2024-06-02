@@ -17,8 +17,5 @@ func NewStudentGroup(studentGroup string) (*StudentGroup, error) {
 }
 
 func isValidStudentGroup(studentGroup string) bool {
-	if len(studentGroup) > 15 {
-		return false
-	}
-	return true
+	return len(studentGroup) <= 15
 }

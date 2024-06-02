@@ -21,8 +21,5 @@ func NewPortfolio(portfolio string) (*Portfolio, error) {
 
 func isValidPortfolio(portfolio string) bool {
 	u, _ := url.ParseRequestURI(portfolio)
-	if u == nil {
-		return false
-	}
-	return true
+	return u != nil
 }

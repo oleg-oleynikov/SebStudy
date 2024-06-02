@@ -23,3 +23,7 @@ type Skills struct {
 func (s *Skills) Appendskill(sk Skill) {
 	s.skills = append(s.skills, sk)
 }
+
+func (s *Skills) GetSkills() []Skill {
+	return s.skills
+}
