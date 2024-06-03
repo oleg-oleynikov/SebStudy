@@ -17,11 +17,3 @@ func NewEducation(education string) (*Education, error) {
 // func isValidEducation(education string) bool {
 // 	return true
 // }
-
-type Educations struct {
-	educations []Education
-}
-
-func (e *Educations) AppendEducation(ed Education) {
-	e.educations = append(e.educations, ed)
-}
