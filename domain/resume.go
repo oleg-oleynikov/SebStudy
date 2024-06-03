@@ -1,8 +1,13 @@
 package domain
 
-import "SebStudy/domain/resume/values"
+import (
+	"SebStudy/domain/resume/values"
+	eventsourcing "SebStudy/event_sourcing"
+)
 
 type Resume struct {
+	eventsourcing.AggregateRootBase
+
 	resumeId      values.ResumeId
 	firstName     values.FirstName
 	middleName    values.MiddleName

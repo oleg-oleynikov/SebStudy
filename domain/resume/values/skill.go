@@ -15,15 +15,3 @@ func NewSkill(skill string) (*Skill, error) {
 		skill: skill,
 	}, nil
 }
-
-type Skills struct {
-	skills []Skill
-}
-
-func (s *Skills) Appendskill(sk Skill) {
-	s.skills = append(s.skills, sk)
-}
-
-func (s *Skills) GetSkills() []Skill {
-	return s.skills
-}
