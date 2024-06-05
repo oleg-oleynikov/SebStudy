@@ -1,4 +1,4 @@
-package domain
+package resume
 
 import (
 	"SebStudy/domain/resume/values"
