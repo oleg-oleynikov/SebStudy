@@ -17,8 +17,8 @@ func (d Dispatcher) Dispatch(command interface{}, metadata CommandMetadata) erro
 	return handler(command, metadata)
 }
 
-func NewDispatcher(commandHandlerMap CommandHandlerMap) Dispatcher {
-	return Dispatcher{
+func NewDispatcher(commandHandlerMap CommandHandlerMap) *Dispatcher {
+	return &Dispatcher{
 		commandHandlerMap: commandHandlerMap,
 	}
 }
