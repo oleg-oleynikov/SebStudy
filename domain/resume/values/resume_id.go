@@ -1,16 +1,20 @@
 package values
 
-import "github.com/google/uuid"
+import (
+	"fmt"
+
+	"github.com/google/uuid"
+)
 
 type ResumeId struct {
 	resumeId uuid.UUID
-// 	resumeId int
+	// 	resumeId int
 }
 
 func NewResumeId(resumeId int) *ResumeId {
 	id := uuid.New()
 	return &ResumeId{
-		resumeId: resumeId,
+		resumeId: id,
 	}
 }
 
