@@ -54,3 +54,21 @@ func NewResume(
 		studentGroup:  studentGroup,
 	}
 }
+
+func (r *Resume) ToString() []string {
+	return []string{
+		r.resumeId.ToString(), "\n",
+		r.firstName.ToString(), "\n",
+		r.middleName.ToString(), "\n",
+		r.lastName.ToString(), "\n",
+		r.phoneNumber.ToString(), "\n",
+		r.educations.ToString(), "\n",
+		r.aboutMe.ToString(), "\n",
+		r.skills.ToString(), "\n",
+		r.photo.ToString(), "\n",
+		r.directions.ToString(), "\n",
+		r.aboutProjects.ToString(), "\n",
+		r.portfolio.ToString(), "\n",
+    r.studentGroup.ToString(), "\n",
+  }
+}

@@ -2,6 +2,7 @@ package values
 
 import (
 	"errors"
+	"fmt"
 	"regexp"
 )
 
@@ -23,4 +24,8 @@ func isValidPhoneNumber(phoneNumber string) bool {
 	phoneNumberRegex := regexp.MustCompile(`^\d{11}$`)
 
 	return phoneNumberRegex.MatchString(phoneNumber)
+}
+
+func (phoneNum *PhoneNumber) ToString() string {
+	return fmt.Sprintf("%s", phoneNum)
 }

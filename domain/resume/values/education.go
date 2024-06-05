@@ -1,5 +1,7 @@
 package values
 
+import "fmt"
+
 type Education struct {
 	education string
 }
@@ -17,3 +19,7 @@ func NewEducation(education string) (*Education, error) {
 // func isValidEducation(education string) bool {
 // 	return true
 // }
+
+func (ed *Education) ToString() string {
+	return fmt.Sprintf("%s", ed)
+}

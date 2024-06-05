@@ -1,6 +1,9 @@
 package values
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
 type Direction struct {
 	direction string
@@ -26,4 +29,8 @@ func (d *Directions) Appendskill(dr Direction) {
 
 func (d *Directions) GetDirections() []Direction {
 	return d.directions
+}
+
+func (dir *Directions) ToString() string {
+	return fmt.Sprintf("[%s]", dir)
 }

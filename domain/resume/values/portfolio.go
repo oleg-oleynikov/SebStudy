@@ -2,6 +2,7 @@ package values
 
 import (
 	"errors"
+	"fmt"
 	"net/url"
 )
 
@@ -22,4 +23,8 @@ func NewPortfolio(portfolio string) (*Portfolio, error) {
 func isValidPortfolio(portfolio string) bool {
 	u, _ := url.ParseRequestURI(portfolio)
 	return u != nil
+}
+
+func (p Portfolio) ToString() string {
+	return fmt.Sprintf("%s", p)
 }
