@@ -23,24 +23,35 @@ type Resume struct {
 	studentGroup  values.StudentGroup
 }
 
-func NewResume(resumeId1 values.ResumeId, firstName1 values.FirstName, middleName1 values.MiddleName,
-	lastName1 values.LastName, phoneNumber1 values.PhoneNumber, educations1 values.Educations,
-	aboutMe1 values.AboutMe, skills1 values.Skills, photo1 values.Photo, directions1 values.Directions,
-	aboutProjects1 values.AboutProjects, portfolio1 values.Portfolio, studentGroup1 values.StudentGroup) Resume {
-	return Resume{
-		resumeId:      resumeId1,
-		firstName:     firstName1,
-		middleName:    middleName1,
-		lastName:      lastName1,
-		phoneNumber:   phoneNumber1,
-		educations:    educations1,
-		aboutMe:       aboutMe1,
-		skills:        skills1,
-		photo:         photo1,
-		directions:    directions1,
-		aboutProjects: aboutProjects1,
-		portfolio:     portfolio1,
-		studentGroup:  studentGroup1,
+func NewResume(
+	resumeId values.ResumeId,
+	firstName values.FirstName,
+	middleName values.MiddleName,
+	lastName values.LastName,
+	phoneNumber values.PhoneNumber,
+	educations values.Educations,
+	aboutMe values.AboutMe,
+	skills values.Skills,
+	photo values.Photo,
+	directions values.Directions,
+	aboutProjects values.AboutProjects,
+	portfolio values.Portfolio,
+	studentGroup values.StudentGroup,
+) *Resume {
+	return &Resume{
+		resumeId:      resumeId,
+		firstName:     firstName,
+		middleName:    middleName,
+		lastName:      lastName,
+		phoneNumber:   phoneNumber,
+		educations:    educations,
+		aboutMe:       aboutMe,
+		skills:        skills,
+		photo:         photo,
+		directions:    directions,
+		aboutProjects: aboutProjects,
+		portfolio:     portfolio,
+		studentGroup:  studentGroup,
 	}
 }
 

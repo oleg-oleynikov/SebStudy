@@ -3,12 +3,12 @@ package values
 import "fmt"
 
 type Photo struct {
-	photo string
+	url string
 }
 
-func NewPhoto(photo string) (*Photo, error) {
+func NewPhoto(url string) (*Photo, error) {
 	return &Photo{
-		photo: photo,
+		url: url,
 	}, nil
 }
 
