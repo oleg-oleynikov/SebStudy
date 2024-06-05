@@ -1,6 +1,9 @@
 package values
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
 type AboutProjects struct {
 	aboutProjects string
@@ -14,4 +17,8 @@ func NewAboutProjects(aboutProjects string) (*AboutProjects, error) {
 	return &AboutProjects{
 		aboutProjects: aboutProjects,
 	}, nil
+}
+
+func (aProjects *AboutProjects) ToString() string {
+	return fmt.Sprintf("%s", aProjects)
 }

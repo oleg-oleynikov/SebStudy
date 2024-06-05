@@ -1,6 +1,10 @@
 package values
 
-import "github.com/google/uuid"
+import (
+	"fmt"
+
+	"github.com/google/uuid"
+)
 
 type ResumeId struct {
 	resumeId uuid.UUID
@@ -11,4 +15,8 @@ func NewResumeId(resumeId int) *ResumeId {
 	return &ResumeId{
 		resumeId: id,
 	}
+}
+
+func (rID *ResumeId) ToString() string {
+	return fmt.Sprintf("%v", rID)
 }

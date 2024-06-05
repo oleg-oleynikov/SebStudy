@@ -1,6 +1,9 @@
 package values
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
 type Skill struct {
 	skill string
@@ -14,4 +17,8 @@ func NewSkill(skill string) (*Skill, error) {
 	return &Skill{
 		skill: skill,
 	}, nil
+}
+
+func (sk *Skill) ToString() string {
+	return fmt.Sprintf("%s", sk)
 }

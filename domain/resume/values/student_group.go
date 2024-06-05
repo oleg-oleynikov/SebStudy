@@ -1,6 +1,9 @@
 package values
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
 type StudentGroup struct {
 	studentGroup string
@@ -18,4 +21,8 @@ func NewStudentGroup(studentGroup string) (*StudentGroup, error) {
 
 func isValidStudentGroup(studentGroup string) bool {
 	return len(studentGroup) <= 15
+}
+
+func (group *StudentGroup) ToString() string {
+	return fmt.Sprintf("%s", group)
 }

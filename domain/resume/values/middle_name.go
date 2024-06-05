@@ -2,6 +2,7 @@ package values
 
 import (
 	"errors"
+	"fmt"
 	"regexp"
 )
 
@@ -23,4 +24,8 @@ func isValidMiddleName(middleName string) bool {
 	middleNameRegex := regexp.MustCompile(`^[^0-9A-Za-z]+$`)
 
 	return middleNameRegex.MatchString(middleName)
+}
+
+func (mName *MiddleName) ToString() string {
+	return fmt.Sprintf("%s", mName)
 }

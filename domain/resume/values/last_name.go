@@ -2,6 +2,7 @@ package values
 
 import (
 	"errors"
+	"fmt"
 	"regexp"
 )
 
@@ -23,4 +24,8 @@ func isValidLastName(lastName string) bool {
 	lastNameRegex := regexp.MustCompile(`^[^0-9A-Za-z]+$`)
 
 	return lastNameRegex.MatchString(lastName)
+}
+
+func (lName *LastName) ToString() string {
+	return fmt.Sprintf("%s", lName)
 }
