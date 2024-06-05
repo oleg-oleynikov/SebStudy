@@ -1,18 +1,15 @@
 package commands
 
 import (
-	resume "SebStudy/domain/resume"
-	"time"
+	"SebStudy/domain/resume"
 )
 
 type SendResume struct {
-	resume    resume.Resume
-	timestamp time.Time
+	resume resume.Resume
 }
 
-func NewSendResume(resume resume.Resume, timestamp time.Time) *SendResume {
+func NewSendResume(resume resume.Resume) *SendResume {
 	return &SendResume{
-		resume:    resume,
-		timestamp: timestamp,
+		resume: resume,
 	}
 }
