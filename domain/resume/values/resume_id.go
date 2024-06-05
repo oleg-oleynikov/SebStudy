@@ -14,7 +14,7 @@ type ResumeId struct {
 func NewResumeId(resumeId int) *ResumeId {
 	id := uuid.New()
 	return &ResumeId{
-		resumeId: resumeId,
+		resumeId: id,
 	}
 }
 
