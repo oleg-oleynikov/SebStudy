@@ -34,7 +34,6 @@ func TestResume(t *testing.T) {
 
 	resume1 := NewResume(*idResume, *firstName, *middleName, *lastName, *phone,
 		educs, *description, skills, *photo, directions, *projectDescription, *portfolioLink, *group)
-	fmt.Println(resume1)
 
 	fmt.Println(resume1.ToString())
 }
