@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"time"
 
 	pb "SebStudy/proto/resume"
 
@@ -46,12 +47,15 @@ func main() {
 		StudentGroup:  "SA-33",
 	}
 
+	t := time.Now()
+	current_time := time.Date(t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), time.UTC)
+
 	event := cloudevents.NewEvent()
 	event.SetSource("example/uri")
 	event.SetType("example.type")
+	event.SetTime(current_time)
 	b, err := proto.Marshal(&testResume)
 	event.SetData("application/protobuf", b)
-
 	ctx := cloudevents.ContextWithTarget(context.Background(), "http://localhost:8080/")
 
 	if result := c.Send(ctx, event); cloudevents.IsUndelivered(result) {
