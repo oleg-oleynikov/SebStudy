@@ -2,7 +2,7 @@ package resume
 
 import (
 	"SebStudy/domain/resume/values"
-	eventsourcing "SebStudy/event_sourcing"
+	eventsourcing "SebStudy/eventsourcing"
 )
 
 type Resume struct {
@@ -69,6 +69,6 @@ func (r *Resume) ToString() []string {
 		r.directions.ToString(), "\n",
 		r.aboutProjects.ToString(), "\n",
 		r.portfolio.ToString(), "\n",
-    r.studentGroup.ToString(), "\n",
-  }
+		r.studentGroup.ToString(), "\n",
+	}
 }
