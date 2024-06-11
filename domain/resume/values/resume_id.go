@@ -2,19 +2,17 @@ package values
 
 import (
 	"fmt"
-
-	"github.com/google/uuid"
+	//"github.com/google/uuid"
 )
 
 type ResumeId struct {
-	resumeId uuid.UUID
-	// 	resumeId int
+	// resumeId uuid.UUID
+	resumeId int
 }
 
-func NewResumeId(resumeId int) *ResumeId {
-	id := uuid.New()
+func NewResumeId(rID int) *ResumeId {
 	return &ResumeId{
-		resumeId: id,
+		resumeId: rID,
 	}
 }
 
