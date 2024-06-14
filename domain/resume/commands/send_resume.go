@@ -11,16 +11,16 @@ type SendResume struct {
 	ResumeId      values.ResumeId
 	FirstName     values.FirstName
 	MiddleName    values.MiddleName
-	lastName      values.LastName
-	phoneNumber   values.PhoneNumber
-	educations    values.Educations
-	aboutMe       values.AboutMe
-	skills        values.Skills
-	photo         values.Photo
-	directions    values.Directions
-	aboutProjects values.AboutProjects
-	portfolio     values.Portfolio
-	studentGroup  values.StudentGroup
+	LastName      values.LastName
+	PhoneNumber   values.PhoneNumber
+	Educations    values.Educations
+	AboutMe       values.AboutMe
+	Skills        values.Skills
+	Photo         values.Photo
+	Directions    values.Directions
+	AboutProjects values.AboutProjects
+	Portfolio     values.Portfolio
+	StudentGroup  values.StudentGroup
 }
 
 func NewSendResume(
@@ -42,15 +42,15 @@ func NewSendResume(
 		ResumeId:      resumeId,
 		FirstName:     firstName,
 		MiddleName:    middleName,
-		lastName:      lastName,
-		phoneNumber:   phoneNumber,
-		educations:    educations,
-		aboutMe:       aboutMe,
-		skills:        skills,
-		photo:         photo,
-		directions:    directions,
-		aboutProjects: aboutProjects,
-		portfolio:     portfolio,
-		studentGroup:  studentGroup,
+		LastName:      lastName,
+		PhoneNumber:   phoneNumber,
+		Educations:    educations,
+		AboutMe:       aboutMe,
+		Skills:        skills,
+		Photo:         photo,
+		Directions:    directions,
+		AboutProjects: aboutProjects,
+		Portfolio:     portfolio,
+		StudentGroup:  studentGroup,
 	}
 }
