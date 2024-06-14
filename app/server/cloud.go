@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"reflect"
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 )
@@ -12,6 +13,7 @@ import (
 type CloudServer struct {
 	Dispatcher *infrastructure.Dispatcher
 	Server     cloudevents.Client
+	CeMapper   *infrastructure.CeMapper
 }
 
 func NewCloudEventsClient(port int) cloudevents.Client {
@@ -22,10 +24,11 @@ func NewCloudEventsClient(port int) cloudevents.Client {
 	return ce
 }
 
-func NewCloudServer(d *infrastructure.Dispatcher, ce cloudevents.Client) *CloudServer {
+func NewCloudServer(d *infrastructure.Dispatcher, c cloudevents.Client, ceMapper *infrastructure.CeMapper) *CloudServer {
 	return &CloudServer{
 		Dispatcher: d,
-		Server:     ce,
+		Server:     c,
+		CeMapper:   ceMapper,
 	}
 }
 
@@ -36,6 +39,14 @@ func (c *CloudServer) Run() {
 }
 
 func (c *CloudServer) receive(event cloudevents.Event) {
-	fmt.Printf("%s", event)
-	c.Dispatcher.Dispatch(event, infrastructure.NewCommandMetadataFromCloudEvent(event))
+	// fmt.Printf("%s", event)
+	// fmt.Println(event.Type())
+
+	cmd, err := c.CeMapper.MapToCommand(event)
+	if err != nil {
+		panic(fmt.Errorf("failed to map cloudevent: %v", err)) // убрать панику
+	}
+	fmt.Printf("Заглушка: %s\n", reflect.TypeOf(cmd))
+	// proto.Unmarshal(event.Data, )
+	// c.Dispatcher.Dispatch(event, infrastructure.NewCommandMetadataFromCloudEvent(event))
 }

@@ -22,8 +22,8 @@ func TestResume(t *testing.T) {
 	portfolioLink, _ := values.NewPortfolio("https://github.com")
 	group, _ := values.NewStudentGroup("СА-33")
 
-	educs := values.Educations{}
-	educs.AppendEducation(*educ)
+	// educs := values.Educations{}
+	// educs.AppendEducation(*educ)
 
 	skills := values.Skills{}
 	skills.AppendSkill(*skill1)
@@ -33,7 +33,7 @@ func TestResume(t *testing.T) {
 	directions.Appendskill(*direction)
 
 	resume1 := NewResume(*idResume, *firstName, *middleName, *lastName, *phone,
-		educs, *description, skills, *photo, directions, *projectDescription, *portfolioLink, *group)
+		*educ, *description, skills, *photo, directions, *projectDescription, *portfolioLink, *group)
 	fmt.Println(resume1)
 
 	fmt.Println(resume1.ToString())

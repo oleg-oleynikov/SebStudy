@@ -1,6 +1,8 @@
 package resume
 
 import (
+	"SebStudy/domain/resume/commands"
+	"SebStudy/domain/resume/events"
 	"SebStudy/domain/resume/values"
 	eventsourcing "SebStudy/eventsourcing"
 )
@@ -13,7 +15,7 @@ type Resume struct {
 	middleName    values.MiddleName
 	lastName      values.LastName
 	phoneNumber   values.PhoneNumber
-	educations    values.Educations
+	education     values.Education
 	aboutMe       values.AboutMe
 	skills        values.Skills
 	photo         values.Photo
@@ -29,7 +31,7 @@ func NewResume(
 	middleName values.MiddleName,
 	lastName values.LastName,
 	phoneNumber values.PhoneNumber,
-	educations values.Educations,
+	education values.Education,
 	aboutMe values.AboutMe,
 	skills values.Skills,
 	photo values.Photo,
@@ -38,13 +40,13 @@ func NewResume(
 	portfolio values.Portfolio,
 	studentGroup values.StudentGroup,
 ) *Resume {
-	return &Resume{
+	r := &Resume{
 		resumeId:      resumeId,
 		firstName:     firstName,
 		middleName:    middleName,
 		lastName:      lastName,
 		phoneNumber:   phoneNumber,
-		educations:    educations,
+		education:     education,
 		aboutMe:       aboutMe,
 		skills:        skills,
 		photo:         photo,
@@ -53,6 +55,10 @@ func NewResume(
 		portfolio:     portfolio,
 		studentGroup:  studentGroup,
 	}
+
+	r.Register(events.ResumeSended{}, func(e interface{}) { r.ResumeSended(e.(events.ResumeSended)) })
+
+	return r
 }
 
 func (r *Resume) ToString() []string {
@@ -62,7 +68,7 @@ func (r *Resume) ToString() []string {
 		r.middleName.ToString(), "\n",
 		r.lastName.ToString(), "\n",
 		r.phoneNumber.ToString(), "\n",
-		r.educations.ToString(), "\n",
+		r.education.ToString(), "\n",
 		r.aboutMe.ToString(), "\n",
 		r.skills.ToString(), "\n",
 		r.photo.ToString(), "\n",
@@ -71,4 +77,14 @@ func (r *Resume) ToString() []string {
 		r.portfolio.ToString(), "\n",
 		r.studentGroup.ToString(), "\n",
 	}
+}
+
+func (r *Resume) ResumeSended(e events.ResumeSended) {
+	// Проставляем все поля пустому объекту Resume
+	return
+}
+
+func (r *Resume) SendResume(c commands.SendResume) {
+	// Формируем ResumeSended event и делаем r.Raise(ResumeSended{})
+	return
 }

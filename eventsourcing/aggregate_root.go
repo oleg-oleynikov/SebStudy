@@ -6,14 +6,14 @@ type AggregateRoot interface {
 	Load(events []interface{})
 	ClearChanges()
 	GetChanges() []interface{}
-	GetId() string
+	GetId() int
 	GetVersion() int
 }
 
 type AggregateRootBase struct {
 	AggregateRoot
 
-	Id       string
+	Id       int
 	version  int
 	changes  []interface{}
 	handlers map[reflect.Type]func(interface{})
@@ -41,11 +41,11 @@ func (a *AggregateRootBase) Register(event interface{}, handler func(interface{}
 
 func (a *AggregateRootBase) Load(events []interface{}) {
 	for _, event := range events {
-		a.Apply(event)
+		a.Raise(event)
 	}
 }
 
-func (a *AggregateRootBase) Apply(event interface{}) {
+func (a *AggregateRootBase) Raise(event interface{}) {
 	if handler, exists := a.handlers[getValueType(event)]; exists {
 		handler(event)
 		a.changes = append(a.changes, event)
@@ -61,7 +61,7 @@ func (a *AggregateRootBase) GetChanges() []interface{} {
 	return a.changes
 }
 
-func (a *AggregateRootBase) GetId() string {
+func (a *AggregateRootBase) GetId() int {
 	return a.Id
 }
 
