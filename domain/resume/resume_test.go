@@ -30,7 +30,7 @@ func TestResume(t *testing.T) {
 	skills.AppendSkill(*skill2)
 
 	directions := values.Directions{}
-	directions.Appendskill(*direction)
+	directions.AppendDirection(*direction)
 
 	resume1 := NewResume(*idResume, *firstName, *middleName, *lastName, *phone,
 		educs, *description, skills, *photo, directions, *projectDescription, *portfolioLink, *group)

@@ -23,7 +23,7 @@ type Directions struct {
 	directions []Direction
 }
 
-func (d *Directions) Appendskill(dr Direction) {
+func (d *Directions) AppendDirection(dr Direction) {
 	d.directions = append(d.directions, dr)
 }
 
