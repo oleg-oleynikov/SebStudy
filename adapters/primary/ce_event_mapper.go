@@ -4,7 +4,6 @@ import (
 	"SebStudy/domain/resume/commands"
 	"SebStudy/domain/resume/values"
 	"fmt"
-	"reflect"
 
 	pb "SebStudy/proto/resume"
 
@@ -53,15 +52,18 @@ func (c *CeMapper) Register(ceType string, f func(cloudevents.Event) (interface{
 }
 
 func toSendResume(c cloudevents.Event) (interface{}, error) {
+
 	var de pb.ResumeSended
 	proto.Unmarshal(c.Data(), &de)
-	fmt.Printf("Event data: %v\nEvent type: %s\n", &de, reflect.ValueOf(&de))
+
+	// fmt.Printf("Event data: %v\nEvent type: %s\n", &de, reflect.ValueOf(&de))
 	//TODO: Заполнить поля cmd из cloudevents.Event (c)
 	// proto.Unmarshal(c.Data())
 
 	// if reflect.ValueOf(*de).IsZero() {
 	// 	return nil, errors.New("struct is empty")
 	// }
+
 	resumeID := values.NewResumeId(int(de.GetResumeId()))
 
 	firstName, err := values.NewFirstName(de.GetFirstName())
@@ -144,5 +146,5 @@ func toSendResume(c cloudevents.Event) (interface{}, error) {
 		educations, *aboutMe, skills, *photo, directions,
 		*aboutProjects, *portfolio, *studentGroup)
 
-	return createdResume, nil
+	return &createdResume, nil
 }

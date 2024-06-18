@@ -1,11 +1,11 @@
 package primary
 
 import (
+	"SebStudy/infrastructure"
 	"SebStudy/ports"
 	"context"
 	"fmt"
 	"log"
-	"reflect"
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 )
@@ -46,7 +46,7 @@ func (c *CloudEventsAdapter) receive(event cloudevents.Event) {
 	if err != nil {
 		panic(fmt.Errorf("failed to map cloudevent: %v", err)) // убрать панику
 	}
-	fmt.Printf("Заглушка: %s\n", reflect.TypeOf(cmd))
+	// fmt.Printf("Заглушка: %s\n", reflect.TypeOf(cmd))
 	// proto.Unmarshal(event.Data, )
-	// c.Dispatcher.Dispatch(event, infrastructure.NewCommandMetadataFromCloudEvent(event))
+	c.Dispatcher.Dispatch(cmd, infrastructure.NewCommandMetadataFromCloudEvent(event))
 }

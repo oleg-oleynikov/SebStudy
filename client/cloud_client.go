@@ -53,9 +53,9 @@ func main() {
 	event := cloudevents.NewEvent()
 	event.SetTime(current_time)
 	event.SetSource("example/uri")
-	event.SetType("resume.send2")
+	event.SetType("resume.send")
 	event.SetTime(current_time)
-	b, err := proto.Marshal(&testResume)
+	b, _ := proto.Marshal(&testResume)
 	event.SetData("application/protobuf", b)
 	ctx := cloudevents.ContextWithTarget(context.Background(), "http://localhost:8080/")
 

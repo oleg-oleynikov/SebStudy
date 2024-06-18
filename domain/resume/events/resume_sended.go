@@ -26,3 +26,22 @@ type ResumeSended struct {
 	StudentGroup  values.StudentGroup
 	CreatedAt     time.Time
 }
+
+func NewResumeSended(
+	ResumeId values.ResumeId,
+	FirstName values.FirstName,
+	MiddleName values.MiddleName,
+	LastName values.LastName,
+	PhoneNumber values.PhoneNumber,
+	Educations values.Educations,
+	AboutMe values.AboutMe,
+	Skills values.Skills,
+	Photo values.Photo,
+	Directions values.Directions,
+	AboutProjects values.AboutProjects,
+	Portfolio values.Portfolio,
+	StudentGroup values.StudentGroup,
+	CreatedAt time.Time,
+) *ResumeSended {
+	return nil
+}

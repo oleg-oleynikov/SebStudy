@@ -5,10 +5,10 @@ import (
 )
 
 type CommandMetadata struct {
-	CloudEvent *cloudevents.Event
+	CloudEvent cloudevents.Event
 }
 
-func NewCommandMetadataFromCloudEvent(cloudevent *cloudevents.Event) CommandMetadata {
+func NewCommandMetadataFromCloudEvent(cloudevent cloudevents.Event) CommandMetadata {
 	return CommandMetadata{
 		CloudEvent: cloudevent,
 	}

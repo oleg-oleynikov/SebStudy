@@ -5,6 +5,7 @@ import (
 	"SebStudy/domain/resume/events"
 	"SebStudy/domain/resume/values"
 	eventsourcing "SebStudy/eventsourcing"
+	"time"
 )
 
 type Resume struct {
@@ -15,7 +16,7 @@ type Resume struct {
 	middleName    values.MiddleName
 	lastName      values.LastName
 	phoneNumber   values.PhoneNumber
-	education     values.Education
+	educations    values.Educations
 	aboutMe       values.AboutMe
 	skills        values.Skills
 	photo         values.Photo
@@ -31,7 +32,7 @@ func NewResume(
 	middleName values.MiddleName,
 	lastName values.LastName,
 	phoneNumber values.PhoneNumber,
-	education values.Education,
+	educations values.Educations,
 	aboutMe values.AboutMe,
 	skills values.Skills,
 	photo values.Photo,
@@ -46,7 +47,7 @@ func NewResume(
 		middleName:    middleName,
 		lastName:      lastName,
 		phoneNumber:   phoneNumber,
-		education:     education,
+		educations:    educations,
 		aboutMe:       aboutMe,
 		skills:        skills,
 		photo:         photo,
@@ -68,7 +69,7 @@ func (r *Resume) ToString() []string {
 		r.middleName.ToString(), "\n",
 		r.lastName.ToString(), "\n",
 		r.phoneNumber.ToString(), "\n",
-		r.education.ToString(), "\n",
+		r.educations.ToString(), "\n",
 		r.aboutMe.ToString(), "\n",
 		r.skills.ToString(), "\n",
 		r.photo.ToString(), "\n",
@@ -80,11 +81,23 @@ func (r *Resume) ToString() []string {
 }
 
 func (r *Resume) ResumeSended(e events.ResumeSended) {
-	// Проставляем все поля пустому объекту Resume
-	return
+	r.resumeId = e.ResumeId
+	r.firstName = e.FirstName
+	r.middleName = e.MiddleName
+	r.lastName = e.LastName
+	r.phoneNumber = e.PhoneNumber
+	r.educations = e.Educations
+	r.aboutMe = e.AboutMe
+	r.skills = e.Skills
+	r.photo = e.Photo
+	r.directions = e.Directions
+	r.aboutProjects = e.AboutProjects
+	r.portfolio = e.Portfolio
+	r.studentGroup = e.StudentGroup
 }
 
 func (r *Resume) SendResume(c commands.SendResume) {
 	// Формируем ResumeSended event и делаем r.Raise(ResumeSended{})
-	return
+	e := events.NewResumeSended(c.ResumeId, c.FirstName, c.MiddleName, c.LastName, c.PhoneNumber, c.Educations, c.AboutMe, c.Skills, c.Photo, c.Directions, c.AboutProjects, c.Portfolio, c.StudentGroup, time.Now())
+	r.Raise(e)
 }
