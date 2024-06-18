@@ -53,7 +53,7 @@ func main() {
 	event := cloudevents.NewEvent()
 	event.SetTime(current_time)
 	event.SetSource("example/uri")
-	event.SetType("example.type")
+	event.SetType("resume.send2")
 	event.SetTime(current_time)
 	b, err := proto.Marshal(&testResume)
 	event.SetData("application/protobuf", b)
@@ -66,12 +66,4 @@ func main() {
 		log.Printf("result: %v", result)
 	}
 
-}
-
-func SendCloudEvent(ctx context.Context, event cloudevents.Event) error {
-	c, err := cloudevents.NewClientHTTP()
-	if err != nil {
-		log.Fatalf("failed to create client, %v", err)
-	}
-	return c.Send(ctx, event)
 }

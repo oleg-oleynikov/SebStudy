@@ -10,10 +10,6 @@ type CommandHandler interface {
 	GetHandlers() map[reflect.Type]func(Command, CommandMetadata) error
 }
 
-type CommandHandle interface {
-	Handle(command Command) error
-}
-
 type CommandHandlerBase struct {
 	CommandHandler
 

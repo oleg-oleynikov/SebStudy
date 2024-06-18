@@ -1,11 +1,22 @@
 package main
 
-import "SebStudy/app/server"
+import (
+	"SebStudy/adapters/primary"
+	"SebStudy/domain/resume"
+	"SebStudy/infrastructure"
+)
 
 func main() {
 	// disp :=
-	ce := server.NewCloudEventsClient(8080)
-	s := server.NewCloudServer(nil, ce)
+	handlers := resume.NewHandlers(nil)
+	cmdHandlerMap := infrastructure.NewCommandHandlerMap(handlers)
+	dispatcher := infrastructure.NewDispatcher(cmdHandlerMap)
+
+	ceMapper := primary.NewCeMapper()
+
+	s := primary.NewCloudEventsAdapter(dispatcher, ceMapper, 8080)
 
 	s.Run()
+	// u := uuid.New()
+	// fmt.Println(u)
 }

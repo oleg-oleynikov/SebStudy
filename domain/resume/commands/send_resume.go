@@ -2,12 +2,9 @@ package commands
 
 import (
 	"SebStudy/domain/resume/values"
-	"SebStudy/eventsourcing"
 )
 
 type SendResume struct {
-	eventsourcing.AggregateRootBase
-
 	ResumeId      values.ResumeId
 	FirstName     values.FirstName
 	MiddleName    values.MiddleName

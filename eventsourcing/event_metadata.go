@@ -17,6 +17,7 @@ func NewEventMetadata(EventId string, Time time.Time) EventMetadata {
 
 }
 
+// TODO: Доделать чтобы делал метадату из CommandMetadata
 func NewEventMetadataFrom() EventMetadata {
 	return EventMetadata{}
 }

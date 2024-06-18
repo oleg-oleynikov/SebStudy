@@ -1,10 +1,11 @@
 package resume
 
 import (
+	"SebStudy/domain/resume/values"
 	"SebStudy/infrastructure"
 )
 
 type ResumeRepository interface {
-	SaveResume(resume *Resume, metadata infrastructure.CommandMetadata)
-	GetResume(resumeId string) (*Resume, error)
+	Save(resume *Resume, metadata infrastructure.CommandMetadata) error
+	Get(resumeId *values.ResumeId) (*Resume, error)
 }
