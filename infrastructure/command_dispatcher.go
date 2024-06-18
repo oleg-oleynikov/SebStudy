@@ -8,7 +8,7 @@ type Dispatcher struct {
 	commandHandlerMap CommandHandlerMap
 }
 
-func (d Dispatcher) Dispatch(command interface{}, metadata CommandMetadata) error {
+func (d *Dispatcher) Dispatch(command interface{}, metadata CommandMetadata) error {
 	handler, err := d.commandHandlerMap.Get(GetType(command))
 	if err != nil {
 		return fmt.Errorf("no handler registered")

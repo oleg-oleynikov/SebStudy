@@ -52,7 +52,7 @@ func main() {
 
 	event := cloudevents.NewEvent()
 	event.SetSource("example/uri")
-	event.SetType("resume.send")
+	event.SetType("resume.send2")
 	event.SetTime(current_time)
 	b, err := proto.Marshal(&testResume)
 	event.SetData("application/protobuf", b)

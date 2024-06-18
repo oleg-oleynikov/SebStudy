@@ -1,7 +1,7 @@
-package server
+package primary
 
 import (
-	"SebStudy/infrastructure"
+	"SebStudy/ports"
 	"context"
 	"fmt"
 	"log"
@@ -10,13 +10,21 @@ import (
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 )
 
-type CloudServer struct {
-	Dispatcher *infrastructure.Dispatcher
+type CloudEventsAdapter struct {
+	Dispatcher ports.CeEventDispatcher
 	Server     cloudevents.Client
-	CeMapper   *infrastructure.CeMapper
+	CeMapper   *CeMapper
 }
 
-func NewCloudEventsClient(port int) cloudevents.Client {
+func NewCloudEventsAdapter(d ports.CeEventDispatcher, ceMapper *CeMapper, port int) *CloudEventsAdapter {
+	return &CloudEventsAdapter{
+		Dispatcher: d,
+		Server:     newCloudEventsClient(port),
+		CeMapper:   ceMapper,
+	}
+}
+
+func newCloudEventsClient(port int) cloudevents.Client {
 	ce, err := cloudevents.NewClientHTTP(cloudevents.WithPort(port))
 	if err != nil {
 		log.Fatalf("failed to create client, %v", err)
@@ -24,21 +32,13 @@ func NewCloudEventsClient(port int) cloudevents.Client {
 	return ce
 }
 
-func NewCloudServer(d *infrastructure.Dispatcher, c cloudevents.Client, ceMapper *infrastructure.CeMapper) *CloudServer {
-	return &CloudServer{
-		Dispatcher: d,
-		Server:     c,
-		CeMapper:   ceMapper,
-	}
-}
-
-func (c *CloudServer) Run() {
+func (c *CloudEventsAdapter) Run() {
 	if err := c.Server.StartReceiver(context.Background(), c.receive); err != nil {
 		log.Fatalf("failed to start receiver: %v", err)
 	}
 }
 
-func (c *CloudServer) receive(event cloudevents.Event) {
+func (c *CloudEventsAdapter) receive(event cloudevents.Event) {
 	// fmt.Printf("%s", event)
 	// fmt.Println(event.Type())
 
