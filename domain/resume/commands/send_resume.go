@@ -2,9 +2,12 @@ package commands
 
 import (
 	"SebStudy/domain/resume/values"
+	"SebStudy/infrastructure"
 )
 
 type SendResume struct {
+	infrastructure.Command
+
 	ResumeId      values.ResumeId
 	FirstName     values.FirstName
 	MiddleName    values.MiddleName

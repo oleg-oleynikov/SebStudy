@@ -42,6 +42,22 @@ func NewResumeSended(
 	Portfolio values.Portfolio,
 	StudentGroup values.StudentGroup,
 	CreatedAt time.Time,
-) *ResumeSended {
-	return nil
+) ResumeSended {
+	// Также здесь дописать
+	return ResumeSended{
+		ResumeId:      ResumeId,
+		FirstName:     FirstName,
+		MiddleName:    MiddleName,
+		LastName:      LastName,
+		PhoneNumber:   PhoneNumber,
+		Educations:    Educations,
+		AboutMe:       AboutMe,
+		Skills:        Skills,
+		Photo:         Photo,
+		Directions:    Directions,
+		AboutProjects: AboutProjects,
+		Portfolio:     Portfolio,
+		StudentGroup:  StudentGroup,
+		CreatedAt:     CreatedAt,
+	}
 }

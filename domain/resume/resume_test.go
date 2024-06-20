@@ -32,9 +32,21 @@ func TestResume(t *testing.T) {
 	directions := values.Directions{}
 	directions.AppendDirection(*direction)
 
-	resume1 := NewResume(*idResume, *firstName, *middleName, *lastName, *phone,
-		educs, *description, skills, *photo, directions, *projectDescription, *portfolioLink, *group)
+	resume1 := NewResume()
 	fmt.Println(resume1)
+	resume1.resumeId = *idResume
+	resume1.firstName = *firstName
+	resume1.middleName = *middleName
+	resume1.lastName = *lastName
+	resume1.phoneNumber = *phone
+	resume1.educations = educs
+	resume1.aboutMe = *description
+	resume1.skills = skills
+	resume1.photo = *photo
+	resume1.directions = directions
+	resume1.aboutProjects = *projectDescription
+	resume1.portfolio = *portfolioLink
+	resume1.studentGroup = *group
 
 	fmt.Println(resume1.ToString())
 }

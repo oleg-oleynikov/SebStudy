@@ -26,38 +26,12 @@ type Resume struct {
 	studentGroup  values.StudentGroup
 }
 
-func NewResume(
-	resumeId values.ResumeId,
-	firstName values.FirstName,
-	middleName values.MiddleName,
-	lastName values.LastName,
-	phoneNumber values.PhoneNumber,
-	educations values.Educations,
-	aboutMe values.AboutMe,
-	skills values.Skills,
-	photo values.Photo,
-	directions values.Directions,
-	aboutProjects values.AboutProjects,
-	portfolio values.Portfolio,
-	studentGroup values.StudentGroup,
-) *Resume {
+func NewResume() *Resume {
 	r := &Resume{
-		resumeId:      resumeId,
-		firstName:     firstName,
-		middleName:    middleName,
-		lastName:      lastName,
-		phoneNumber:   phoneNumber,
-		educations:    educations,
-		aboutMe:       aboutMe,
-		skills:        skills,
-		photo:         photo,
-		directions:    directions,
-		aboutProjects: aboutProjects,
-		portfolio:     portfolio,
-		studentGroup:  studentGroup,
+		AggregateRootBase: eventsourcing.NewAggregateRootBase(),
 	}
 
-	r.Register(events.ResumeSended{}, func(e interface{}) { r.ResumeSended(e.(events.ResumeSended)) })
+	r.registerHandlers()
 
 	return r
 }
@@ -80,6 +54,10 @@ func (r *Resume) ToString() []string {
 	}
 }
 
+func (r *Resume) registerHandlers() {
+	r.Register(events.ResumeSended{}, func(e interface{}) { r.ResumeSended(e.(events.ResumeSended)) })
+}
+
 func (r *Resume) ResumeSended(e events.ResumeSended) {
 	r.resumeId = e.ResumeId
 	r.firstName = e.FirstName
@@ -96,8 +74,10 @@ func (r *Resume) ResumeSended(e events.ResumeSended) {
 	r.studentGroup = e.StudentGroup
 }
 
-func (r *Resume) SendResume(c commands.SendResume) {
+func (r *Resume) SendResume(c *commands.SendResume) {
 	// Формируем ResumeSended event и делаем r.Raise(ResumeSended{})
+
+	// TODO: Исправить дело с time.Now();
 	e := events.NewResumeSended(c.ResumeId, c.FirstName, c.MiddleName, c.LastName, c.PhoneNumber, c.Educations, c.AboutMe, c.Skills, c.Photo, c.Directions, c.AboutProjects, c.Portfolio, c.StudentGroup, time.Now())
 	r.Raise(e)
 }

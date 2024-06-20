@@ -1,6 +1,8 @@
 package eventsourcing
 
-import "reflect"
+import (
+	"reflect"
+)
 
 type AggregateRoot interface {
 	Load(events []interface{})
@@ -19,11 +21,11 @@ type AggregateRootBase struct {
 	handlers map[reflect.Type]func(interface{})
 }
 
-func NewAggregateRootBase() *AggregateRootBase {
-	return &AggregateRootBase{
+func NewAggregateRootBase() AggregateRootBase {
+	return AggregateRootBase{
 		version:  -1,
 		changes:  make([]interface{}, 0),
-		handlers: make(map[reflect.Type]func(interface{})),
+		handlers: make(map[reflect.Type]func(interface{}), 0),
 	}
 }
 
@@ -46,6 +48,7 @@ func (a *AggregateRootBase) Load(events []interface{}) {
 }
 
 func (a *AggregateRootBase) Raise(event interface{}) {
+	// fmt.Println("ssss")
 	if handler, exists := a.handlers[getValueType(event)]; exists {
 		handler(event)
 		a.changes = append(a.changes, event)

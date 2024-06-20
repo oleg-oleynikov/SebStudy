@@ -7,7 +7,6 @@ import (
 )
 
 func main() {
-	// disp :=
 	handlers := resume.NewHandlers(nil)
 	cmdHandlerMap := infrastructure.NewCommandHandlerMap(handlers)
 	dispatcher := infrastructure.NewDispatcher(cmdHandlerMap)
@@ -17,6 +16,4 @@ func main() {
 	s := primary.NewCloudEventsAdapter(dispatcher, ceMapper, 8080)
 
 	s.Run()
-	// u := uuid.New()
-	// fmt.Println(u)
 }

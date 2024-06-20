@@ -7,6 +7,7 @@ import (
 
 	pb "SebStudy/proto/resume"
 
+	pbcloudevents "github.com/cloudevents/sdk-go/binding/format/protobuf/v2"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"google.golang.org/protobuf/proto"
 )
@@ -56,7 +57,7 @@ func main() {
 	event.SetType("resume.send")
 	event.SetTime(current_time)
 	b, _ := proto.Marshal(&testResume)
-	event.SetData("application/protobuf", b)
+	event.SetData(pbcloudevents.ContentTypeProtobuf, b)
 	ctx := cloudevents.ContextWithTarget(context.Background(), "http://localhost:8080/")
 
 	if result := c.Send(ctx, event); cloudevents.IsUndelivered(result) {

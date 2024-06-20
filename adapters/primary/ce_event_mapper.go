@@ -146,5 +146,5 @@ func toSendResume(c cloudevents.Event) (interface{}, error) {
 		educations, *aboutMe, skills, *photo, directions,
 		*aboutProjects, *portfolio, *studentGroup)
 
-	return &createdResume, nil
+	return createdResume, nil
 }

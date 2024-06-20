@@ -46,7 +46,7 @@ func (c *CloudEventsAdapter) receive(event cloudevents.Event) {
 	if err != nil {
 		panic(fmt.Errorf("failed to map cloudevent: %v", err)) // убрать панику
 	}
-	// fmt.Printf("Заглушка: %s\n", reflect.TypeOf(cmd))
-	// proto.Unmarshal(event.Data, )
+
+	// fmt.Println("Тип команды: ", reflect.TypeOf(cmd))
 	c.Dispatcher.Dispatch(cmd, infrastructure.NewCommandMetadataFromCloudEvent(event))
 }
