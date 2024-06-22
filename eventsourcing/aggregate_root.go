@@ -23,7 +23,7 @@ type AggregateRootBase struct {
 
 func NewAggregateRootBase() AggregateRootBase {
 	return AggregateRootBase{
-		version:  -1,
+		version:  0,
 		changes:  make([]interface{}, 0),
 		handlers: make(map[reflect.Type]func(interface{}), 0),
 	}
