@@ -4,7 +4,6 @@ import (
 	"SebStudy/infrastructure"
 	"SebStudy/ports"
 	"context"
-	"fmt"
 	"log"
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
@@ -38,15 +37,17 @@ func (c *CloudEventsAdapter) Run() {
 	}
 }
 
-func (c *CloudEventsAdapter) receive(event cloudevents.Event) {
-	// fmt.Printf("%s", event)
-	// fmt.Println(event.Type())
+func (c *CloudEventsAdapter) receive(ctx context.Context, event cloudevents.Event) {
 
-	cmd, err := c.CeMapper.MapToCommand(event)
+	cmd, err := c.CeMapper.MapToCommand(ctx, event)
 	if err != nil {
-		panic(fmt.Errorf("failed to map cloudevent: %v", err)) // убрать панику
+		log.Printf("failed to map cloudevent: %v", err)
+		return
 	}
 
-	// fmt.Println("Тип команды: ", reflect.TypeOf(cmd))
-	c.Dispatcher.Dispatch(cmd, infrastructure.NewCommandMetadataFromCloudEvent(event))
+	err = c.Dispatcher.Dispatch(cmd, infrastructure.NewCommandMetadataFromCloudEvent(event))
+	if err != nil {
+		log.Printf("failed to dispatch command: %v", err)
+		return
+	}
 }

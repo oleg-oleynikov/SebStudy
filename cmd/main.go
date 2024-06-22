@@ -6,6 +6,10 @@ import (
 	"SebStudy/infrastructure"
 )
 
+const (
+	port = 8080
+)
+
 func main() {
 	handlers := resume.NewHandlers(nil)
 	cmdHandlerMap := infrastructure.NewCommandHandlerMap(handlers)
@@ -13,7 +17,7 @@ func main() {
 
 	ceMapper := primary.NewCeMapper()
 
-	s := primary.NewCloudEventsAdapter(dispatcher, ceMapper, 8080)
+	s := primary.NewCloudEventsAdapter(dispatcher, ceMapper, port)
 
 	s.Run()
 }

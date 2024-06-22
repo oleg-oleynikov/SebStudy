@@ -1,7 +1,6 @@
 package values
 
 import (
-	"errors"
 	"fmt"
 	"regexp"
 )
@@ -12,7 +11,7 @@ type FirstName struct {
 
 func NewFirstName(firstName string) (*FirstName, error) {
 	if !isValidFirstName(firstName) {
-		return nil, errors.New("invalid first name")
+		return nil, fmt.Errorf("invalid first name: %s", firstName)
 	}
 
 	return &FirstName{

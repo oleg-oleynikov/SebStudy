@@ -2,12 +2,13 @@ package main
 
 import (
 	"context"
+	"encoding/base64"
+	"fmt"
 	"log"
 	"time"
 
 	pb "SebStudy/proto/resume"
 
-	pbcloudevents "github.com/cloudevents/sdk-go/binding/format/protobuf/v2"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"google.golang.org/protobuf/proto"
 )
@@ -48,23 +49,31 @@ func main() {
 		StudentGroup:  "SA-33",
 	}
 
+	// b, _ := proto.Marshal(&testResume)
+	// encodedData := base64.StdEncoding.EncodeToString(b)
+	// fmt.Println(encodedData)
+
 	t := time.Now()
 	current_time := time.Date(t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), time.UTC)
 
 	event := cloudevents.NewEvent()
-	event.SetTime(current_time)
+	event.SetID("1234-1234-1234-1234")
 	event.SetSource("example/uri")
 	event.SetType("resume.send")
 	event.SetTime(current_time)
+	event.SetSpecVersion("1.0")
 	b, _ := proto.Marshal(&testResume)
-	event.SetData(pbcloudevents.ContentTypeProtobuf, b)
+	event.SetData("application/protobuf", b)
+
+	// fmt.Println(event.Data(), "Это была дата")
+	str := base64.StdEncoding.EncodeToString(b)
+	fmt.Println(str)
 	ctx := cloudevents.ContextWithTarget(context.Background(), "http://localhost:8080/")
 
 	if result := c.Send(ctx, event); cloudevents.IsUndelivered(result) {
 		log.Fatalf("failed to send, %v", result)
 	} else {
-		log.Printf("sent: %v", event)
-		log.Printf("result: %v", result)
+		log.Printf("sent cloudevent, %s", event)
+		log.Printf("status code: %d", result)
 	}
-
 }

@@ -3,7 +3,6 @@ package resume
 import (
 	"SebStudy/domain/resume/commands"
 	"SebStudy/infrastructure"
-	"fmt"
 )
 
 type CommandHandlers struct {
@@ -26,12 +25,9 @@ func NewHandlers(repository ResumeRepository) *CommandHandlers {
 		// }
 
 		resume := NewResume()
-		// resume.RegisterHandlers()
 
 		resume.SendResume(cmd)
 
-		// fmt.Print(resume, "\n", resume.GetVersion())
-		fmt.Println(resume.GetChanges()...)
 		// repository.Save(resume, m)
 		return nil
 	})
