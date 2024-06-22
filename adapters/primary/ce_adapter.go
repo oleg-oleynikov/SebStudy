@@ -37,17 +37,19 @@ func (c *CloudEventsAdapter) Run() {
 	}
 }
 
-func (c *CloudEventsAdapter) receive(ctx context.Context, event cloudevents.Event) {
+func (c *CloudEventsAdapter) receive(ctx context.Context, event cloudevents.Event) cloudevents.Result {
 
 	cmd, err := c.CeMapper.MapToCommand(ctx, event)
 	if err != nil {
 		log.Printf("failed to map cloudevent: %v", err)
-		return
+		return cloudevents.NewHTTPResult(400, "failed to map cloudevent: %v", err)
 	}
 
 	err = c.Dispatcher.Dispatch(cmd, infrastructure.NewCommandMetadataFromCloudEvent(event))
 	if err != nil {
 		log.Printf("failed to dispatch command: %v", err)
-		return
+		return cloudevents.NewHTTPResult(500, "failed to dispatch command: %v", err)
 	}
+
+	return cloudevents.ResultACK
 }

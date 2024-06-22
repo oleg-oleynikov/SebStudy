@@ -28,7 +28,7 @@ func NewHandlers(repository ResumeRepository) *CommandHandlers {
 		resume.SendResume(cmd)
 
 		// repository.Save(resume, m)
-		log.Printf("Событие %s успешно обработано, версия агрегата: %s", cmd, resume.GetVersion())
+		log.Printf("Событие %v успешно обработано, версия агрегата: %d", cmd, resume.GetVersion())
 		return nil
 	})
 
