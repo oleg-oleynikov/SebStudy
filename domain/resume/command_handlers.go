@@ -3,6 +3,7 @@ package resume
 import (
 	"SebStudy/domain/resume/commands"
 	"SebStudy/infrastructure"
+	"log"
 )
 
 type CommandHandlers struct {
@@ -14,8 +15,6 @@ func NewHandlers(repository ResumeRepository) *CommandHandlers {
 
 	commandHandlers.Register(commands.SendResume{}, func(c infrastructure.Command, m infrastructure.CommandMetadata) error {
 		cmd := c.(*commands.SendResume)
-
-		// TODO: Сделать репозиторий
 
 		// id := values.NewResumeId(cmd.ResumeId.Value)
 
@@ -29,6 +28,7 @@ func NewHandlers(repository ResumeRepository) *CommandHandlers {
 		resume.SendResume(cmd)
 
 		// repository.Save(resume, m)
+		log.Printf("Событие %s успешно обработано, версия агрегата: %s", cmd, resume.GetVersion())
 		return nil
 	})
 

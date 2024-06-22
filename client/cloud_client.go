@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"encoding/base64"
-	"fmt"
 	"log"
 	"time"
 
@@ -49,10 +48,6 @@ func main() {
 		StudentGroup:  "SA-33",
 	}
 
-	// b, _ := proto.Marshal(&testResume)
-	// encodedData := base64.StdEncoding.EncodeToString(b)
-	// fmt.Println(encodedData)
-
 	t := time.Now()
 	current_time := time.Date(t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), time.UTC)
 
@@ -63,11 +58,10 @@ func main() {
 	event.SetTime(current_time)
 	event.SetSpecVersion("1.0")
 	b, _ := proto.Marshal(&testResume)
-	event.SetData("application/protobuf", b)
+	var protoBytes []byte = make([]byte, base64.StdEncoding.EncodedLen(len(b)))
+	base64.StdEncoding.Encode(protoBytes, b)
+	event.SetData("base64", protoBytes)
 
-	// fmt.Println(event.Data(), "Это была дата")
-	str := base64.StdEncoding.EncodeToString(b)
-	fmt.Println(str)
 	ctx := cloudevents.ContextWithTarget(context.Background(), "http://localhost:8080/")
 
 	if result := c.Send(ctx, event); cloudevents.IsUndelivered(result) {

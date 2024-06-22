@@ -4,6 +4,7 @@ import (
 	"SebStudy/domain/resume/commands"
 	"SebStudy/domain/resume/values"
 	"context"
+	"encoding/base64"
 	"fmt"
 
 	pb "SebStudy/proto/resume"
@@ -55,9 +56,12 @@ func (c *CeMapper) Register(ceType string, f func(context.Context, cloudevents.E
 func toSendResume(ctx context.Context, c cloudevents.Event) (interface{}, error) {
 
 	var de pb.ResumeSended
-	err := proto.Unmarshal(c.Data(), &de)
-
+	str, err := base64.StdEncoding.DecodeString(string(c.DataEncoded))
 	if err != nil {
+		return nil, err
+	}
+
+	if err := proto.Unmarshal(str, &de); err != nil {
 		return nil, err
 	}
 
