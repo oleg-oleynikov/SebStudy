@@ -22,7 +22,7 @@ func main() {
 
 	testResume := pb.Resume{
 		ResumeId:    1,
-		FirstName:   "Алексей",
+		FirstName:   "Алексейf",
 		MiddleName:  "Валерьевич",
 		LastName:    "Кузнецов",
 		PhoneNumber: "79295132116",
@@ -67,7 +67,7 @@ func main() {
 	if result := c.Send(ctx, event); cloudevents.IsUndelivered(result) {
 		log.Fatalf("failed to send, %v", result)
 	} else {
-		log.Printf("sent cloudevent, %s", event)
-		log.Printf("status code: %d", result)
+		log.Printf("sent cloudevent, %s\n", event)
+		log.Printf("status code: %v\n", result)
 	}
 }
