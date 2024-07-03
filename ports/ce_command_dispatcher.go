@@ -2,6 +2,6 @@ package ports
 
 import "SebStudy/infrastructure"
 
-type CeEventDispatcher interface {
+type CeCommandDispatcher interface {
 	Dispatch(command interface{}, metadata infrastructure.CommandMetadata) error
 }

@@ -8,8 +8,8 @@ type CommandMetadata struct {
 	CloudEvent cloudevents.Event
 }
 
-func NewCommandMetadataFromCloudEvent(cloudevent cloudevents.Event) CommandMetadata {
+func NewCommandMetadataFromCloudEvent(cloudEvent cloudevents.Event) CommandMetadata {
 	return CommandMetadata{
-		CloudEvent: cloudevent,
+		CloudEvent: cloudEvent,
 	}
 }

@@ -6,11 +6,7 @@ import (
 	"time"
 )
 
-// eventsourcing "SebStudy/event_sourcing"
-
 type ResumeSended struct {
-	// eventsourcing.DomainEvent
-
 	ResumeId      values.ResumeId
 	FirstName     values.FirstName
 	MiddleName    values.MiddleName
@@ -43,7 +39,6 @@ func NewResumeSended(
 	StudentGroup values.StudentGroup,
 	CreatedAt time.Time,
 ) ResumeSended {
-	// Также здесь дописать
 	return ResumeSended{
 		ResumeId:      ResumeId,
 		FirstName:     FirstName,

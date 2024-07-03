@@ -75,8 +75,6 @@ func (r *Resume) ResumeSended(e events.ResumeSended) {
 }
 
 func (r *Resume) SendResume(c *commands.SendResume) {
-	// Формируем ResumeSended event и делаем r.Raise(ResumeSended{})
-
 	// TODO: Исправить дело с time.Now();
 	e := events.NewResumeSended(c.ResumeId, c.FirstName, c.MiddleName, c.LastName, c.PhoneNumber, c.Educations, c.AboutMe, c.Skills, c.Photo, c.Directions, c.AboutProjects, c.Portfolio, c.StudentGroup, time.Now())
 	r.Raise(e)

@@ -1,23 +1,26 @@
 package eventsourcing
 
 import (
+	"SebStudy/infrastructure"
 	"time"
 )
 
 type EventMetadata struct {
-	EventId string
-	Time    time.Time
+	EventId   string
+	Timestamp time.Time
 }
 
-func NewEventMetadata(EventId string, Time time.Time) EventMetadata {
-	return EventMetadata{
-		EventId: EventId,
-		Time:    Time,
+func NewEventMetadata(eventId string, timestamp time.Time) *EventMetadata {
+	return &EventMetadata{
+		EventId:   eventId,
+		Timestamp: timestamp,
 	}
 
 }
 
-// TODO: Доделать чтобы делал метадату из CommandMetadata
-func NewEventMetadataFrom() EventMetadata {
-	return EventMetadata{}
+func NewEventMetadataFrom(c infrastructure.CommandMetadata) *EventMetadata {
+	return &EventMetadata{
+		EventId:   c.CloudEvent.ID(),
+		Timestamp: c.CloudEvent.Time(),
+	}
 }

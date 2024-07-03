@@ -23,11 +23,10 @@ func TestResume(t *testing.T) {
 	group, _ := values.NewStudentGroup("СА-33")
 
 	educs := values.Educations{}
-	educs.AppendEducation(*educ)
+	educs.AppendEducations(*educ)
 
 	skills := values.Skills{}
-	skills.AppendSkill(*skill1)
-	skills.AppendSkill(*skill2)
+	skills.AppendSkills(*skill1, *skill2)
 
 	directions := values.Directions{}
 	directions.AppendDirection(*direction)

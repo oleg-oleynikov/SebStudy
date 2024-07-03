@@ -23,7 +23,7 @@ type AggregateRootBase struct {
 
 func NewAggregateRootBase() AggregateRootBase {
 	return AggregateRootBase{
-		version:  0,
+		version:  -1,
 		changes:  make([]interface{}, 0),
 		handlers: make(map[reflect.Type]func(interface{}), 0),
 	}
@@ -48,7 +48,6 @@ func (a *AggregateRootBase) Load(events []interface{}) {
 }
 
 func (a *AggregateRootBase) Raise(event interface{}) {
-	// fmt.Println("ssss")
 	if handler, exists := a.handlers[getValueType(event)]; exists {
 		handler(event)
 		a.changes = append(a.changes, event)
