@@ -2,6 +2,8 @@ package main
 
 import (
 	"SebStudy/adapters/primary"
+	"SebStudy/adapters/secondary"
+	"SebStudy/adapters/util"
 	"SebStudy/domain/resume"
 	"SebStudy/infrastructure"
 	"os"
@@ -10,7 +12,9 @@ import (
 )
 
 const (
+	host = "localhost"
 	port = 8080
+	url  = "http://localhost:8080/"
 )
 
 func main() {
@@ -29,12 +33,14 @@ func main() {
 
 	// eventBus.Publish("hello", []byte("Hello"))
 
-	handlers := resume.NewHandlers(nil)
+	ceMapper := util.NewCeMapper()
+
+	ceEventSender := secondary.NewCeSenderAdapter(url, ceMapper)
+
+	handlers := resume.NewHandlers(nil, ceEventSender)
 	cmdHandlerMap := infrastructure.NewCommandHandlerMap()
 	cmdHandlerMap.AppendHandlers(handlers)
 	dispatcher := infrastructure.NewDispatcher(cmdHandlerMap)
-
-	ceMapper := primary.NewCeMapper()
 
 	ceAdapter := primary.NewCloudEventsAdapter(dispatcher, ceMapper, port)
 

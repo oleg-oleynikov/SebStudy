@@ -28,3 +28,7 @@ func isValidFirstName(firstName string) bool {
 func (frName *FirstName) ToString() string {
 	return fmt.Sprintf("%s", frName)
 }
+
+func (f *FirstName) GetFirstName() string {
+	return f.firstName
+}

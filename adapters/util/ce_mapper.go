@@ -1,4 +1,4 @@
-package primary
+package util
 
 import (
 	"SebStudy/domain/resume/commands"
@@ -12,9 +12,13 @@ import (
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type EventType string
+
+type CeToEvent func(ctx context.Context, ce cloudevents.Event) (interface{}, error)
+type EventToCe func(eventType, source string, e interface{}) (cloudevents.Event, error)
 
 const (
 	EVENT   EventType = "event"
@@ -22,31 +26,29 @@ const (
 )
 
 type CeMapper struct {
-	handlers          map[string]func(context.Context, cloudevents.Event) (interface{}, error)
+	CeToEvent         map[string]CeToEvent
+	EventToCe         map[string]EventToCe
 	handlersTypeEvent map[string]EventType
 }
 
 func NewCeMapper() *CeMapper {
 	c := &CeMapper{}
-	c.handlers = make(map[string]func(context.Context, cloudevents.Event) (interface{}, error), 0)
+	c.CeToEvent = make(map[string]CeToEvent, 0)
+	c.EventToCe = make(map[string]EventToCe, 0)
 	c.handlersTypeEvent = make(map[string]EventType, 0)
 
-	c.Register("resume.send", toSendResume, COMMAND)
+	c.RegisterCommand("resume.send", toSendResume)
 
-	c.Register("resume.sended", toResumeSended, EVENT)
+	c.RegisterEvent("resume.sended", toResumeSended, resumeSendedToCloudEvent)
 
 	return c
 }
 
-func (cm *CeMapper) MapFromCloudEvent(ctx context.Context, c cloudevents.Event) (interface{}, error) {
+func (cm *CeMapper) MapToEvent(ctx context.Context, c cloudevents.Event) (interface{}, error) {
 	handler, err := cm.Get(c.Type())
 	if err != nil {
 		return nil, err
 	}
-
-	// if err := decodeBase64(c); err != nil {
-	// 	return nil, err
-	// }
 
 	cmd, err := handler(ctx, c)
 	if err != nil {
@@ -56,35 +58,67 @@ func (cm *CeMapper) MapFromCloudEvent(ctx context.Context, c cloudevents.Event) 
 	return cmd, nil
 }
 
-func (cm *CeMapper) Get(t string) (func(context.Context, cloudevents.Event) (interface{}, error), error) {
-	if h, ex := cm.handlers[t]; ex {
+func (cm *CeMapper) MapToCloudEvent(e interface{}, eventType, source string) (cloudevents.Event, error) {
+	handler, err := cm.GetToCe(eventType)
+	if err != nil {
+		return cloudevents.Event{}, err
+	}
+
+	cloudEvent, err := handler(eventType, source, e)
+	if err != nil {
+		return cloudevents.Event{}, err
+	}
+
+	return cloudEvent, nil
+}
+
+func (cm *CeMapper) Get(t string) (CeToEvent, error) {
+	if h, ex := cm.CeToEvent[t]; ex {
 		return h, nil
 	}
 
 	return nil, fmt.Errorf("handler for {%v} type doesnt exist", t)
 }
 
-func (c *CeMapper) Register(ceType string, f func(context.Context, cloudevents.Event) (interface{}, error), typeEvent EventType) {
-	c.handlers[ceType] = f
+func (cm *CeMapper) GetToCe(t string) (EventToCe, error) {
+	if h, ex := cm.EventToCe[t]; ex {
+		return h, nil
+	}
+
+	return nil, fmt.Errorf("handler for {%v} type doesnt exist", t)
+}
+
+func (c *CeMapper) register(ceType string, f CeToEvent, typeEvent EventType) {
+	c.CeToEvent[ceType] = f
 	c.handlersTypeEvent[ceType] = typeEvent
 }
 
-func (c *CeMapper) GetEventType(ceType string) (EventType, error) {
-	if typeEvent, ok := c.handlersTypeEvent[ceType]; ok {
-		return typeEvent, nil
-	}
-	return EventType(""), fmt.Errorf("Type doesnot exist")
-	// return
+func (c *CeMapper) RegisterEvent(ceType string, e CeToEvent, ce EventToCe) {
+	c.register(ceType, e, EVENT)
+	c.EventToCe[ceType] = ce
 }
 
-// func decodeBase64(c cloudevents.Event) error {
-// 	protoBytes, err := base64.StdEncoding.DecodeString(string(c.DataEncoded))
-// 	if err != nil {
-// 		return err
-// 	}
+func (c *CeMapper) RegisterCommand(ceType string, e CeToEvent) {
+	c.register(ceType, e, COMMAND)
+}
 
-// 	return c.SetData("application/protobuf", protoBytes)
-// }
+func (c *CeMapper) IsCommand(ceType string) bool {
+	typeOfEvent, _ := c.GetEventType(ceType)
+	return typeOfEvent == COMMAND
+}
+
+func (c *CeMapper) IsEvent(ceType string) bool {
+	typeOfEvent, _ := c.GetEventType(ceType)
+	return typeOfEvent == EVENT
+}
+
+func (c *CeMapper) GetEventType(ceType string) (EventType, error) {
+	typeEvent, ok := c.handlersTypeEvent[ceType]
+	if ok {
+		return typeEvent, nil
+	}
+	return typeEvent, fmt.Errorf("type does not exist")
+}
 
 func toSendResume(ctx context.Context, c cloudevents.Event) (interface{}, error) {
 
@@ -277,4 +311,75 @@ func toResumeSended(ctx context.Context, c cloudevents.Event) (interface{}, erro
 		*aboutProjects, *portfolio, *studentGroup, c.Time())
 
 	return createdResume, nil
+}
+
+func resumeSendedToCloudEvent(eventType, source string, e interface{}) (cloudevents.Event, error) {
+	event, ok := e.(events.ResumeSended)
+	if !ok {
+		return cloudevents.Event{}, fmt.Errorf("impossible cast")
+	}
+
+	pbEducations := []*pb.Education{}
+	educations := event.Educations.GetEducations()
+	for _, v := range educations {
+		pbEducations = append(pbEducations, &pb.Education{
+			Education: v.GetEducation(),
+		})
+	}
+
+	pbSkills := []*pb.Skill{}
+	skills := event.Skills.GetSkills()
+	for _, v := range skills {
+		pbSkills = append(pbSkills, &pb.Skill{
+			Skill: v.GetSkill(),
+		})
+	}
+
+	pbDirections := []*pb.Direction{}
+	directions := event.Directions.GetDirections()
+	for _, v := range directions {
+		pbDirections = append(pbDirections, &pb.Direction{
+			Direction: v.GetDirection(),
+		})
+	}
+
+	timestamp := timestamppb.Timestamp{
+		Seconds: event.CreatedAt.Unix(),
+		Nanos:   int32(event.CreatedAt.Second()),
+	}
+
+	pbEvent := pb.ResumeSended{
+		ResumeId:      uint64(event.ResumeId.Value),
+		FirstName:     event.FirstName.GetFirstName(),
+		MiddleName:    event.MiddleName.GetMiddleName(),
+		LastName:      event.LastName.GetLastName(),
+		PhoneNumber:   event.PhoneNumber.GetPhoneNumber(),
+		Educations:    pbEducations,
+		AboutMe:       event.AboutMe.GetAboutMe(),
+		Skills:        pbSkills,
+		Photo:         event.Photo.GetUrl(),
+		Directions:    pbDirections,
+		AboutProjects: event.AboutProjects.GetAboutProjects(),
+		Portfolio:     event.Portfolio.GetPortfolio(),
+		StudentGroup:  event.StudentGroup.GetStudentGroup(),
+		CreatedAt:     &timestamp,
+	}
+
+	cloudEvent := initCloudEvent(eventType, source, &pbEvent)
+
+	return cloudEvent, nil
+}
+
+func initCloudEvent(eventType, source string, mes proto.Message) cloudevents.Event {
+	cloudEvent := cloudevents.Event{}
+	cloudEvent.SetSpecVersion("1.0")
+	cloudEvent.SetID("1234-1234-1234")
+	cloudEvent.SetType(eventType)
+	cloudEvent.SetSource(source)
+	b, _ := proto.Marshal(mes)
+	var protoBytes []byte = make([]byte, base64.StdEncoding.EncodedLen(len(b)))
+	base64.StdEncoding.Encode(protoBytes, b)
+	cloudEvent.SetData("application/protobuf", protoBytes)
+
+	return cloudEvent
 }

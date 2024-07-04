@@ -19,6 +19,10 @@ func NewDirection(direction string) (*Direction, error) {
 	}, nil
 }
 
+func (dr *Direction) ToString() string {
+	return fmt.Sprintf("[%s]", dr)
+}
+
 type Directions struct {
 	directions []Direction
 }
@@ -33,4 +37,8 @@ func (d *Directions) GetDirections() []Direction {
 
 func (dir *Directions) ToString() string {
 	return fmt.Sprintf("[%s]", dir)
+}
+
+func (d *Direction) GetDirection() string {
+	return d.direction
 }

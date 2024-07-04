@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/base64"
+	"fmt"
 	"log"
 	"time"
 
@@ -20,9 +21,9 @@ func main() {
 		log.Fatalf("failed to create client, %v", err)
 	}
 
-	testResume := pb.Resume{
+	testResume := pb.ResumeSended{
 		ResumeId:    1,
-		FirstName:   "Алексейf",
+		FirstName:   "Алексей",
 		MiddleName:  "Валерьевич",
 		LastName:    "Кузнецов",
 		PhoneNumber: "79295132116",
@@ -54,13 +55,14 @@ func main() {
 	event := cloudevents.NewEvent()
 	event.SetID("1234-1234-1234-1234")
 	event.SetSource("example/uri")
-	event.SetType("resume.send")
+	event.SetType("resume.sended")
 	event.SetTime(current_time)
 	event.SetSpecVersion("1.0")
 	b, _ := proto.Marshal(&testResume)
+	fmt.Println(b)
 	var protoBytes []byte = make([]byte, base64.StdEncoding.EncodedLen(len(b)))
 	base64.StdEncoding.Encode(protoBytes, b)
-	event.SetData("base64", protoBytes)
+	event.SetData("application/protobuf", protoBytes)
 
 	ctx := cloudevents.ContextWithTarget(context.Background(), "http://localhost:8080/")
 

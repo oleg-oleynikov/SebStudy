@@ -22,3 +22,7 @@ func NewAboutMe(aboutMe string) (*AboutMe, error) {
 func (aMe *AboutMe) ToString() string {
 	return fmt.Sprintf("%s", aMe)
 }
+
+func (a *AboutMe) GetAboutMe() string {
+	return a.aboutMe
+}

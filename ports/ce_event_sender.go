@@ -1,5 +1,5 @@
-package interfaces
+package ports
 
-type EventSender interface {
+type CeEventSender interface {
 	SendEvent(e interface{}, eventType, source string) error
 }

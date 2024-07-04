@@ -29,3 +29,7 @@ func isValidLastName(lastName string) bool {
 func (lName *LastName) ToString() string {
 	return fmt.Sprintf("%s", lName)
 }
+
+func (l *LastName) GetLastName() string {
+	return l.lastName
+}

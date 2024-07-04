@@ -26,3 +26,7 @@ func isValidStudentGroup(studentGroup string) bool {
 func (group *StudentGroup) ToString() string {
 	return fmt.Sprintf("%s", group)
 }
+
+func (sg *StudentGroup) GetStudentGroup() string {
+	return sg.studentGroup
+}

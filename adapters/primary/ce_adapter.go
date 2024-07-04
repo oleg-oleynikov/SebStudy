@@ -1,6 +1,7 @@
 package primary
 
 import (
+	"SebStudy/adapters/util"
 	"SebStudy/infrastructure"
 	"SebStudy/ports"
 	"context"
@@ -12,14 +13,14 @@ import (
 
 type CloudEventsAdapter struct {
 	CommandDispatcher ports.CeCommandDispatcher
-	Server            cloudevents.Client
-	CeMapper          *CeMapper
+	Client            cloudevents.Client
+	CeMapper          *util.CeMapper
 }
 
-func NewCloudEventsAdapter(d ports.CeCommandDispatcher, ceMapper *CeMapper, port int) *CloudEventsAdapter {
+func NewCloudEventsAdapter(d ports.CeCommandDispatcher, ceMapper *util.CeMapper, port int) *CloudEventsAdapter {
 	return &CloudEventsAdapter{
 		CommandDispatcher: d,
-		Server:            newCloudEventsClient(port),
+		Client:            newCloudEventsClient(port),
 		CeMapper:          ceMapper,
 	}
 }
@@ -27,14 +28,14 @@ func NewCloudEventsAdapter(d ports.CeCommandDispatcher, ceMapper *CeMapper, port
 func newCloudEventsClient(port int) cloudevents.Client {
 	ce, err := cloudevents.NewClientHTTP(cloudevents.WithPort(port))
 	if err != nil {
-		log.Fatalf("failed to create client, %v", err)
+		log.Fatalf("failed to create http client, %v", err)
 	}
 	return ce
 }
 
 func (c *CloudEventsAdapter) Run() {
 	go func() {
-		log.Fatalf("failed to start receiver: %s", c.Server.StartReceiver(context.Background(), c.receive))
+		log.Fatalf("failed to start receiver: %s", c.Client.StartReceiver(context.Background(), c.receive))
 	}()
 }
 
@@ -45,19 +46,19 @@ func (c *CloudEventsAdapter) receive(ctx context.Context, event cloudevents.Even
 	// 	return cloudevents.NewHTTPResult(500, "ce-type must have postfix from: %s", "{event, command}")
 	// }
 
-	ceEventType, err := c.CeMapper.GetEventType(event.Type())
-	if err != nil {
-		return cloudevents.NewHTTPResult(400, "%s", err)
-	}
+	// ceEventType, err := c.CeMapper.GetEventType(event.Type())
+	// if err != nil {
+	// 	return cloudevents.NewHTTPResult(400, "%s", err)
+	// }
 
-	mappedEvent, err := c.CeMapper.MapFromCloudEvent(ctx, event)
+	mappedEvent, err := c.CeMapper.MapToEvent(ctx, event)
 
 	if err != nil {
 		log.Printf("failed to map cloudevent: %v", err)
 		return cloudevents.NewHTTPResult(400, "failed to map cloudevent: %v", err)
 	}
 
-	if ceEventType == COMMAND {
+	if c.CeMapper.IsCommand(event.Type()) {
 		err = c.CommandDispatcher.Dispatch(mappedEvent, infrastructure.NewCommandMetadataFromCloudEvent(event))
 		if err != nil {
 			log.Printf("failed to dispatch command: %v", err)
@@ -65,8 +66,9 @@ func (c *CloudEventsAdapter) receive(ctx context.Context, event cloudevents.Even
 		}
 
 		return cloudevents.ResultACK
-	} else if ceEventType == EVENT {
+	} else if c.CeMapper.IsEvent(event.Type()) {
 		fmt.Println("Отправка в Event Bus (NATS), а там еще чет дальше event store еще что то")
+		return cloudevents.ResultACK
 	}
 
 	return cloudevents.ResultACK

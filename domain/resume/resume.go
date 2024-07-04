@@ -5,6 +5,7 @@ import (
 	"SebStudy/domain/resume/events"
 	"SebStudy/domain/resume/values"
 	eventsourcing "SebStudy/eventsourcing"
+	"SebStudy/ports"
 	"time"
 )
 
@@ -74,8 +75,13 @@ func (r *Resume) ResumeSended(e events.ResumeSended) {
 	r.studentGroup = e.StudentGroup
 }
 
-func (r *Resume) SendResume(c *commands.SendResume) {
+func (r *Resume) SendResume(c *commands.SendResume, sender ports.CeEventSender) error {
 	// TODO: Исправить дело с time.Now();
 	e := events.NewResumeSended(c.ResumeId, c.FirstName, c.MiddleName, c.LastName, c.PhoneNumber, c.Educations, c.AboutMe, c.Skills, c.Photo, c.Directions, c.AboutProjects, c.Portfolio, c.StudentGroup, time.Now())
 	r.Raise(e)
+	err := sender.SendEvent(e, "resume.sended", "domain/resume/resumesended")
+	if err != nil {
+		return err
+	}
+	return nil
 }

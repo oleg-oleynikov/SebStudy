@@ -28,3 +28,7 @@ func isValidPortfolio(portfolio string) bool {
 func (p Portfolio) ToString() string {
 	return fmt.Sprintf("%s", p)
 }
+
+func (p *Portfolio) GetPortfolio() string {
+	return p.portfolio
+}

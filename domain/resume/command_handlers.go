@@ -3,14 +3,14 @@ package resume
 import (
 	"SebStudy/domain/resume/commands"
 	"SebStudy/infrastructure"
-	"log"
+	"SebStudy/ports"
 )
 
 type CommandHandlers struct {
 	*infrastructure.CommandHandlerBase
 }
 
-func NewHandlers(repository ResumeRepository) *CommandHandlers {
+func NewHandlers(repository ResumeRepository, eventSender ports.CeEventSender) *CommandHandlers {
 	commandHandlers := &CommandHandlers{infrastructure.NewCommandHandler()}
 
 	commandHandlers.Register(commands.SendResume{}, func(c infrastructure.Command, m infrastructure.CommandMetadata) error {
@@ -25,12 +25,13 @@ func NewHandlers(repository ResumeRepository) *CommandHandlers {
 
 		resume := NewResume()
 
-		resume.SendResume(cmd)
+		if err := resume.SendResume(cmd, eventSender); err != nil {
+			return err
+		}
 
-		// PushEvent
+		// resume.SendResume(cmd, eventSender)
 
-		// repository.Save(resume, m)
-		log.Printf("Событие %v успешно обработано, версия агрегата: %d", cmd, resume.GetVersion())
+		// log.Printf("Событие %v успешно обработано, версия агрегата: %d", cmd, resume.GetVersion())
 		return nil
 	})
 

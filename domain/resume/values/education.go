@@ -23,3 +23,7 @@ func NewEducation(education string) (*Education, error) {
 func (ed *Education) ToString() string {
 	return fmt.Sprintf("%s", ed)
 }
+
+func (ed *Education) GetEducation() string {
+	return ed.education
+}

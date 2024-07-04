@@ -15,3 +15,7 @@ func NewPhoto(url string) (*Photo, error) {
 func (photo *Photo) ToString() string {
 	return fmt.Sprintf("%s", photo)
 }
+
+func (p *Photo) GetUrl() string {
+	return p.url
+}

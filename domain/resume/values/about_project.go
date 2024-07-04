@@ -22,3 +22,7 @@ func NewAboutProjects(aboutProjects string) (*AboutProjects, error) {
 func (aProjects *AboutProjects) ToString() string {
 	return fmt.Sprintf("%s", aProjects)
 }
+
+func (a *AboutProjects) GetAboutProjects() string {
+	return a.aboutProjects
+}

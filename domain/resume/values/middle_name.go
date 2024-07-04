@@ -29,3 +29,7 @@ func isValidMiddleName(middleName string) bool {
 func (mName *MiddleName) ToString() string {
 	return fmt.Sprintf("%s", mName)
 }
+
+func (m *MiddleName) GetMiddleName() string {
+	return m.middleName
+}

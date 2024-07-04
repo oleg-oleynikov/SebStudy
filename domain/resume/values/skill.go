@@ -22,3 +22,7 @@ func NewSkill(skill string) (*Skill, error) {
 func (sk *Skill) ToString() string {
 	return fmt.Sprintf("%s", sk)
 }
+
+func (s *Skill) GetSkill() string {
+	return s.skill
+}
