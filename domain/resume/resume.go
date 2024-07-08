@@ -4,13 +4,13 @@ import (
 	"SebStudy/domain/resume/commands"
 	"SebStudy/domain/resume/events"
 	"SebStudy/domain/resume/values"
-	eventsourcing "SebStudy/eventsourcing"
+	"SebStudy/infrastructure"
 	"SebStudy/ports"
 	"time"
 )
 
 type Resume struct {
-	eventsourcing.AggregateRootBase
+	infrastructure.AggregateRootBase
 
 	resumeId      values.ResumeId
 	firstName     values.FirstName
@@ -29,7 +29,7 @@ type Resume struct {
 
 func NewResume() *Resume {
 	r := &Resume{
-		AggregateRootBase: eventsourcing.NewAggregateRootBase(),
+		AggregateRootBase: infrastructure.NewAggregateRootBase(),
 	}
 
 	r.registerHandlers()
@@ -76,12 +76,12 @@ func (r *Resume) ResumeSended(e events.ResumeSended) {
 }
 
 func (r *Resume) SendResume(c *commands.SendResume, sender ports.CeEventSender) error {
-	// TODO: Исправить дело с time.Now();
 	e := events.NewResumeSended(c.ResumeId, c.FirstName, c.MiddleName, c.LastName, c.PhoneNumber, c.Educations, c.AboutMe, c.Skills, c.Photo, c.Directions, c.AboutProjects, c.Portfolio, c.StudentGroup, time.Now())
-	r.Raise(e)
+
 	err := sender.SendEvent(e, "resume.sended", "domain/resume/resumesended")
 	if err != nil {
 		return err
 	}
+
 	return nil
 }

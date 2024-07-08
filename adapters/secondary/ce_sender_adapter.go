@@ -3,7 +3,6 @@ package secondary
 import (
 	"SebStudy/adapters/util"
 	"context"
-	"fmt"
 	"log"
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
@@ -33,19 +32,22 @@ func (c *CeSenderAdapter) SendEvent(e interface{}, eventType, source string) err
 	}
 	result := c.Client.Send(c.Context, cloudEvent)
 	if cloudevents.IsUndelivered(result) {
-		return fmt.Errorf("failed to send cloud event: %v", result)
+		// return fmt.Errorf("failed to send cloud event: %v", result)
+		return cloudevents.NewHTTPResult(500, "failed to send cloud event: %v", result)
 	} else {
 		var httpResult *cehttp.Result
 		if cloudevents.ResultAs(result, &httpResult) {
-			log.Printf("Sent with status code %d", httpResult.StatusCode)
+			// log.Printf("Sent with status code %d", httpResult.StatusCode)
+			return result
 		} else {
-			return fmt.Errorf("send did not return an HTTP response: %s", result)
+			// return fmt.Errorf("send did not return an HTTP response: %s", result)
+			return cloudevents.NewHTTPResult(400, "send did not return an HTTP response: %s", result)
 		}
 	}
 
 	// return nil
 
-	return nil
+	// return nil
 }
 
 func (c *CeSenderAdapter) newCloudEvent(data interface{}, eventType, source string) (cloudevents.Event, error) {
@@ -64,6 +66,7 @@ func newCloudEventsClient(targetUrl string) (cloudevents.Client, context.Context
 	if err != nil {
 		log.Fatalf("failed to create client, %v", err)
 	}
+
 	// if err != nil {
 	// 	log.Fatalf("failed to create protocol: %s", err.Error())
 	// }

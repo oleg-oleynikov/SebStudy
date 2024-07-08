@@ -20,7 +20,8 @@ func (c *CommandHandlerMap) Get(t reflect.Type) (func(Command, CommandMetadata) 
 	if handler, exists := c.handlers[t]; exists {
 		return handler, nil
 	}
-	return nil, fmt.Errorf("handler not found")
+
+	return nil, fmt.Errorf("handler for {%v} not found", t)
 }
 
 func (c *CommandHandlerMap) AppendHandlers(commandHandlers ...CommandHandler) {

@@ -10,18 +10,11 @@ type CommandHandlers struct {
 	*infrastructure.CommandHandlerBase
 }
 
-func NewHandlers(repository ResumeRepository, eventSender ports.CeEventSender) *CommandHandlers {
+func NewHandlers(eventSender ports.CeEventSender) *CommandHandlers {
 	commandHandlers := &CommandHandlers{infrastructure.NewCommandHandler()}
 
 	commandHandlers.Register(commands.SendResume{}, func(c infrastructure.Command, m infrastructure.CommandMetadata) error {
 		cmd := c.(*commands.SendResume)
-
-		// id := values.NewResumeId(cmd.ResumeId.Value)
-
-		// resume, err := repository.Get(id)
-		// if err != nil {
-		// 	return err
-		// }
 
 		resume := NewResume()
 
@@ -29,9 +22,6 @@ func NewHandlers(repository ResumeRepository, eventSender ports.CeEventSender) *
 			return err
 		}
 
-		// resume.SendResume(cmd, eventSender)
-
-		// log.Printf("Событие %v успешно обработано, версия агрегата: %d", cmd, resume.GetVersion())
 		return nil
 	})
 

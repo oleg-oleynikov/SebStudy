@@ -6,9 +6,12 @@ import (
 	"SebStudy/adapters/util"
 	"SebStudy/domain/resume"
 	"SebStudy/infrastructure"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/nats-io/nats.go"
 )
 
 const (
@@ -18,14 +21,15 @@ const (
 )
 
 func main() {
+
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
 
-	// _, err := infrastructure.NewEventBus(nats.DefaultURL)
+	eventBus, err := infrastructure.NewEventBus(nats.DefaultURL)
 
-	// if err != nil {
-	// 	log.Fatalf("failed to connect nats: %s", err)
-	// }
+	if err != nil {
+		log.Fatalf("failed to connect nats: %s", err)
+	}
 
 	// eventBus.Subscribe("hello", func(msg *nats.Msg) {
 	// 	fmt.Printf("Received event: %s\n", string(msg.Data))
@@ -37,12 +41,13 @@ func main() {
 
 	ceEventSender := secondary.NewCeSenderAdapter(url, ceMapper)
 
-	handlers := resume.NewHandlers(nil, ceEventSender)
+	handlers := resume.NewHandlers(ceEventSender)
 	cmdHandlerMap := infrastructure.NewCommandHandlerMap()
 	cmdHandlerMap.AppendHandlers(handlers)
 	dispatcher := infrastructure.NewDispatcher(cmdHandlerMap)
+	eventHandler := infrastructure.NewEventHandler(eventBus)
 
-	ceAdapter := primary.NewCloudEventsAdapter(dispatcher, ceMapper, port)
+	ceAdapter := primary.NewCloudEventsAdapter(dispatcher, eventHandler, ceMapper, port)
 
 	ceAdapter.Run()
 

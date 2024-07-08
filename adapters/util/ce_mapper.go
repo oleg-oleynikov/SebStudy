@@ -117,7 +117,7 @@ func (c *CeMapper) GetEventType(ceType string) (EventType, error) {
 	if ok {
 		return typeEvent, nil
 	}
-	return typeEvent, fmt.Errorf("type does not exist")
+	return typeEvent, fmt.Errorf("type %s does not exist", ceType)
 }
 
 func toSendResume(ctx context.Context, c cloudevents.Event) (interface{}, error) {
@@ -373,7 +373,6 @@ func resumeSendedToCloudEvent(eventType, source string, e interface{}) (cloudeve
 func initCloudEvent(eventType, source string, mes proto.Message) cloudevents.Event {
 	cloudEvent := cloudevents.Event{}
 	cloudEvent.SetSpecVersion("1.0")
-	cloudEvent.SetID("1234-1234-1234")
 	cloudEvent.SetType(eventType)
 	cloudEvent.SetSource(source)
 	b, _ := proto.Marshal(mes)
