@@ -4,6 +4,7 @@ import (
 	"SebStudy/adapters/primary"
 	"SebStudy/adapters/secondary"
 	"SebStudy/adapters/util"
+	"SebStudy/adapters/util/ce_mapper_func"
 	"SebStudy/domain/resume"
 	"SebStudy/infrastructure"
 	"log"
@@ -37,7 +38,8 @@ func main() {
 
 	// eventBus.Publish("hello", []byte("Hello"))
 
-	ceMapper := util.NewCeMapper()
+	ceMapper := util.GetCeMapperInstance()
+	ce_mapper_func.InitializeMapHandler()
 
 	ceEventSender := secondary.NewCeSenderAdapter(url, ceMapper)
 
@@ -45,7 +47,8 @@ func main() {
 	cmdHandlerMap := infrastructure.NewCommandHandlerMap()
 	cmdHandlerMap.AppendHandlers(handlers)
 	dispatcher := infrastructure.NewDispatcher(cmdHandlerMap)
-	eventHandler := infrastructure.NewEventHandler(eventBus)
+	eventHandlerMap := infrastructure.NewEventHandlerMap()
+	eventHandler := infrastructure.NewEventHandler(eventBus, eventHandlerMap)
 
 	ceAdapter := primary.NewCloudEventsAdapter(dispatcher, eventHandler, ceMapper, port)
 

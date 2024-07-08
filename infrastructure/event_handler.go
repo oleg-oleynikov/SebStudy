@@ -8,23 +8,27 @@ import (
 
 type EventHandler struct {
 	EventBus *EventBus
+
+	eventHandlerMap EventHandlerMap
 }
 
-func NewEventHandler(eventBus *EventBus) *EventHandler {
+func NewEventHandler(eventBus *EventBus, hm EventHandlerMap) *EventHandler {
 	eh := &EventHandler{
-		EventBus: eventBus,
+		EventBus:        eventBus,
+		eventHandlerMap: hm,
 	}
-	// eh.EventBus.Subscribe("hello", func(mes *nats.Msg) {
-	// 	fmt.Printf("received message: %v\n", mes)
-	// })
-	// return &EventHandler {
-	// 	EventBus: eventBus,
-	// }
+
 	return eh
 }
 
 func (eh *EventHandler) Handle(event interface{}, metadata EventMetadata) error {
 	log.Printf("Дошло до хендлера событий с типом - {%s} и uuid - {%s}", metadata.EventType, metadata.EventId)
-	return cloudevents.ResultACK
+	_, err := eh.eventHandlerMap.Get(metadata.EventType)
+	if err != nil {
+		return err
+	}
 
+	// err := handler(event, metadata)
+
+	return cloudevents.ResultACK
 }
