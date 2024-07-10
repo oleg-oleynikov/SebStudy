@@ -12,7 +12,7 @@ func (s *Skills) AppendSkills(sk ...Skill) error {
 		return nil
 	}
 
-	return fmt.Errorf("The number of skills cannot be more than 500")
+	return fmt.Errorf("the number of skills cannot be more than 500")
 }
 
 func (s *Skills) GetSkills() []Skill {
