@@ -2,15 +2,17 @@ package util
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"sync"
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
+	"google.golang.org/protobuf/proto"
 )
 
 type EventType string
 
-type CeToEvent func(ctx context.Context, ce cloudevents.Event) (interface{}, error)
+type CeToEvent func(ctx context.Context, cloudEvent cloudevents.Event) (interface{}, error)
 type EventToCe func(eventType, source string, e interface{}) (cloudevents.Event, error)
 
 const (
@@ -19,27 +21,27 @@ const (
 )
 
 type CeMapper struct {
-	CeToEvent         map[string]CeToEvent
-	EventToCe         map[string]EventToCe
-	handlersTypeEvent map[string]EventType
+	CeToEvent  map[string]CeToEvent
+	EventToCe  map[string]EventToCe
+	eventTypes map[string]EventType
 }
 
 var (
-	instance *CeMapper
-	once     sync.Once
+	instance1 *CeMapper
+	once1     sync.Once
 )
 
 func GetCeMapperInstance() *CeMapper {
-	once.Do(func() {
+	once1.Do(func() {
 		c := &CeMapper{}
 		c.CeToEvent = make(map[string]CeToEvent, 0)
 		c.EventToCe = make(map[string]EventToCe, 0)
-		c.handlersTypeEvent = make(map[string]EventType, 0)
+		c.eventTypes = make(map[string]EventType, 0)
 
-		instance = c
+		instance1 = c
 	})
 
-	return instance
+	return instance1
 }
 
 func (cm *CeMapper) MapToEvent(ctx context.Context, c cloudevents.Event) (interface{}, error) {
@@ -88,7 +90,7 @@ func (cm *CeMapper) GetToCe(t string) (EventToCe, error) {
 
 func (c *CeMapper) register(ceType string, f CeToEvent, typeEvent EventType) {
 	c.CeToEvent[ceType] = f
-	c.handlersTypeEvent[ceType] = typeEvent
+	c.eventTypes[ceType] = typeEvent
 }
 
 func (c *CeMapper) RegisterEvent(ceType string, e CeToEvent, ce EventToCe) {
@@ -111,9 +113,22 @@ func (c *CeMapper) IsEvent(ceType string) bool {
 }
 
 func (c *CeMapper) GetEventType(ceType string) (EventType, error) {
-	typeEvent, ok := c.handlersTypeEvent[ceType]
+	typeEvent, ok := c.eventTypes[ceType]
 	if ok {
 		return typeEvent, nil
 	}
 	return typeEvent, fmt.Errorf("type %s does not exist", ceType)
+}
+
+func InitCloudEvent(eventType, source string, mes proto.Message) cloudevents.Event {
+	cloudEvent := cloudevents.Event{}
+	cloudEvent.SetSpecVersion("1.0")
+	cloudEvent.SetType(eventType)
+	cloudEvent.SetSource(source)
+	b, _ := proto.Marshal(mes)
+	var protoBytes []byte = make([]byte, base64.StdEncoding.EncodedLen(len(b)))
+	base64.StdEncoding.Encode(protoBytes, b)
+	cloudEvent.SetData("application/protobuf", protoBytes)
+
+	return cloudEvent
 }

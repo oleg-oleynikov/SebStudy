@@ -4,15 +4,17 @@ import (
 	"SebStudy/adapters/primary"
 	"SebStudy/adapters/secondary"
 	"SebStudy/adapters/util"
-	"SebStudy/adapters/util/ce_mapper_func"
 	"SebStudy/domain/resume"
 	"SebStudy/infrastructure"
+
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
 
 	"github.com/nats-io/nats.go"
+
+	"SebStudy/initializers"
 )
 
 const (
@@ -32,14 +34,12 @@ func main() {
 		log.Fatalf("failed to connect nats: %s", err)
 	}
 
-	// eventBus.Subscribe("hello", func(msg *nats.Msg) {
-	// 	fmt.Printf("Received event: %s\n", string(msg.Data))
-	// })
-
-	// eventBus.Publish("hello", []byte("Hello"))
-
 	ceMapper := util.GetCeMapperInstance()
-	ce_mapper_func.InitializeMapHandler()
+	initializers.InitializeCeMapperHandlers()
+
+	eventSerde := infrastructure.GetEventSerdeInstance()
+	writeRepo := secondary.NewPostgresAdapter()
+	eventStore := infrastructure.NewEventStore(eventBus, eventSerde, writeRepo)
 
 	ceEventSender := secondary.NewCeSenderAdapter(url, ceMapper)
 
@@ -47,8 +47,8 @@ func main() {
 	cmdHandlerMap := infrastructure.NewCommandHandlerMap()
 	cmdHandlerMap.AppendHandlers(handlers)
 	dispatcher := infrastructure.NewDispatcher(cmdHandlerMap)
-	eventHandlerMap := infrastructure.NewEventHandlerMap()
-	eventHandler := infrastructure.NewEventHandler(eventBus, eventHandlerMap)
+
+	eventHandler := infrastructure.NewEventHandler(eventBus, eventStore)
 
 	ceAdapter := primary.NewCloudEventsAdapter(dispatcher, eventHandler, ceMapper, port)
 

@@ -64,6 +64,7 @@ func (c *CloudEventsAdapter) receive(ctx context.Context, event cloudevents.Even
 			return cloudevents.NewHTTPResult(500, "failed to dispatch command: %v", err)
 		}
 	} else if c.CeMapper.IsEvent(event.Type()) {
+		// fmt.Println(mappedEvent)
 		err := c.EventDispatcher.Handle(mappedEvent, *infrastructure.NewEventMetadataFromCloudEvent(event))
 		if err != nil {
 			if _, ok := err.(cloudevents.Result); ok {

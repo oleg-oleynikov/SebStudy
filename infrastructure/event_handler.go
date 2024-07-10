@@ -1,29 +1,30 @@
 package infrastructure
 
 import (
-	"log"
-
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 )
 
 type EventHandler struct {
-	EventBus *EventBus
-
-	eventHandlerMap EventHandlerMap
+	EventBus   *EventBus
+	EventStore *EventStore
 }
 
-func NewEventHandler(eventBus *EventBus, hm EventHandlerMap) *EventHandler {
+func NewEventHandler(eventBus *EventBus, eventStore *EventStore) *EventHandler {
 	eh := &EventHandler{
-		EventBus:        eventBus,
-		eventHandlerMap: hm,
+		EventBus:   eventBus,
+		EventStore: eventStore,
 	}
 
 	return eh
 }
 
 func (eh *EventHandler) Handle(event interface{}, metadata EventMetadata) error {
-	log.Printf("Дошло до хендлера событий с типом - {%s} и uuid - {%s}", metadata.EventType, metadata.EventId)
-	_, err := eh.eventHandlerMap.Get(metadata.EventType)
+	// TODO: Сделать запрос в event store для сбора событий по агрегату и его восстановление
+
+	eventMessage := NewEventMessage(event, metadata, 0) // Публикация но тут я б еще подумал
+
+	// eh.EventBus.Publish(metadata.EventType, eventMessage)
+	err := eh.EventBus.Publish(metadata.EventType, eventMessage)
 	if err != nil {
 		return err
 	}

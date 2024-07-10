@@ -5,6 +5,8 @@ import (
 	"reflect"
 )
 
+// TODO: Изменить на логику когда можешь убрать функционал удалив файл, ну или закоментив содержимое
+
 type CommandHandlerMap struct {
 	handlers map[reflect.Type]func(Command, CommandMetadata) error
 }
@@ -31,3 +33,7 @@ func (c *CommandHandlerMap) AppendHandlers(commandHandlers ...CommandHandler) {
 		}
 	}
 }
+
+// func (c *CommandHandlerMap) RegisterCommand(valueType reflect.Type, f func(Command, CommandMetadata) error) {
+// 	c.handlers[valueType] = f
+// }

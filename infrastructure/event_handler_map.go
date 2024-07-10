@@ -1,39 +1,47 @@
 package infrastructure
 
-import (
-	"fmt"
-	"log"
-)
+// import (
+// 	"fmt"
+// 	"log"
+// )
 
-type eventHandler func(interface{}, EventMetadata) error
+// type eventHandler func(interface{}, EventMetadata) error
 
-type EventHandlerMap struct {
-	handlers map[string]eventHandler
-}
+// type EventHandlerMap struct {
+// 	eventBus *EventBus
+// 	handlers map[string]eventHandler
+// }
 
-func NewEventHandlerMap() EventHandlerMap {
-	eh := EventHandlerMap{
-		handlers: make(map[string]eventHandler),
-	}
+// // type EventMessage struct {
+// // 	event    interface{}
+// // 	metadata EventMetadata
+// // 	version  int
+// // }
 
-	eh.register("resume.sended", resumeSended)
+// func NewEventHandlerMap(eventBus *EventBus) EventHandlerMap {
+// 	eh := EventHandlerMap{
+// 		eventBus: eventBus,
+// 		handlers: make(map[string]eventHandler),
+// 	}
 
-	return eh
-}
+// 	eh.register("resume.sended", resumeSended)
 
-func (eh *EventHandlerMap) register(eventType string, f eventHandler) {
-	eh.handlers[eventType] = f
-}
+// 	return eh
+// }
 
-func (eh *EventHandlerMap) Get(eventType string) (eventHandler, error) {
-	if h, ok := eh.handlers[eventType]; ok {
-		return h, nil
-	}
+// func (eh *EventHandlerMap) register(eventType string, f eventHandler) {
+// 	eh.handlers[eventType] = f
+// }
 
-	return nil, fmt.Errorf("handler for event %s does not exist", eventType)
-}
+// func (eh *EventHandlerMap) Get(eventType string) (eventHandler, error) {
+// 	if h, ok := eh.handlers[eventType]; ok {
+// 		return h, nil
+// 	}
 
-func resumeSended(e interface{}, m EventMetadata) error {
-	log.Printf("Дошло до нужного хендлера событий с типом - {%s} и uuid - {%s}", m.EventType, m.EventId)
-	return nil
-}
+// 	return nil, fmt.Errorf("handler for event %s does not exist", eventType)
+// }
+
+// func resumeSended(e interface{}, m EventMetadata) error {
+// 	log.Printf("Дошло до нужного хендлера событий с типом - {%s} и uuid - {%s}", m.EventType, m.EventId)
+// 	return nil
+// }

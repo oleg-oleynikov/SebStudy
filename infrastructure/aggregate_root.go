@@ -44,6 +44,7 @@ func (a *AggregateRootBase) Register(event interface{}, handler func(interface{}
 func (a *AggregateRootBase) Load(events []interface{}) {
 	for _, event := range events {
 		a.Raise(event)
+		a.version++
 	}
 }
 
@@ -51,7 +52,6 @@ func (a *AggregateRootBase) Raise(event interface{}) {
 	if handler, exists := a.handlers[getValueType(event)]; exists {
 		handler(event)
 		a.changes = append(a.changes, event)
-		a.version++
 	}
 }
 

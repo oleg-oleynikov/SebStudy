@@ -1,7 +1,6 @@
 package values
 
 import (
-	"errors"
 	"fmt"
 	"regexp"
 )
@@ -12,7 +11,7 @@ type PhoneNumber struct {
 
 func NewPhoneNumber(phoneNumber string) (*PhoneNumber, error) {
 	if !isValidPhoneNumber(phoneNumber) {
-		return nil, errors.New("invalid phone number")
+		return nil, fmt.Errorf("invalid phone number: {%s}", phoneNumber)
 	}
 
 	return &PhoneNumber{
