@@ -2,15 +2,14 @@ package main
 
 import (
 	"context"
-	"encoding/base64"
 	"fmt"
 	"log"
 	"time"
 
 	pb "SebStudy/proto/resume"
 
+	_ "github.com/cloudevents/sdk-go/binding/format/protobuf/v2"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
-	"google.golang.org/protobuf/proto"
 )
 
 func main() {
@@ -22,23 +21,19 @@ func main() {
 	}
 
 	testResume := pb.ResumeSended{
-		ResumeId:    1,
+		ResumeId:    "dddddddddddddddddd",
 		FirstName:   "Алексей",
 		MiddleName:  "Валерьевич",
 		LastName:    "Кузнецов",
 		PhoneNumber: "79295132116",
-		Educations: []*pb.Education{
-			{
-				Education: "IT",
-			},
-		},
-		AboutMe: "I am a student",
+		Education:   "РКСИ",
+		AboutMe:     "I am a student",
 		Skills: []*pb.Skill{
 			{
 				Skill: "Golang",
 			},
 		},
-		Photo: "https://www.google.com",
+		Photo: []byte{},
 		Directions: []*pb.Direction{
 			{
 				Direction: "back-end",
@@ -55,14 +50,17 @@ func main() {
 	event := cloudevents.NewEvent()
 	event.SetID("1234-1234-1234-1234")
 	event.SetSource("example/uri")
-	event.SetType("resume.sended")
+	event.SetType("resume.send")
 	event.SetTime(current_time)
 	event.SetSpecVersion("1.0")
-	b, _ := proto.Marshal(&testResume)
-	fmt.Println(b)
-	var protoBytes []byte = make([]byte, base64.StdEncoding.EncodedLen(len(b)))
-	base64.StdEncoding.Encode(protoBytes, b)
-	event.SetData("application/protobuf", protoBytes)
+	// b, _ := proto.Marshal(&testResume)
+	// fmt.Println(b)
+	// var protoBytes []byte = make([]byte, base64.StdEncoding.EncodedLen(len(b)))
+	// base64.StdEncoding.Encode(protoBytes, b)
+
+	// event.SetData(pbcloudevents.ContentTypeProtobuf, &testResume)
+	event.SetData("application/json", &testResume)
+	fmt.Println(event.DataEncoded)
 
 	ctx := cloudevents.ContextWithTarget(context.Background(), "http://localhost:8080/")
 
