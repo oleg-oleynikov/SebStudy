@@ -32,11 +32,17 @@ func main() {
 			{
 				Skill: "Golang",
 			},
+			{
+				Skill: "Java",
+			},
 		},
-		Photo: []byte{},
+		Photo: []byte{255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255},
 		Directions: []*pb.Direction{
 			{
 				Direction: "back-end",
+			},
+			{
+				Direction: "fddffdfddf",
 			},
 		},
 		AboutProjects: "about projects",
