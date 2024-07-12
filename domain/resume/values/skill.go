@@ -6,7 +6,7 @@ import (
 )
 
 type Skill struct {
-	skill string
+	Skill string
 }
 
 func NewSkill(skill string) (*Skill, error) {
@@ -15,7 +15,7 @@ func NewSkill(skill string) (*Skill, error) {
 	}
 
 	return &Skill{
-		skill: skill,
+		Skill: skill,
 	}, nil
 }
 
@@ -24,5 +24,5 @@ func (sk *Skill) ToString() string {
 }
 
 func (s *Skill) GetSkill() string {
-	return s.skill
+	return s.Skill
 }

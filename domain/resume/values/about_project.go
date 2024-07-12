@@ -6,7 +6,7 @@ import (
 )
 
 type AboutProjects struct {
-	aboutProjects string
+	AboutProjects string
 }
 
 func NewAboutProjects(aboutProjects string) (*AboutProjects, error) {
@@ -15,7 +15,7 @@ func NewAboutProjects(aboutProjects string) (*AboutProjects, error) {
 	}
 
 	return &AboutProjects{
-		aboutProjects: aboutProjects,
+		AboutProjects: aboutProjects,
 	}, nil
 }
 
@@ -24,5 +24,5 @@ func (aProjects *AboutProjects) ToString() string {
 }
 
 func (a *AboutProjects) GetAboutProjects() string {
-	return a.aboutProjects
+	return a.AboutProjects
 }

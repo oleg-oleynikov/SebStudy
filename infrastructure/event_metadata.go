@@ -4,6 +4,9 @@ import (
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 )
 
+type DomainEvent interface {
+}
+
 type EventMetadata struct {
 	EventId   string
 	EventType string

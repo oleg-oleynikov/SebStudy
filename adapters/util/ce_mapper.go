@@ -2,7 +2,6 @@ package util
 
 import (
 	"context"
-	"encoding/base64"
 	"fmt"
 	"sync"
 
@@ -125,10 +124,11 @@ func InitCloudEvent(eventType, source string, mes proto.Message) cloudevents.Eve
 	cloudEvent.SetSpecVersion("1.0")
 	cloudEvent.SetType(eventType)
 	cloudEvent.SetSource(source)
-	b, _ := proto.Marshal(mes)
-	var protoBytes []byte = make([]byte, base64.StdEncoding.EncodedLen(len(b)))
-	base64.StdEncoding.Encode(protoBytes, b)
-	cloudEvent.SetData("application/protobuf", protoBytes)
+	// b, _ := proto.Marshal(mes)
+	// var protoBytes []byte = make([]byte, base64.StdEncoding.EncodedLen(len(b)))
+	// base64.StdEncoding.Encode(protoBytes, b)
+	// cloudEvent.SetData("application/protobuf", protoBytes)
+	cloudEvent.SetData("application/json", mes)
 
 	return cloudEvent
 }

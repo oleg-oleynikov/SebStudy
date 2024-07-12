@@ -6,7 +6,7 @@ import (
 )
 
 type PhoneNumber struct {
-	phoneNumber string
+	PhoneNumber string
 }
 
 func NewPhoneNumber(phoneNumber string) (*PhoneNumber, error) {
@@ -15,7 +15,7 @@ func NewPhoneNumber(phoneNumber string) (*PhoneNumber, error) {
 	}
 
 	return &PhoneNumber{
-		phoneNumber: phoneNumber,
+		PhoneNumber: phoneNumber,
 	}, nil
 }
 
@@ -30,5 +30,5 @@ func (phoneNum *PhoneNumber) ToString() string {
 }
 
 func (p *PhoneNumber) GetPhoneNumber() string {
-	return p.phoneNumber
+	return p.PhoneNumber
 }

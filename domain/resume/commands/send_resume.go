@@ -13,7 +13,7 @@ type SendResume struct {
 	MiddleName    values.MiddleName
 	LastName      values.LastName
 	PhoneNumber   values.PhoneNumber
-	Educations    values.Educations
+	Education     values.Education
 	AboutMe       values.AboutMe
 	Skills        values.Skills
 	Photo         values.Photo
@@ -29,7 +29,7 @@ func NewSendResume(
 	middleName values.MiddleName,
 	lastName values.LastName,
 	phoneNumber values.PhoneNumber,
-	educations values.Educations,
+	education values.Education,
 	aboutMe values.AboutMe,
 	skills values.Skills,
 	photo values.Photo,
@@ -44,7 +44,7 @@ func NewSendResume(
 		MiddleName:    middleName,
 		LastName:      lastName,
 		PhoneNumber:   phoneNumber,
-		Educations:    educations,
+		Education:     education,
 		AboutMe:       aboutMe,
 		Skills:        skills,
 		Photo:         photo,

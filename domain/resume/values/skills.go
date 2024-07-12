@@ -3,12 +3,12 @@ package values
 import "fmt"
 
 type Skills struct {
-	skills []Skill
+	Skills []Skill
 }
 
 func (s *Skills) AppendSkills(sk ...Skill) error {
-	if len(s.skills)+len(sk) < 500 {
-		s.skills = append(s.skills, sk...)
+	if len(s.Skills)+len(sk) < 500 {
+		s.Skills = append(s.Skills, sk...)
 		return nil
 	}
 
@@ -16,7 +16,7 @@ func (s *Skills) AppendSkills(sk ...Skill) error {
 }
 
 func (s *Skills) GetSkills() []Skill {
-	return s.skills
+	return s.Skills
 }
 
 func (s *Skills) ToString() string {

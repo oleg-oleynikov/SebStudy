@@ -7,7 +7,7 @@ import (
 )
 
 type Portfolio struct {
-	portfolio string
+	Portfolio string
 }
 
 func NewPortfolio(portfolio string) (*Portfolio, error) {
@@ -16,7 +16,7 @@ func NewPortfolio(portfolio string) (*Portfolio, error) {
 	}
 
 	return &Portfolio{
-		portfolio: portfolio,
+		Portfolio: portfolio,
 	}, nil
 }
 
@@ -30,5 +30,5 @@ func (p Portfolio) ToString() string {
 }
 
 func (p *Portfolio) GetPortfolio() string {
-	return p.portfolio
+	return p.Portfolio
 }

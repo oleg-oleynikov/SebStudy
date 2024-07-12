@@ -6,7 +6,7 @@ import (
 )
 
 type StudentGroup struct {
-	studentGroup string
+	StudentGroup string
 }
 
 func NewStudentGroup(studentGroup string) (*StudentGroup, error) {
@@ -15,7 +15,7 @@ func NewStudentGroup(studentGroup string) (*StudentGroup, error) {
 	}
 
 	return &StudentGroup{
-		studentGroup: studentGroup,
+		StudentGroup: studentGroup,
 	}, nil
 }
 
@@ -28,5 +28,5 @@ func (group *StudentGroup) ToString() string {
 }
 
 func (sg *StudentGroup) GetStudentGroup() string {
-	return sg.studentGroup
+	return sg.StudentGroup
 }
