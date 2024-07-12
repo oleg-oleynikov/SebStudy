@@ -3,16 +3,16 @@ package values
 import "fmt"
 
 type Education struct {
-	education string
+	Education string
 }
 
-func NewEducation(education string) (*Education, error) {
+func NewEducation(education string) (Education, error) {
 	// if !isValidEducation(education) {
 	// 	return nil, errors.New("invalid education")
 	// }
 
-	return &Education{
-		education: education,
+	return Education{
+		Education: education,
 	}, nil
 }
 
@@ -25,5 +25,5 @@ func (ed *Education) ToString() string {
 }
 
 func (ed *Education) GetEducation() string {
-	return ed.education
+	return ed.Education
 }

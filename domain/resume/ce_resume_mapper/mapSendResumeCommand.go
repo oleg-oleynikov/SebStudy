@@ -5,27 +5,29 @@ import (
 	"SebStudy/domain/resume/commands"
 	"SebStudy/domain/resume/values"
 	"context"
-	"encoding/base64"
 
 	pb "SebStudy/proto/resume"
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
-	"google.golang.org/protobuf/proto"
 )
 
 var toSendResumeCommand util.CeToEvent = func(ctx context.Context, c cloudevents.Event) (interface{}, error) {
 
 	var rs pb.ResumeSended
-	bytes, err := base64.StdEncoding.DecodeString(string(c.DataEncoded))
-	if err != nil {
+	// bytes, err := base64.StdEncoding.DecodeString(string(c.DataEncoded))
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	// if err := proto.Unmarshal(c.Data(), &rs); err != nil {
+	// 	return nil, err
+	// }
+
+	if err := c.DataAs(&rs); err != nil {
 		return nil, err
 	}
 
-	if err := proto.Unmarshal(bytes, &rs); err != nil {
-		return nil, err
-	}
-
-	resumeID := values.NewResumeId(int(rs.GetResumeId()))
+	resumeID := values.NewResumeId(rs.GetResumeId())
 
 	firstName, err := values.NewFirstName(rs.GetFirstName())
 	if err != nil {
@@ -47,14 +49,19 @@ var toSendResumeCommand util.CeToEvent = func(ctx context.Context, c cloudevents
 		return nil, err
 	}
 
-	var educations values.Educations
-	for i := 0; i < len(rs.Educations); i++ {
-		data := rs.Educations[i]
-		education, err := values.NewEducation(data.Education)
-		if err != nil {
-			return nil, err
-		}
-		educations.AppendEducations(*education)
+	// var educations values.Educations
+	// for i := 0; i < len(rs.Educations); i++ {
+	// 	data := rs.Educations[i]
+	// 	education, err := values.NewEducation(data.Education)
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+	// 	educations.AppendEducations(*education)
+	// }
+
+	education, err := values.NewEducation(rs.Education)
+	if err != nil {
+		return nil, err
 	}
 
 	aboutMe, err := values.NewAboutMe(rs.GetAboutMe())
@@ -72,7 +79,7 @@ var toSendResumeCommand util.CeToEvent = func(ctx context.Context, c cloudevents
 		skills.AppendSkills(*skill)
 	}
 
-	photo, err := values.NewPhoto(rs.GetPhoto())
+	photo, err := values.NewPhoto(rs.GetPhoto(), "")
 	if err != nil {
 		return nil, err
 	}
@@ -104,7 +111,7 @@ var toSendResumeCommand util.CeToEvent = func(ctx context.Context, c cloudevents
 
 	createdResume := commands.NewSendResume(
 		*resumeID, *firstName, *middleName, *lastName, *phoneNumber,
-		educations, *aboutMe, skills, *photo, directions,
+		education, *aboutMe, skills, *photo, directions,
 		*aboutProjects, *portfolio, *studentGroup)
 
 	return createdResume, nil

@@ -3,11 +3,11 @@ package values
 import "fmt"
 
 type Educations struct {
-	educations []Education
+	Educations []Education
 }
 
 func (e *Educations) AppendEducations(ed ...Education) {
-	e.educations = append(e.educations, ed...)
+	e.Educations = append(e.Educations, ed...)
 }
 
 func (e *Educations) ToString() string {
@@ -15,5 +15,5 @@ func (e *Educations) ToString() string {
 }
 
 func (e *Educations) GetEducations() []Education {
-	return e.educations
+	return e.Educations
 }

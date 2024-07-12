@@ -7,7 +7,7 @@ import (
 )
 
 type LastName struct {
-	lastName string
+	LastName string
 }
 
 func NewLastName(lastName string) (*LastName, error) {
@@ -16,7 +16,7 @@ func NewLastName(lastName string) (*LastName, error) {
 	}
 
 	return &LastName{
-		lastName: lastName,
+		LastName: lastName,
 	}, nil
 }
 
@@ -31,5 +31,5 @@ func (lName *LastName) ToString() string {
 }
 
 func (l *LastName) GetLastName() string {
-	return l.lastName
+	return l.LastName
 }

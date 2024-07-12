@@ -6,7 +6,7 @@ import (
 )
 
 type Direction struct {
-	direction string
+	Direction string
 }
 
 func NewDirection(direction string) (*Direction, error) {
@@ -15,7 +15,7 @@ func NewDirection(direction string) (*Direction, error) {
 	}
 
 	return &Direction{
-		direction: direction,
+		Direction: direction,
 	}, nil
 }
 
@@ -40,5 +40,5 @@ func (dir *Directions) ToString() string {
 }
 
 func (d *Direction) GetDirection() string {
-	return d.direction
+	return d.Direction
 }

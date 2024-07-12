@@ -45,6 +45,6 @@ func (eb *EventBus) Subscribe(topic string, cb nats.Handler) error {
 	return nil
 }
 
-func (eb *EventBus) Publish(topic string, data *EventMessage /*interface{}*/) error {
+func (eb *EventBus) Publish(topic string, data interface{}) error {
 	return eb.nc.Publish(topic, data)
 }

@@ -17,20 +17,27 @@ type CloudEventsAdapter struct {
 	CeMapper          *util.CeMapper
 }
 
-func NewCloudEventsAdapter(d ports.CeCommandDispatcher, e ports.CeEventHandler, ceMapper *util.CeMapper, port int) *CloudEventsAdapter {
+func NewCloudEventsAdapter(d ports.CeCommandDispatcher, e ports.CeEventHandler, ceMapper *util.CeMapper) *CloudEventsAdapter {
 	return &CloudEventsAdapter{
 		CommandDispatcher: d,
 		EventDispatcher:   e,
-		Client:            newCloudEventsClient(port),
-		CeMapper:          ceMapper,
+
+		Client:   newCloudEventsClient(),
+		CeMapper: ceMapper,
 	}
 }
 
-func newCloudEventsClient(port int) cloudevents.Client {
-	ce, err := cloudevents.NewClientHTTP(cloudevents.WithPort(port))
+func newCloudEventsClient() cloudevents.Client {
+	p, err := cloudevents.NewHTTP()
+	if err != nil {
+		log.Fatalf("failed to create protocol: %s", err.Error())
+	}
+
+	ce, err := cloudevents.NewClient(p)
 	if err != nil {
 		log.Fatalf("failed to create http client, %v", err)
 	}
+
 	return ce
 }
 
@@ -64,7 +71,6 @@ func (c *CloudEventsAdapter) receive(ctx context.Context, event cloudevents.Even
 			return cloudevents.NewHTTPResult(500, "failed to dispatch command: %v", err)
 		}
 	} else if c.CeMapper.IsEvent(event.Type()) {
-		// fmt.Println(mappedEvent)
 		err := c.EventDispatcher.Handle(mappedEvent, *infrastructure.NewEventMetadataFromCloudEvent(event))
 		if err != nil {
 			if _, ok := err.(cloudevents.Result); ok {

@@ -18,9 +18,8 @@ import (
 )
 
 const (
-	host = "localhost"
-	port = 8080
-	url  = "http://localhost:8080/"
+	// host = "localhost"
+	url = "http://localhost:8080/"
 )
 
 func main() {
@@ -39,7 +38,8 @@ func main() {
 
 	eventSerde := infrastructure.GetEventSerdeInstance()
 	writeRepo := secondary.NewPostgresAdapter()
-	eventStore := infrastructure.NewEventStore(eventBus, eventSerde, writeRepo)
+	imageStore := infrastructure.NewImageStore("./uploads")
+	eventStore := infrastructure.NewEventStore(eventBus, eventSerde, writeRepo, imageStore)
 
 	ceEventSender := secondary.NewCeSenderAdapter(url, ceMapper)
 
@@ -50,7 +50,7 @@ func main() {
 
 	eventHandler := infrastructure.NewEventHandler(eventBus, eventStore)
 
-	ceAdapter := primary.NewCloudEventsAdapter(dispatcher, eventHandler, ceMapper, port)
+	ceAdapter := primary.NewCloudEventsAdapter(dispatcher, eventHandler, ceMapper)
 
 	ceAdapter.Run()
 

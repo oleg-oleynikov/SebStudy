@@ -6,10 +6,10 @@ import (
 
 type ResumeId struct {
 	// resumeId uuid.UUID
-	Value int
+	Value string
 }
 
-func NewResumeId(resumeId int) *ResumeId {
+func NewResumeId(resumeId string) *ResumeId {
 	// id := uuid.New()
 	return &ResumeId{
 		Value: resumeId,

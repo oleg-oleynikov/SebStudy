@@ -1,15 +1,15 @@
 package infrastructure
 
-type EventMessage struct {
-	Event    interface{}
-	Metadata EventMetadata
-	Version  int
-}
+// type EventMessage struct {
+// 	Event    interface{}   `json:"event"`
+// 	Metadata EventMetadata `json:"metadata"`
+// 	Version  int           `json:"version"`
+// }
 
-func NewEventMessage(event interface{}, metadata EventMetadata, version int) *EventMessage {
-	return &EventMessage{
-		Event:    event,
-		Metadata: metadata,
-		Version:  version,
-	}
-}
+// func NewEventMessage(event interface{}, metadata EventMetadata, version int) *EventMessage {
+// 	return &EventMessage{
+// 		Event:    event,
+// 		Metadata: metadata,
+// 		Version:  version,
+// 	}
+// }
