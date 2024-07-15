@@ -24,15 +24,15 @@ func (dr *Direction) ToString() string {
 }
 
 type Directions struct {
-	directions []Direction
+	Directions []Direction
 }
 
 func (d *Directions) AppendDirection(dr Direction) {
-	d.directions = append(d.directions, dr)
+	d.Directions = append(d.Directions, dr)
 }
 
 func (d *Directions) GetDirections() []Direction {
-	return d.directions
+	return d.Directions
 }
 
 func (dir *Directions) ToString() string {

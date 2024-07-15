@@ -6,22 +6,27 @@ import (
 	"log"
 )
 
-type EventStore struct {
+type EventStore interface {
+	LoadEvents(aggregateId string) ([]interface{}, error)
+	AppendEvents(CommandMetadata, int, ...interface{}) error
+}
+
+type EsEventStore struct {
 	eventBus   *EventBus
 	eventSerde *EventSerde
 	writeRepo  db_ports.WriteModel
-	imageStore *ImageStore
+	// imageStore *ImageStore
 }
 
-func NewEventStore(eventBus *EventBus, eventSerde *EventSerde, writeRepo db_ports.WriteModel, imageStore *ImageStore) *EventStore {
-	es := &EventStore{
+func NewEsEventStore(eventBus *EventBus, eventSerde *EventSerde, writeRepo db_ports.WriteModel, imageStore *ImageStore) *EsEventStore {
+	es := &EsEventStore{
 		eventBus:   eventBus,
 		eventSerde: eventSerde,
 		writeRepo:  writeRepo,
-		imageStore: imageStore,
+		// imageStore: imageStore,
 	}
 
-	es.eventBus.Subscribe("resume.sended", func(event events.ResumeSended) {
+	es.eventBus.Subscribe("resume.sended", func(event *EventMessage[events.ResumeSended]) {
 		// log.Println(reflect.TypeOf(eventMes.Event))
 		// ev := eventMes.Event
 		// log.Println(eventMes)
@@ -53,15 +58,22 @@ func NewEventStore(eventBus *EventBus, eventSerde *EventSerde, writeRepo db_port
 		// if err := es.writeRepo.Save(data); err != nil {
 		// 	log.Println()
 		// }
-
-		log.Printf("Ну типа сохранилось вот ивент мес: %v\n", event)
+		log.Println(event)
 	})
 
 	return es
 }
 
-// Получение всех ивентов по id агрегата
+func (es *EsEventStore) LoadEvents(aggregateId string) ([]interface{}, error) {
+	// return nil, nil
+	events, err := es.writeRepo.GetByAggregateId(aggregateId)
+	if err != nil {
+		return nil, err
+	}
 
-func GetEvents(aggregateId int) []interface{} {
+	return events, nil
+}
+
+func (es *EsEventStore) AppendEvents(m CommandMetadata, version int, events ...interface{}) error {
 	return nil
 }

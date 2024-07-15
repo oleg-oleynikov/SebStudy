@@ -10,12 +10,11 @@ type CommandHandlers struct {
 	*infrastructure.CommandHandlerBase
 }
 
-func NewHandlers(eventSender ports.CeEventSender) *CommandHandlers {
+func NewHandlers(eventSender ports.CeEventSender, repository ResumeRepository) *CommandHandlers {
 	commandHandlers := &CommandHandlers{infrastructure.NewCommandHandler()}
 
 	commandHandlers.Register(commands.SendResume{}, func(c infrastructure.Command, m infrastructure.CommandMetadata) error {
 		cmd := c.(*commands.SendResume)
-
 		resume := NewResume()
 
 		if err := resume.SendResume(cmd, eventSender); err != nil {

@@ -39,7 +39,7 @@ func TestResume(t *testing.T) {
 
 	resume1 := NewResume()
 	fmt.Println(resume1)
-	resume1.resumeId = *idResume
+	resume1.resumeId = idResume
 	resume1.firstName = *firstName
 	resume1.middleName = *middleName
 	resume1.lastName = *lastName

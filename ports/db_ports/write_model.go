@@ -1,6 +1,7 @@
 package db_ports
 
 type WriteModel interface {
-	Get(aggregateId int, collections string) ([]interface{}, error)
+	Get(aggregateId string) ([]interface{}, error)
 	Save(data interface{}) error
+	GetByAggregateId(aggregateId string) ([]interface{}, error)
 }

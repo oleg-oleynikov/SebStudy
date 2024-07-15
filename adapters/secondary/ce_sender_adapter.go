@@ -32,7 +32,6 @@ func (c *CeSenderAdapter) SendEvent(e interface{}, eventType, source string) err
 	}
 	result := c.Client.Send(c.Context, cloudEvent)
 	if cloudevents.IsUndelivered(result) {
-		// return fmt.Errorf("failed to send cloud event: %v", result)
 		return cloudevents.NewHTTPResult(500, "failed to send cloud event: %v", result)
 	} else {
 		var httpResult *cehttp.Result
@@ -40,14 +39,9 @@ func (c *CeSenderAdapter) SendEvent(e interface{}, eventType, source string) err
 			// log.Printf("Sent with status code %d", httpResult.StatusCode)
 			return result
 		} else {
-			// return fmt.Errorf("send did not return an HTTP response: %s", result)
 			return cloudevents.NewHTTPResult(400, "send did not return an HTTP response: %s", result)
 		}
 	}
-
-	// return nil
-
-	// return nil
 }
 
 func (c *CeSenderAdapter) newCloudEvent(data interface{}, eventType, source string) (cloudevents.Event, error) {
