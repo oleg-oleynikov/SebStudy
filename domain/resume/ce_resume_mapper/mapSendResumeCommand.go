@@ -110,7 +110,7 @@ var toSendResumeCommand util.CeToEvent = func(ctx context.Context, c cloudevents
 	}
 
 	createdResume := commands.NewSendResume(
-		*resumeID, *firstName, *middleName, *lastName, *phoneNumber,
+		resumeID, *firstName, *middleName, *lastName, *phoneNumber,
 		education, *aboutMe, skills, *photo, directions,
 		*aboutProjects, *portfolio, *studentGroup)
 

@@ -13,6 +13,7 @@ func TestResume(t *testing.T) {
 	if err != nil {
 		return
 	}
+
 	idResume := values.NewResumeId(uuidR.String())
 	firstName, _ := values.NewFirstName("Алексей")
 	middleName, _ := values.NewMiddleName("Валерьевич")
@@ -39,7 +40,7 @@ func TestResume(t *testing.T) {
 
 	resume1 := NewResume()
 	fmt.Println(resume1)
-	resume1.resumeId = *idResume
+	resume1.resumeId = idResume
 	resume1.firstName = *firstName
 	resume1.middleName = *middleName
 	resume1.lastName = *lastName

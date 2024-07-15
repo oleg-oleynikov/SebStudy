@@ -60,7 +60,6 @@ func (r *Resume) registerHandlers() {
 }
 
 func (r *Resume) ResumeSended(e events.ResumeSended) {
-	r.resumeId = e.ResumeId
 	r.firstName = e.FirstName
 	r.middleName = e.MiddleName
 	r.lastName = e.LastName
@@ -76,10 +75,10 @@ func (r *Resume) ResumeSended(e events.ResumeSended) {
 }
 
 func (r *Resume) SendResume(c *commands.SendResume, sender ports.CeEventSender) error {
+
 	e := events.NewResumeSended(c.ResumeId, c.FirstName, c.MiddleName, c.LastName, c.PhoneNumber, c.Education, c.AboutMe, c.Skills, c.Photo, c.Directions, c.AboutProjects, c.Portfolio, c.StudentGroup, time.Now())
 
-	err := sender.SendEvent(e, "resume.sended", "domain/resume/resumesended")
-	if err != nil {
+	if err := sender.SendEvent(e, "resume.sended", "domain/resume"); err != nil {
 		return err
 	}
 

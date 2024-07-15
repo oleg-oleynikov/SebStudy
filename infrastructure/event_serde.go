@@ -48,8 +48,7 @@ func (es *EventSerde) GetMapToEvent(tEvent reflect.Type) (MapToEvent, error) {
 	return mapToEvent, nil
 }
 
-// Будет переводить в формат для записи event log
-func (e *EventSerde) Serialize(event interface{}, metadata *EventMetadata) (map[string]interface{}, error) {
+func (e *EventSerde) Serialize(event interface{}, metadata EventMetadata) (map[string]interface{}, error) {
 	return nil, nil
 	// eventToMap, err := e.GetEventToMap(eventMessage.Metadata.EventType)
 	// if err != nil {
@@ -59,7 +58,6 @@ func (e *EventSerde) Serialize(event interface{}, metadata *EventMetadata) (map[
 	// return eventToMap(eventMessage)
 }
 
-// Ну логично при получении из бд события будут проходить через это
 func (e *EventSerde) Deserialize(data interface{}) (interface{}, *EventMetadata, error) {
 
 	// mapToEvent, err := e.GetMapToEvent()

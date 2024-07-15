@@ -39,16 +39,17 @@ func main() {
 	eventSerde := infrastructure.GetEventSerdeInstance()
 	writeRepo := secondary.NewPostgresAdapter()
 	imageStore := infrastructure.NewImageStore("./uploads")
-	eventStore := infrastructure.NewEventStore(eventBus, eventSerde, writeRepo, imageStore)
+	eventStore := infrastructure.NewEsEventStore(eventBus, eventSerde, writeRepo, imageStore)
 
 	ceEventSender := secondary.NewCeSenderAdapter(url, ceMapper)
+	resumeRepo := resume.NewEventStoreResumeRepo(eventStore)
 
-	handlers := resume.NewHandlers(ceEventSender)
+	resumeCmdHandlers := resume.NewHandlers(ceEventSender, resumeRepo)
 	cmdHandlerMap := infrastructure.NewCommandHandlerMap()
-	cmdHandlerMap.AppendHandlers(handlers)
+	cmdHandlerMap.AppendHandlers(resumeCmdHandlers)
 	dispatcher := infrastructure.NewDispatcher(cmdHandlerMap)
 
-	eventHandler := infrastructure.NewEventHandler(eventBus, eventStore)
+	eventHandler := infrastructure.NewEventHandler(eventBus)
 
 	ceAdapter := primary.NewCloudEventsAdapter(dispatcher, eventHandler, ceMapper)
 

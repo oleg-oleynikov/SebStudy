@@ -9,9 +9,9 @@ type ResumeId struct {
 	Value string
 }
 
-func NewResumeId(resumeId string) *ResumeId {
+func NewResumeId(resumeId string) ResumeId {
 	// id := uuid.New()
-	return &ResumeId{
+	return ResumeId{
 		Value: resumeId,
 	}
 }

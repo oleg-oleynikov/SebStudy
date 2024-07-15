@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/google/uuid"
 )
@@ -19,12 +20,14 @@ func NewImageStore(imageFolderPath string) *ImageStore {
 }
 
 func (is *ImageStore) SaveImage(imageBytes []byte) (string, error) {
-	photoUuid, err := uuid.NewV7()
+	imageUuid, err := uuid.NewV7()
 	if err != nil {
 		return "", err
 	}
-	imagePath := fmt.Sprintf("%s/%s.jpg", is.imageFolderPath, photoUuid)
+
+	imagePath := fmt.Sprintf("%s/%s.jpg", is.imageFolderPath, imageUuid)
 	file, err := os.Create(imagePath)
+
 	if err != nil {
 		return "", err
 	}
@@ -32,4 +35,29 @@ func (is *ImageStore) SaveImage(imageBytes []byte) (string, error) {
 	file.Write(imageBytes)
 
 	return imagePath, nil
+}
+
+func (is *ImageStore) GetImageBytes(imagePath string) ([]byte, error) {
+	if !strings.HasSuffix(imagePath, ".jpg") {
+		return nil, fmt.Errorf("image must has a suffix .jpg")
+	}
+
+	imageBytes, err := os.ReadFile(imagePath)
+	if err != nil {
+		return nil, err
+	}
+
+	return imageBytes, nil
+}
+
+func (is *ImageStore) DeleteImageByPath(imagePath string) error {
+	if !strings.HasSuffix(imagePath, ".jpg") {
+		return fmt.Errorf("image must has a suffix .jpg")
+	}
+
+	if err := os.Remove(imagePath); err != nil {
+		return err
+	}
+
+	return nil
 }
