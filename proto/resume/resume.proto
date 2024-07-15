@@ -49,6 +49,7 @@ message ResumeSended {
     string portfolio = 12;
     string studentGroup = 13;
     google.protobuf.Timestamp createdAt=14;
+    // optional int version = 15;
 }
 
 // message ResumeSendedResponse {

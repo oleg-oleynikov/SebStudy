@@ -42,14 +42,14 @@ func main() {
 	eventStore := infrastructure.NewEsEventStore(eventBus, eventSerde, writeRepo, imageStore)
 
 	ceEventSender := secondary.NewCeSenderAdapter(url, ceMapper)
-	// resumeRepo := resume.NewEventStoreResumeRepo(eventStore)
+	resumeRepo := resume.NewEventStoreResumeRepo(eventStore)
 
-	resumeCmdHandlers := resume.NewHandlers(ceEventSender, nil) // Добавить репозиторий для мракобесия ну комманд
+	resumeCmdHandlers := resume.NewHandlers(ceEventSender, resumeRepo)
 	cmdHandlerMap := infrastructure.NewCommandHandlerMap()
 	cmdHandlerMap.AppendHandlers(resumeCmdHandlers)
 	dispatcher := infrastructure.NewDispatcher(cmdHandlerMap)
 
-	eventHandler := infrastructure.NewEventHandler(eventBus, eventStore)
+	eventHandler := infrastructure.NewEventHandler(eventBus)
 
 	ceAdapter := primary.NewCloudEventsAdapter(dispatcher, eventHandler, ceMapper)
 

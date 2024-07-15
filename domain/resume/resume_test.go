@@ -13,6 +13,7 @@ func TestResume(t *testing.T) {
 	if err != nil {
 		return
 	}
+
 	idResume := values.NewResumeId(uuidR.String())
 	firstName, _ := values.NewFirstName("Алексей")
 	middleName, _ := values.NewMiddleName("Валерьевич")

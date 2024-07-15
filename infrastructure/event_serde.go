@@ -48,7 +48,7 @@ func (es *EventSerde) GetMapToEvent(tEvent reflect.Type) (MapToEvent, error) {
 	return mapToEvent, nil
 }
 
-func (e *EventSerde) Serialize(event interface{}, metadata *EventMetadata) (map[string]interface{}, error) {
+func (e *EventSerde) Serialize(event interface{}, metadata EventMetadata) (map[string]interface{}, error) {
 	return nil, nil
 	// eventToMap, err := e.GetEventToMap(eventMessage.Metadata.EventType)
 	// if err != nil {

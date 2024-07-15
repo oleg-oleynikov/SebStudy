@@ -6,16 +6,22 @@ import (
 )
 
 type EventStoreResumeRepo struct {
-	eventStore *infrastructure.EventStore
+	eventStore infrastructure.EventStore
 }
 
-func NewEventStoreResumeRepo(eventStore *infrastructure.EventStore) *EventStoreResumeRepo {
+func NewEventStoreResumeRepo(eventStore infrastructure.EventStore) *EventStoreResumeRepo {
 	return &EventStoreResumeRepo{
 		eventStore: eventStore,
 	}
 }
 
 func (es *EventStoreResumeRepo) Get(resumeId *values.ResumeId) (*Resume, error) {
-	return nil, nil
+	events, err := es.eventStore.LoadEvents(resumeId.Value)
+	if err != nil {
+		return nil, err
+	}
+	resume := NewResume()
+	resume.Load(events)
 
+	return resume, nil
 }
