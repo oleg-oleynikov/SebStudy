@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	pb "SebStudy/proto/resume"
@@ -18,6 +19,12 @@ func main() {
 	c, err := cloudevents.NewClient(p, cloudevents.WithTimeNow(), cloudevents.WithUUIDs())
 	if err != nil {
 		log.Fatalf("failed to create client, %v", err)
+	}
+
+	_, err = os.ReadFile("C:/Users/Олег/Desktop/images.jpg")
+	if err != nil {
+		fmt.Println("Картинка хуйня")
+		return
 	}
 
 	testResume := pb.ResumeSended{
@@ -37,6 +44,7 @@ func main() {
 			},
 		},
 		Photo: []byte{255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255},
+		// Photo: imageBytes,
 		Directions: []*pb.Direction{
 			{
 				Direction: "back-end",
@@ -52,6 +60,7 @@ func main() {
 
 	t := time.Now()
 	current_time := time.Date(t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), time.UTC)
+	startTime := time.Now()
 
 	event := cloudevents.NewEvent()
 	event.SetID("1234-1234-1234-1234")
@@ -59,6 +68,7 @@ func main() {
 	event.SetType("resume.send")
 	event.SetTime(current_time)
 	event.SetSpecVersion("1.0")
+
 	// b, _ := proto.Marshal(&testResume)
 	// fmt.Println(b)
 	// var protoBytes []byte = make([]byte, base64.StdEncoding.EncodedLen(len(b)))
@@ -66,14 +76,17 @@ func main() {
 
 	// event.SetData(pbcloudevents.ContentTypeProtobuf, &testResume)
 	event.SetData("application/json", &testResume)
-	fmt.Println(event.DataEncoded)
-
+	// event.SetData("application/json", &testResume)
+	// fmt.Println(event.DataEncoded)
+	log.Println(event.Data())
 	ctx := cloudevents.ContextWithTarget(context.Background(), "http://localhost:8080/")
+	// log.Println(event.Data())
 
 	if result := c.Send(ctx, event); cloudevents.IsUndelivered(result) {
 		log.Fatalf("failed to send, %v", result)
 	} else {
-		log.Printf("sent cloudevent, %s\n", event)
+		// log.Printf("sent cloudevent, %s\n", event)
 		log.Printf("status code: %v\n", result)
+		log.Println(time.Since(startTime))
 	}
 }

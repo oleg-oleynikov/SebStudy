@@ -44,6 +44,7 @@ func GetCeMapperInstance() *CeMapper {
 }
 
 func (cm *CeMapper) MapToEvent(ctx context.Context, c cloudevents.Event) (interface{}, error) {
+	// log.Println(c.Data())
 	handler, err := cm.Get(c.Type())
 	if err != nil {
 		return nil, err

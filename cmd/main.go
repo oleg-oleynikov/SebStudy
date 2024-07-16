@@ -37,9 +37,16 @@ func main() {
 	initializers.InitializeCeMapperHandlers()
 
 	eventSerde := infrastructure.GetEventSerdeInstance()
-	writeRepo := secondary.NewPostgresAdapter()
+	reindexerAdapter := secondary.NewReindexerAdapter()
+	// writeRepo := secondary.NewPostgresAdapter()
 	imageStore := infrastructure.NewImageStore("./uploads")
-	eventStore := infrastructure.NewEsEventStore(eventBus, eventSerde, writeRepo, imageStore)
+	// eventStore := infrastructure.NewEsEventStore(eventBus, eventSerde, writeRepo, imageStore)
+	eventStore := infrastructure.NewEsEventStore(eventBus, eventSerde, reindexerAdapter, imageStore)
+
+	// test
+
+	// fmt.Println(reindexerAdapter.Get("123"))
+	//
 
 	ceEventSender := secondary.NewCeSenderAdapter(url, ceMapper)
 	resumeRepo := resume.NewEventStoreResumeRepo(eventStore)

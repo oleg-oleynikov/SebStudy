@@ -1,8 +1,6 @@
 package infrastructure
 
 import (
-	"SebStudy/domain/resume/events"
-
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 )
 
@@ -22,11 +20,9 @@ func NewEventHandler(eventBus *EventBus) *EventHandler {
 	return eh
 }
 
-func (eh *EventHandler) Handle(event interface{}, metadata EventMetadata) error {
-	if metadata.EventType == "resume.sended" { // Сделать нормально надо это))
-		eventMes := NewEventMessage(event.(events.ResumeSended), metadata, 0)
-		eh.EventBus.Publish(metadata.EventType, eventMes)
-	}
+func (eh *EventHandler) Handle(event interface{}, metadata EventMetadata) error { // Пофиксить тему которая касается определения версии
+	eventMes := NewEventMessage(event, metadata, 0)
+	eh.EventBus.Publish(metadata.EventType, eventMes)
 
 	return cloudevents.ResultACK
 }

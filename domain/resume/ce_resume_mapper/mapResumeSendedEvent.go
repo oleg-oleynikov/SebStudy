@@ -20,9 +20,11 @@ var toResumeSendedEvent util.CeToEvent = func(ctx context.Context, c cloudevents
 	// 	return nil, err
 	// }
 
-	// if err := proto.Unmarshal(bytes, &rs); err != nil {
+	// if err := proto.Unmarshal(c.Data(), &rs); err != nil {
 	// 	return nil, err
 	// }
+	// fmt.Println(&rs)
+
 	if err := c.DataAs(&rs); err != nil {
 		return nil, err
 	}

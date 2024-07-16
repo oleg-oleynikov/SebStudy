@@ -27,23 +27,22 @@ func NewEsEventStore(eventBus *EventBus, eventSerde *EventSerde, writeRepo db_po
 	}
 
 	es.eventBus.Subscribe("resume.sended", func(event *EventMessage[events.ResumeSended]) {
-		log.Println(event)
 		imageUrl, err := imageStore.SaveImage(event.Event.Photo.GetPhoto())
 		if err != nil {
 			log.Printf("failed to save image, %s\n", err)
 			return
 		}
 		event.Event.Photo.SetUrl(imageUrl)
-		data, err := es.eventSerde.Serialize(event.Event, event.Metadata)
+		data, err := es.eventSerde.Serialize(event.Event, event.Metadata) // БЛЯТЬ ЕБЛО ТУПОЕ ДОДелОАЙ СЕРИАЛИЗАЦИЮ НОРМ
 		if err != nil {
 			es.imageStore.DeleteImageByPath(imageUrl)
 			return
 		}
-
 		if err := es.writeRepo.Save(data); err != nil {
 			es.imageStore.DeleteImageByPath(imageUrl)
 			return
 		}
+		log.Printf("Ивент сохранился с id: %s\n", event.Metadata.EventId)
 	})
 
 	return es
@@ -51,7 +50,7 @@ func NewEsEventStore(eventBus *EventBus, eventSerde *EventSerde, writeRepo db_po
 
 func (es *EsEventStore) LoadEvents(aggregateId string) ([]interface{}, error) {
 	// return nil, nil
-	events, err := es.writeRepo.GetByAggregateId(aggregateId)
+	events, err := es.writeRepo.Get(aggregateId)
 	if err != nil {
 		return nil, err
 	}
