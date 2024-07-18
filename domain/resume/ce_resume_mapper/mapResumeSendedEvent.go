@@ -15,17 +15,8 @@ import (
 
 var toResumeSendedEvent util.CeToEvent = func(ctx context.Context, c cloudevents.Event) (interface{}, error) {
 	var rs pb.ResumeSended
-	// bytes, err := base64.StdEncoding.DecodeString(string(c.DataEncoded))
-	// if err != nil {
-	// 	return nil, err
-	// }
 
-	// if err := proto.Unmarshal(bytes, &rs); err != nil {
-	// 	return nil, err
-	// }
-	if err := c.DataAs(&rs); err != nil {
-		return nil, err
-	}
+	decodeCloudeventData(c, &rs)
 
 	resumeID := values.NewResumeId(rs.GetResumeId())
 

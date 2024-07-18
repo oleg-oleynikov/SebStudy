@@ -2,6 +2,7 @@ package infrastructure
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strings"
 
@@ -13,6 +14,15 @@ type ImageStore struct {
 }
 
 func NewImageStore(imageFolderPath string) *ImageStore {
+	_, err := os.Stat(imageFolderPath)
+	if os.IsNotExist(err) {
+		os.MkdirAll(imageFolderPath, 0755)
+		if err != nil {
+			log.Fatalf("failed to create folder for imageStore")
+			return nil
+		}
+	}
+
 	imgStore := &ImageStore{
 		imageFolderPath: imageFolderPath,
 	}

@@ -1,5 +1,6 @@
 package secondary
 
+// Ну типа доделать реализацию коннекта с бд, ну по идее и после этого можно будет доделать eventStore
 type PostgresAdapter struct{}
 
 func NewPostgresAdapter() *PostgresAdapter {
@@ -12,7 +13,6 @@ func (pr *PostgresAdapter) Get(aggregateId string) ([]interface{}, error) {
 }
 
 func (pr *PostgresAdapter) Save(data interface{}) error {
-	// log.Println("Sssssss")
 	return nil
 }
 
