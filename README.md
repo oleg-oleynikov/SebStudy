@@ -1,8 +1,8 @@
 # SebStudy
 
 # Quickstart
-docker-compose build
-docker-compose up -d
+1. docker-compose build
+2. docker-compose up -d
 
 
 
