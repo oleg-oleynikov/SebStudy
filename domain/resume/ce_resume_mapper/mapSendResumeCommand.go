@@ -14,16 +14,8 @@ import (
 var toSendResumeCommand util.CeToEvent = func(ctx context.Context, c cloudevents.Event) (interface{}, error) {
 
 	var rs pb.ResumeSended
-	// bytes, err := base64.StdEncoding.DecodeString(string(c.DataEncoded))
-	// if err != nil {
-	// 	return nil, err
-	// }
 
-	// if err := proto.Unmarshal(c.Data(), &rs); err != nil {
-	// 	return nil, err
-	// }
-
-	if err := c.DataAs(&rs); err != nil {
+	if err := decodeCloudeventData(c, &rs); err != nil {
 		return nil, err
 	}
 

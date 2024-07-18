@@ -8,7 +8,7 @@ import (
 
 type EventStore interface {
 	LoadEvents(aggregateId string) ([]interface{}, error)
-	AppendEvents(CommandMetadata, int, ...interface{}) error
+	AppendEvents(CommandMetadata, ...interface{}) error
 }
 
 type EsEventStore struct {
@@ -26,14 +26,14 @@ func NewEsEventStore(eventBus *EventBus, eventSerde *EventSerde, writeRepo db_po
 		imageStore: imageStore,
 	}
 
-	es.eventBus.Subscribe("resume.sended", func(event *EventMessage[events.ResumeSended]) {
+	es.eventBus.Subscribe("resume.sended", func(event EventMessage[events.ResumeSended]) {
 		imageUrl, err := imageStore.SaveImage(event.Event.Photo.GetPhoto())
 		if err != nil {
 			log.Printf("failed to save image, %s\n", err)
 			return
 		}
 		event.Event.Photo.SetUrl(imageUrl)
-		data, err := es.eventSerde.Serialize(event.Event, event.Metadata) // БЛЯТЬ ЕБЛО ТУПОЕ ДОДелОАЙ СЕРИАЛИЗАЦИЮ НОРМ
+		data, err := es.eventSerde.Serialize(event.Event, event.Metadata)
 		if err != nil {
 			es.imageStore.DeleteImageByPath(imageUrl)
 			return
@@ -49,7 +49,6 @@ func NewEsEventStore(eventBus *EventBus, eventSerde *EventSerde, writeRepo db_po
 }
 
 func (es *EsEventStore) LoadEvents(aggregateId string) ([]interface{}, error) {
-	// return nil, nil
 	events, err := es.writeRepo.Get(aggregateId)
 	if err != nil {
 		return nil, err
@@ -58,6 +57,25 @@ func (es *EsEventStore) LoadEvents(aggregateId string) ([]interface{}, error) {
 	return events, nil
 }
 
-func (es *EsEventStore) AppendEvents(m CommandMetadata, version int, events ...interface{}) error {
+func (es *EsEventStore) AppendEvents(m CommandMetadata, events ...interface{}) error {
+	// if events == nil || len(events) == 0 {
+	// 	return nil
+	// }
+
+	var serializedEvents []map[string]interface{}
+	for _, i := range events {
+		// fmt.Println(i)
+		serializedEvent, err := es.eventSerde.Serialize(i, EventMetadata{}) // TODO: Доделать EventMetadata
+		if err != nil {
+			return err
+		}
+
+		serializedEvents = append(serializedEvents, serializedEvent)
+	}
+
+	for _, e := range serializedEvents {
+		es.writeRepo.Save(e)
+	}
+
 	return nil
 }

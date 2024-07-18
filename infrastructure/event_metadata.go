@@ -10,7 +10,7 @@ type DomainEvent interface {
 type EventMetadata struct {
 	EventId   string
 	EventType string
-	Version   int
+	// Version   int
 }
 
 func NewEventMetadata(eventId, eventType string) *EventMetadata {
@@ -20,13 +20,17 @@ func NewEventMetadata(eventId, eventType string) *EventMetadata {
 	}
 }
 
-func (em *EventMetadata) SetVersion(version int) {
-	em.Version = version
-}
+// func (em *EventMetadata) SetVersion(version int) {
+// 	em.Version = version
+// }
 
 func NewEventMetadataFromCloudEvent(c cloudevents.Event) *EventMetadata {
 	return &EventMetadata{
 		EventId:   c.ID(),
 		EventType: c.Type(),
 	}
+}
+
+func NewEventMetadataFrom(m CommandMetadata) *EventMetadata {
+	return nil
 }
