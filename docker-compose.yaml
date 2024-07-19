@@ -2,6 +2,12 @@ version: '3.9'
 
 services:
 
+  nats:
+    image: nats:latest
+    ports:
+      - "4222:4222"
+    entrypoint: ["nats-server"]
+
   app:
     build:
       context: .
@@ -11,9 +17,7 @@ services:
     environment:
       - NATS_URL=nats://nats:4222
     restart: always
+    depends_on:
+      - nats
 
-  nats:
-    image: nats:latest
-    ports:
-      - "4222:4222"
-    entrypoint: ["nats-server"]
+  
