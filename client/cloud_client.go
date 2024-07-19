@@ -75,7 +75,7 @@ func main() {
 	// base64.StdEncoding.Encode(protoBytes, b)
 
 	// event.SetData(pbcloudevents.ContentTypeProtobuf, &testResume)
-	event.SetData("application/json", &testResume)
+	event.SetData("application/protobuf", &testResume)
 	// event.SetData("application/json", &testResume)
 	// fmt.Println(event.DataEncoded)
 	log.Println(event.Data())
