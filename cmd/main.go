@@ -43,8 +43,6 @@ func main() {
 	eventStore := infrastructure.NewEsEventStore(eventBus, eventSerde, writeRepo, imageStore)
 	// eventStore := infrastructure.NewEsEventStore(eventBus, eventSerde, reindexerAdapter, imageStore)
 
-	// test
-
 	// fmt.Println(reindexerAdapter.Get("123"))
 	//
 

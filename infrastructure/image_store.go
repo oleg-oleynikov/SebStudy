@@ -16,9 +16,8 @@ type ImageStore struct {
 func NewImageStore(imageFolderPath string) *ImageStore {
 	_, err := os.Stat(imageFolderPath)
 	if os.IsNotExist(err) {
-		os.MkdirAll(imageFolderPath, 0755)
-		if err != nil {
-			log.Fatalf("failed to create folder for imageStore")
+		if err := os.MkdirAll(imageFolderPath, 0755); err != nil {
+			log.Fatalf("failed to create folder for images: %s", err)
 			return nil
 		}
 	}

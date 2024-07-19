@@ -50,8 +50,10 @@ func (c *CloudEventsAdapter) Run() {
 func (c *CloudEventsAdapter) receive(ctx context.Context, event cloudevents.Event) cloudevents.Result {
 	// event.Data()
 	log.Println("Пришло что то нахуй")
+	log.Println(event)
 
 	if _, err := c.CeMapper.GetEventType(event.Type()); err != nil {
+		log.Printf("unknown event type: %s\n", err)
 		return cloudevents.NewHTTPResult(400, "Unknown event type: %s", err)
 	}
 
@@ -84,5 +86,6 @@ func (c *CloudEventsAdapter) receive(ctx context.Context, event cloudevents.Even
 		}
 	}
 
+	log.Println("Unknown request")
 	return cloudevents.ResultNACK
 }
