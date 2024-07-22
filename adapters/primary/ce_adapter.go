@@ -44,10 +44,13 @@ func NewCloudEventsAdapter(d ports.CeCommandDispatcher, e ports.CeEventHandler, 
 // }
 
 func (c *CloudEventsAdapter) ceHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("Пришло нахуй")
+
 	event, err := cloudevents.NewEventFromHTTPRequest(r)
 	if err != nil {
 		log.Printf("failed to parse CloudEvent from request: %v", err)
-		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		// http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		http.Error(w, "", http.StatusBadRequest)
 		return
 	}
 
@@ -55,7 +58,8 @@ func (c *CloudEventsAdapter) ceHandler(w http.ResponseWriter, r *http.Request) {
 
 	if _, err := c.CeMapper.GetEventType(event.Type()); err != nil {
 		log.Printf("unknown event type: %s\n", err)
-		http.Error(w, "Unknown event type:"+err.Error(), http.StatusBadRequest)
+		// http.Error(w, "Unknown event type:"+err.Error(), http.StatusBadRequest)
+		http.Error(w, "", http.StatusBadRequest)
 		return
 	}
 
@@ -63,7 +67,8 @@ func (c *CloudEventsAdapter) ceHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		log.Printf("failed to map cloudevent: %v", err)
-		http.Error(w, "failed to map cloudevent: "+err.Error(), http.StatusBadRequest)
+		// http.Error(w, "failed to map cloudevent: "+err.Error(), http.StatusBadRequest)
+		http.Error(w, "", http.StatusBadRequest)
 		return
 	}
 
@@ -71,7 +76,7 @@ func (c *CloudEventsAdapter) ceHandler(w http.ResponseWriter, r *http.Request) {
 		err = c.CommandDispatcher.Dispatch(mappedEvent, infrastructure.NewCommandMetadataFromCloudEvent(ceEvent))
 		if err != nil {
 			if _, ok := err.(cloudevents.Result); ok {
-				http.Error(w, err.Error(), http.StatusBadRequest)
+				http.Error(w, "", http.StatusOK)
 				return
 			}
 
@@ -83,18 +88,20 @@ func (c *CloudEventsAdapter) ceHandler(w http.ResponseWriter, r *http.Request) {
 		err := c.EventDispatcher.Handle(mappedEvent, *infrastructure.NewEventMetadataFromCloudEvent(ceEvent))
 		if err != nil {
 			if _, ok := err.(cloudevents.Result); ok {
-				http.Error(w, err.Error(), http.StatusBadRequest)
+				http.Error(w, "", http.StatusOK)
 				return
 			}
 
 			log.Printf("failed to handle event: %v", err)
-			http.Error(w, "failed to handle event: "+err.Error(), http.StatusInternalServerError)
+			// http.Error(w, "failed to handle event: "+err.Error(), http.StatusInternalServerError)
+			http.Error(w, "", http.StatusInternalServerError)
 			return
 		}
 	}
 
 	log.Println("Unknown request")
-	http.Error(w, "Unknown request", http.StatusBadRequest)
+	// http.Error(w, "Unknown request", http.StatusBadRequest)
+	http.Error(w, "", http.StatusBadRequest)
 }
 
 func (c *CloudEventsAdapter) Run() {
@@ -102,7 +109,7 @@ func (c *CloudEventsAdapter) Run() {
 	go func() {
 		ceHandler := handlers.CORS(
 			handlers.AllowedOrigins([]string{"*"}),
-			handlers.AllowedMethods([]string{"POST", "GET", "OPTIONS", "PUT", "DELETE", "PATCH"}),
+			handlers.AllowedMethods([]string{"POST" /*, "GET", "OPTIONS", "PUT", "DELETE", "PATCH"*/}),
 			handlers.AllowedHeaders([]string{"Content-Type"}),
 		)(http.HandlerFunc(c.ceHandler))
 

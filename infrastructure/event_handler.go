@@ -1,6 +1,8 @@
 package infrastructure
 
 import (
+	"log"
+
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 )
 
@@ -22,6 +24,7 @@ func NewEventHandler(eventBus *EventBus) *EventHandler {
 
 func (eh *EventHandler) Handle(event interface{}, metadata EventMetadata) error { // Пофиксить тему которая касается определения версии
 	eventMes := NewEventMessage(event, metadata, 0)
+	log.Println(event)
 	eh.EventBus.Publish(metadata.EventType, eventMes)
 
 	return cloudevents.ResultACK
