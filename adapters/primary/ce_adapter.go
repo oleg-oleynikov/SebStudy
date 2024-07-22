@@ -28,7 +28,7 @@ func NewCloudEventsAdapter(d ports.CeCommandDispatcher, e ports.CeEventHandler, 
 }
 
 func newCloudEventsClient() cloudevents.Client {
-	p, err := cloudevents.NewHTTP()
+	p, err := cloudevents.NewHTTP(cloudevents.WithHeader("Access-Control-Allow-Origin", "10.10.4.21"), cloudevents.WithHeader("Access-Control-Allow-Methods", "*"))
 	if err != nil {
 		log.Fatalf("failed to create protocol: %s", err.Error())
 	}
@@ -42,15 +42,17 @@ func newCloudEventsClient() cloudevents.Client {
 }
 
 func (c *CloudEventsAdapter) Run() {
+
 	go func() {
 		log.Fatalf("failed to start receiver: %s", c.Client.StartReceiver(context.Background(), c.receive))
+		// log.Fatalf("failed to start receiver: %s", c.Client.StartReceiver(context.Background(), handlerWithCORS))
 	}()
 }
 
 func (c *CloudEventsAdapter) receive(ctx context.Context, event cloudevents.Event) cloudevents.Result {
 	// event.Data()
 	// log.Println("Пришло что то нахуй")
-	// log.Println(event)
+	log.Println(event)
 
 	if _, err := c.CeMapper.GetEventType(event.Type()); err != nil {
 		log.Printf("unknown event type: %s\n", err)

@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
 
   nats:
@@ -18,6 +16,4 @@ services:
       - NATS_URL=nats://nats:4222
     restart: always
     depends_on:
-      - nats
-
-  
+      - nats  

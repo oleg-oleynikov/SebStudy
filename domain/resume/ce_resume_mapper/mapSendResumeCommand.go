@@ -4,6 +4,7 @@ import (
 	"SebStudy/adapters/util"
 	"SebStudy/domain/resume/commands"
 	"SebStudy/domain/resume/values"
+	"SebStudy/infrastructure"
 	"context"
 
 	pb "SebStudy/proto/resume"
@@ -15,7 +16,7 @@ var toSendResumeCommand util.CeToEvent = func(ctx context.Context, c cloudevents
 
 	var rs pb.ResumeSended
 
-	if err := decodeCloudeventData(c, &rs); err != nil {
+	if err := infrastructure.DecodeCloudeventData(c, &rs); err != nil {
 		return nil, err
 	}
 
