@@ -4,6 +4,7 @@ import (
 	"SebStudy/adapters/util"
 	"SebStudy/domain/resume/events"
 	"SebStudy/domain/resume/values"
+	"SebStudy/infrastructure"
 	pb "SebStudy/proto/resume"
 
 	"context"
@@ -16,7 +17,9 @@ import (
 var toResumeSendedEvent util.CeToEvent = func(ctx context.Context, c cloudevents.Event) (interface{}, error) {
 	var rs pb.ResumeSended
 
-	decodeCloudeventData(c, &rs)
+	if err := infrastructure.DecodeCloudeventData(c, &rs); err != nil {
+		return nil, err
+	}
 
 	resumeID := values.NewResumeId(rs.GetResumeId())
 

@@ -1,4 +1,4 @@
-package ce_resume_mapper
+package infrastructure
 
 import (
 	"encoding/base64"
@@ -8,7 +8,7 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-func decodeCloudeventData(c cloudevents.Event, protoMes proto.Message) error {
+func DecodeCloudeventData(c cloudevents.Event, protoMes proto.Message) error {
 
 	if err := c.DataAs(protoMes); err == nil {
 		return nil

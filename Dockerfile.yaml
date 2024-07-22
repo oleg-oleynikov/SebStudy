@@ -1,19 +1,9 @@
-# FROM golang:1.22.3-alpine
-# WORKDIR /app
-# COPY . .
-# RUN go mod tidy
-# RUN apk add --no-cache nats-server
-# RUN go build -o . ./cmd/main.go
-# CMD ["sh", "-c", "nats-server & ./main"]
-
-# Этап сборки
 FROM golang:1.22.3-alpine AS builder
 WORKDIR /app
 COPY . .
 RUN go mod tidy
 RUN go build -o main ./cmd/main.go
 
-# Конечный этап
 FROM alpine:latest
 RUN apk add --no-cache nats-server
 WORKDIR /app
