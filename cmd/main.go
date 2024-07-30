@@ -41,10 +41,12 @@ func main() {
 	writeRepo := secondary.NewPostgresAdapter()
 	imageStore := infrastructure.NewImageStore("./uploads")
 	eventStore := infrastructure.NewEsEventStore(eventBus, eventSerde, writeRepo, imageStore)
+
+	ceServiceServer := primary.NewCloudEventServiceServer()
+	ceServiceServer.Run("tcp", ":50051")
 	// eventStore := infrastructure.NewEsEventStore(eventBus, eventSerde, reindexerAdapter, imageStore)
 
 	// fmt.Println(reindexerAdapter.Get("123"))
-	//
 
 	ceEventSender := secondary.NewCeSenderAdapter(url, ceMapper)
 	resumeRepo := resume.NewEventStoreResumeRepo(eventStore)
@@ -61,4 +63,5 @@ func main() {
 	ceAdapter.Run()
 
 	<-quit
+	ceServiceServer.Shutdown()
 }

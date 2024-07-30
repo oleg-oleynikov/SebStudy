@@ -1,4 +1,4 @@
-package event_serde_handlers
+package resume_event_serde
 
 // TODO: Доделать нахуй
 

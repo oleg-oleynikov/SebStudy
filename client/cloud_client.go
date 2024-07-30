@@ -21,7 +21,7 @@ func main() {
 		log.Fatalf("failed to create client, %v", err)
 	}
 
-	_, err = os.ReadFile("C:/Users/Олег/Desktop/images.jpg")
+	imageBytes, err := os.ReadFile("C:/Users/Олег/Desktop/images.jpg")
 	if err != nil {
 		fmt.Println("Картинка хуйня")
 		return
@@ -43,8 +43,8 @@ func main() {
 				Skill: "Java",
 			},
 		},
-		Photo: []byte{255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255},
-		// Photo: imageBytes,
+		// Photo: []byte{255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255},
+		Photo: imageBytes,
 		Directions: []*pb.Direction{
 			{
 				Direction: "back-end",

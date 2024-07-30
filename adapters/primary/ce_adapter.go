@@ -44,7 +44,10 @@ func NewCloudEventsAdapter(d ports.CeCommandDispatcher, e ports.CeEventHandler, 
 // }
 
 func (c *CloudEventsAdapter) ceHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("Пришло нахуй")
+	// log.Println("Пришло нахуй")
+	log.Println(r)
+	log.Println(r.Body)
+	// log.Println(r.)
 
 	event, err := cloudevents.NewEventFromHTTPRequest(r)
 	if err != nil {

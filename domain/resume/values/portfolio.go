@@ -1,7 +1,6 @@
 package values
 
 import (
-	"errors"
 	"fmt"
 	"net/url"
 )
@@ -11,9 +10,9 @@ type Portfolio struct {
 }
 
 func NewPortfolio(portfolio string) (*Portfolio, error) {
-	if !isValidPortfolio(portfolio) {
-		return nil, errors.New("incorrect link")
-	}
+	// if !isValidPortfolio(portfolio) {
+	// 	return nil, errors.New("incorrect link")
+	// }
 
 	return &Portfolio{
 		Portfolio: portfolio,
