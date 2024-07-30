@@ -2,28 +2,31 @@ package primary
 
 import (
 	"context"
+	"log"
 
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 )
 
 type corsCheck func(md metadata.MD) error
+type CorsHandler func(ctx context.Context, method string) error
 
-type grpcCors struct {
+type CorsGrpc struct {
 	corsChecks []corsCheck
 }
 
-func (c *grpcCors) addCorsCheck(handler corsCheck) {
+func (c *CorsGrpc) addCorsCheck(handler corsCheck) {
 	c.corsChecks = append(c.corsChecks, handler)
 }
 
-func NewGrpcCorsBuilder() *grpcCors {
-	return &grpcCors{}
+func NewCorsGrpcBuilder() *CorsGrpc {
+	return &CorsGrpc{}
 }
 
-func (c *grpcCors) WithAllowedOrigins(origins ...string) *grpcCors {
-	corsCheck := func(md metadata.MD) error {
+func (c *CorsGrpc) WithAllowedOrigins(origins ...string) *CorsGrpc {
+	corsCheckAllowedOrigin := func(md metadata.MD) error {
 
 		origin := md.Get("Origin")
 		if len(origin) == 0 {
@@ -37,19 +40,25 @@ func (c *grpcCors) WithAllowedOrigins(origins ...string) *grpcCors {
 		return nil
 	}
 
-	c.addCorsCheck(corsCheck)
+	c.addCorsCheck(corsCheckAllowedOrigin)
 	return c
 }
 
-func (c *grpcCors) WithAllowedMethods(methods ...string) *grpcCors {
+func (c *CorsGrpc) WithAllowedMethods(methods ...string) *CorsGrpc {
+	corsCheckAllowedMethods := func(md metadata.MD) error {
+		log.Println(md.Get("method")[0])
+		return nil
+	}
+
+	c.addCorsCheck(corsCheckAllowedMethods)
 	return nil
 }
 
-func (c *grpcCors) WithAllowedHeaders(headers ...string) *grpcCors {
+func (c *CorsGrpc) WithAllowedHeaders(headers ...string) *CorsGrpc {
 	return nil
 }
 
-func (c *grpcCors) Build() func(ctx context.Context, method string) error {
+func (c *CorsGrpc) BuildHandler() CorsHandler {
 	return func(ctx context.Context, method string) error {
 		md, ok := metadata.FromIncomingContext(ctx)
 		if !ok {
@@ -65,6 +74,44 @@ func (c *grpcCors) Build() func(ctx context.Context, method string) error {
 		return nil
 	}
 }
+
+func CorsToServerOptions(corsHandler CorsHandler) []grpc.ServerOption {
+	unaryCorsInterceptor := grpc.UnaryInterceptor(BuildCorsUnaryInterceptor(corsHandler))
+	streamCorsInterceptor := grpc.StreamInterceptor(BuildCorsStreamInterceptor(corsHandler))
+	return []grpc.ServerOption{unaryCorsInterceptor, streamCorsInterceptor}
+}
+
+func BuildCorsUnaryInterceptor(cors CorsHandler) grpc.UnaryServerInterceptor {
+	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+		if err := cors(ctx, info.FullMethod); err != nil {
+			return nil, err
+		}
+		return handler(ctx, req)
+	}
+}
+
+func BuildCorsStreamInterceptor(cors func(ctx context.Context, method string) error) grpc.StreamServerInterceptor {
+	return func(srv any, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+		if err := cors(ss.Context(), info.FullMethod); err != nil {
+			return err
+		}
+		return handler(srv, ss)
+	}
+}
+
+// func corsInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+// 	if err := handleCORS(ctx, info.FullMethod); err != nil {
+// 		return nil, err
+// 	}
+// 	return handler(ctx, req)
+// }
+
+// func corsStreamInterceptor(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+// 	if err := handleCORS(ss.Context(), info.FullMethod); err != nil {
+// 		return err
+// 	}
+// 	return handler(srv, ss)
+// }
 
 func containsString(needle string, haystack []string) bool {
 	for _, s := range haystack {

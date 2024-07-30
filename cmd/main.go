@@ -42,6 +42,7 @@ func main() {
 	imageStore := infrastructure.NewImageStore("./uploads")
 	eventStore := infrastructure.NewEsEventStore(eventBus, eventSerde, writeRepo, imageStore)
 
+	// corsOption := primary.NewCorsGrpcBuilder().WithAllowedHeaders()
 	ceServiceServer := primary.NewCloudEventServiceServer()
 	ceServiceServer.Run("tcp", ":50051")
 	// eventStore := infrastructure.NewEsEventStore(eventBus, eventSerde, reindexerAdapter, imageStore)
