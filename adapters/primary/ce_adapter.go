@@ -6,17 +6,16 @@ import (
 	"SebStudy/ports"
 	"context"
 	"log"
-	"net/http"
 
-	cloudevents "github.com/cloudevents/sdk-go/v2"
-	"github.com/gorilla/handlers"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+	v1 "open-cluster-management.io/sdk-go/pkg/cloudevents/generic/options/grpc/protobuf/v1"
 )
 
 type CloudEventsAdapter struct {
 	CommandDispatcher ports.CeCommandDispatcher
 	EventDispatcher   ports.CeEventHandler
-	// Client            cloudevents.Client
-	CeMapper *util.CeMapper
+	CeMapper          *util.CeMapper
 }
 
 func NewCloudEventsAdapter(d ports.CeCommandDispatcher, e ports.CeEventHandler, ceMapper *util.CeMapper) *CloudEventsAdapter {
@@ -24,145 +23,45 @@ func NewCloudEventsAdapter(d ports.CeCommandDispatcher, e ports.CeEventHandler, 
 		CommandDispatcher: d,
 		EventDispatcher:   e,
 
-		// Client:   newCloudEventsClient(),
 		CeMapper: ceMapper,
 	}
 }
 
-// func newCloudEventsClient() cloudevents.Client {
-// 	p, err := cloudevents.NewHTTP()
-// 	if err != nil {
-// 		log.Fatalf("failed to create protocol: %s", err.Error())
-// 	}
+func (c *CloudEventsAdapter) ReceiveCloudEvent(event *v1.CloudEvent) error {
+	log.Println(event)
 
-// 	ce, err := cloudevents.NewClient(p)
-// 	if err != nil {
-// 		log.Fatalf("failed to create http client, %v", err)
-// 	}
-
-// 	return ce
-// }
-
-func (c *CloudEventsAdapter) ceHandler(w http.ResponseWriter, r *http.Request) {
-	// log.Println("Пришло нахуй")
-	log.Println(r)
-	log.Println(r.Body)
-	// log.Println(r.)
-
-	event, err := cloudevents.NewEventFromHTTPRequest(r)
-	if err != nil {
-		log.Printf("failed to parse CloudEvent from request: %v", err)
-		// http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
-		http.Error(w, "", http.StatusBadRequest)
-		return
-	}
-
-	ceEvent := *event
-
-	if _, err := c.CeMapper.GetEventType(event.Type()); err != nil {
+	if _, err := c.CeMapper.GetEventType(event.Type); err != nil {
 		log.Printf("unknown event type: %s\n", err)
-		// http.Error(w, "Unknown event type:"+err.Error(), http.StatusBadRequest)
-		http.Error(w, "", http.StatusBadRequest)
-		return
+		return status.Errorf(codes.InvalidArgument, "unknown event type: %s", err)
 	}
 
-	mappedEvent, err := c.CeMapper.MapToEvent(context.Background(), ceEvent)
+	mappedEvent, err := c.CeMapper.MapToEvent(context.Background(), event)
 
 	if err != nil {
 		log.Printf("failed to map cloudevent: %v", err)
-		// http.Error(w, "failed to map cloudevent: "+err.Error(), http.StatusBadRequest)
-		http.Error(w, "", http.StatusBadRequest)
-		return
+		return status.Errorf(codes.InvalidArgument, "failed to map cloudevent: %s", err)
 	}
 
-	if c.CeMapper.IsCommand(event.Type()) {
-		err = c.CommandDispatcher.Dispatch(mappedEvent, infrastructure.NewCommandMetadataFromCloudEvent(ceEvent))
+	if c.CeMapper.IsCommand(event.Type) {
+		err = c.CommandDispatcher.Dispatch(mappedEvent, infrastructure.NewCommandMetadataFromCloudEvent(event))
 		if err != nil {
-			if _, ok := err.(cloudevents.Result); ok {
-				http.Error(w, "", http.StatusOK)
-				return
+			if _, ok := status.FromError(err); ok {
+				return err
 			}
 
 			log.Printf("failed to dispatch command: %v", err)
-			http.Error(w, "failed to dispatch command: "+err.Error(), http.StatusInternalServerError)
-			return
+			return status.Errorf(codes.Internal, "failed to dispatch command: %v", err)
 		}
-	} else if c.CeMapper.IsEvent(event.Type()) {
-		err := c.EventDispatcher.Handle(mappedEvent, *infrastructure.NewEventMetadataFromCloudEvent(ceEvent))
-		if err != nil {
-			if _, ok := err.(cloudevents.Result); ok {
-				http.Error(w, "", http.StatusOK)
-				return
-			}
 
-			log.Printf("failed to handle event: %v", err)
-			// http.Error(w, "failed to handle event: "+err.Error(), http.StatusInternalServerError)
-			http.Error(w, "", http.StatusInternalServerError)
-			return
+	} else if c.CeMapper.IsEvent(event.Type) {
+		err := c.EventDispatcher.Handle(mappedEvent, *infrastructure.NewEventMetadataFromCloudEvent(event))
+		if _, ok := status.FromError(err); ok {
+			return err
 		}
+
+		log.Printf("failed to dispatch event: %v", err)
+		return status.Errorf(codes.InvalidArgument, "failed to dispatch event: %v", err)
 	}
 
-	log.Println("Unknown request")
-	// http.Error(w, "Unknown request", http.StatusBadRequest)
-	http.Error(w, "", http.StatusBadRequest)
+	return status.Errorf(codes.Canceled, "failed to process event")
 }
-
-func (c *CloudEventsAdapter) Run() {
-
-	go func() {
-		ceHandler := handlers.CORS(
-			handlers.AllowedOrigins([]string{"*"}),
-			handlers.AllowedMethods([]string{"POST" /*, "GET", "OPTIONS", "PUT", "DELETE", "PATCH"*/}),
-			handlers.AllowedHeaders([]string{"Content-Type"}),
-		)(http.HandlerFunc(c.ceHandler))
-
-		http.Handle("/", ceHandler)
-
-		log.Println("Start server on localhost:8080")
-		http.ListenAndServe(":8080", nil)
-		// log.Fatalf("failed to start receiver: %s", c.Client.StartReceiver(context.Background(), c.receive))
-	}()
-}
-
-// func (c *CloudEventsAdapter) receiveCe(ctx context.Context, event cloudevents.Event) cloudevents.Result {
-// 	// event.Data()
-// 	// log.Println("Пришло что то нахуй")
-// 	// log.Println(event)
-
-// 	if _, err := c.CeMapper.GetEventType(event.Type()); err != nil {
-// 		log.Printf("unknown event type: %s\n", err)
-// 		return cloudevents.NewHTTPResult(http.StatusBadRequest, "Unknown event type: %s", err)
-// 	}
-
-// 	mappedEvent, err := c.CeMapper.MapToEvent(ctx, event)
-
-// 	if err != nil {
-// 		log.Printf("failed to map cloudevent: %v", err)
-// 		return cloudevents.NewHTTPResult(http.StatusBadRequest, "failed to map cloudevent: %v", err)
-// 	}
-
-// 	if c.CeMapper.IsCommand(event.Type()) {
-// 		err = c.CommandDispatcher.Dispatch(mappedEvent, infrastructure.NewCommandMetadataFromCloudEvent(event))
-// 		if err != nil {
-// 			if _, ok := err.(cloudevents.Result); ok {
-// 				return err
-// 			}
-
-// 			log.Printf("failed to dispatch command: %v", err)
-// 			return cloudevents.NewHTTPResult(500, "failed to dispatch command: %v", err)
-// 		}
-// 	} else if c.CeMapper.IsEvent(event.Type()) {
-// 		err := c.EventDispatcher.Handle(mappedEvent, *infrastructure.NewEventMetadataFromCloudEvent(event))
-// 		if err != nil {
-// 			if _, ok := err.(cloudevents.Result); ok {
-// 				return err
-// 			}
-
-// 			log.Printf("failed to handle event: %v", err)
-// 			return cloudevents.NewHTTPResult(http.StatusInternalServerError, "failed to handle event: %v", err)
-// 		}
-// 	}
-
-// 	log.Println("Unknown request")
-// 	return cloudevents.ResultNACK
-// }

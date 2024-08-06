@@ -1,8 +1,6 @@
 package infrastructure
 
-import (
-	cloudevents "github.com/cloudevents/sdk-go/v2"
-)
+import v1 "open-cluster-management.io/sdk-go/pkg/cloudevents/generic/options/grpc/protobuf/v1"
 
 type DomainEvent interface {
 }
@@ -24,10 +22,10 @@ func NewEventMetadata(eventId, eventType string) *EventMetadata {
 // 	em.Version = version
 // }
 
-func NewEventMetadataFromCloudEvent(c cloudevents.Event) *EventMetadata {
+func NewEventMetadataFromCloudEvent(c *v1.CloudEvent) *EventMetadata {
 	return &EventMetadata{
-		EventId:   c.ID(),
-		EventType: c.Type(),
+		EventId:   c.Id,
+		EventType: c.Type,
 	}
 }
 

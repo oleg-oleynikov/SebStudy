@@ -2,24 +2,22 @@ package secondary
 
 import (
 	"SebStudy/adapters/util"
-	"context"
-	"log"
+	"SebStudy/infrastructure"
 
-	cloudevents "github.com/cloudevents/sdk-go/v2"
-	cehttp "github.com/cloudevents/sdk-go/v2/protocol/http"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+	v1 "open-cluster-management.io/sdk-go/pkg/cloudevents/generic/options/grpc/protobuf/v1"
 )
 
 type CeSenderAdapter struct {
-	Client   cloudevents.Client
-	Context  context.Context
+	Client *infrastructure.CloudeventsServiceClient
+
 	CeMapper *util.CeMapper
 }
 
-func NewCeSenderAdapter(targetUrl string, ceMapper *util.CeMapper) *CeSenderAdapter {
-	client, context := newCloudEventsClient(targetUrl)
+func NewCeSenderAdapter(client *infrastructure.CloudeventsServiceClient, ceMapper *util.CeMapper) *CeSenderAdapter {
 	return &CeSenderAdapter{
 		Client:   client,
-		Context:  context,
 		CeMapper: ceMapper,
 	}
 }
@@ -28,48 +26,21 @@ func (c *CeSenderAdapter) SendEvent(e interface{}, eventType, source string) err
 	cloudEvent, err := c.newCloudEvent(e, eventType, source)
 
 	if err != nil {
-		return err
+		return status.Errorf(codes.InvalidArgument, "failed to pack cloudevent for send event: %v", err)
 	}
-	result := c.Client.Send(c.Context, cloudEvent)
-	if cloudevents.IsUndelivered(result) {
-		return cloudevents.NewHTTPResult(500, "failed to send cloud event: %v", result)
-	} else {
-		var httpResult *cehttp.Result
-		if cloudevents.ResultAs(result, &httpResult) {
-			// log.Printf("Sent with status code %d", httpResult.StatusCode)
-			return result
-		} else {
-			return cloudevents.NewHTTPResult(400, "send did not return an HTTP response: %s", result)
-		}
+
+	if err := c.Client.Publish(cloudEvent); err != nil {
+		return status.Errorf(codes.Internal, "failed to send cloudevent: %v", err)
 	}
+
+	return status.Errorf(codes.OK, "OK")
 }
 
-func (c *CeSenderAdapter) newCloudEvent(data interface{}, eventType, source string) (cloudevents.Event, error) {
+func (c *CeSenderAdapter) newCloudEvent(data interface{}, eventType, source string) (*v1.CloudEvent, error) {
 	cloudEvent, err := c.CeMapper.MapToCloudEvent(data, eventType, source)
 	if err != nil {
 		return cloudEvent, err
 	}
 
 	return cloudEvent, err
-}
-
-func newCloudEventsClient(targetUrl string) (cloudevents.Client, context.Context) {
-	p, _ := cloudevents.NewHTTP()
-
-	c, err := cloudevents.NewClient(p, cloudevents.WithTimeNow(), cloudevents.WithUUIDs())
-	if err != nil {
-		log.Fatalf("failed to create client, %v", err)
-	}
-
-	// if err != nil {
-	// 	log.Fatalf("failed to create protocol: %s", err.Error())
-	// }
-
-	// c, err := cloudevents.NewClient(p, cloudevents.WithTimeNow(), cloudevents.WithUUIDs())
-	// if err != nil {
-	// 	log.Fatalf("failed to create client, %v", err)
-	// }
-	ctx := cloudevents.ContextWithTarget(context.Background(), targetUrl)
-
-	return c, ctx
 }

@@ -16,9 +16,9 @@ BoundedContext Resume {
             // Количество символов: 1-25 символов
         }
 
-        ValueObject MidleName {
-            String midleName
-            // Не должно быть: [0-9], ъ ь в начале, спец символов, латиница   
+        ValueObject MiddleName {
+            String middleName
+            // Не должно быть: [0-9], ъ ьц в начале, спец символов, латиница   
             // Количество символов: 1-25 символов
         }
 
@@ -108,19 +108,41 @@ BoundedContext Resume {
         Entity Resume {
             aggregateRoot 
 
-            - ResumeId resumeId
-            - FirstName firstName
-            - LastName lastName
-            - MidleName midleName
-            - PhoneNumber phoneNumber
-            - Education education
-            - AboutMe aboutMe
-            - Skills skills
-            - Photo photo
-            - Directions directions
-            - AboutProjects aboutProjects
-            - Portfolio portfolio
-            - StudentId (foreign key to AccountStudent:uuid)
+            - required ResumeId resumeId
+            - required FirstName firstName
+            - required LastName lastName
+            - optional MiddleName middleName
+            - required PhoneNumber phoneNumber
+            - required Education education
+            - optional AboutMe aboutMe
+            - optional Skills skills
+            - optional Photo photo
+            - required Directions directions
+            - optional AboutProjects aboutProjects
+            - optional Portfolio portfolio
+            // - required StudentId (foreign key to AccountStudent:uuid), передавать в атрибутах
+            /* 
+                ТУТ ПРО JWT
+                ВАЖНО ОЧЕНЬ
+             */
+            // Тут описано как передавать Олежке и Кирюше JWT
+            /* 
+                {
+                    "event": {
+                        "id": "12341234", 
+                        "proto_data": {
+                            "type_url": "type.googleapis.com/proto.ResumeSended",
+                            "value": "CgQxMjM0EgV1c2VyMRoFMTIzNDU="
+                        },
+                        "attributes": {
+                            "jwt": "" //  <- JWT ВОТ ТУТ ЕСЛИ НЕ ПОНЯЛИ
+                        },
+                        "source": "example.com",
+                        "spec_version": "1.0",
+                        "type": "resume.send"
+                    }
+                }
+            */
         }
     }
 }
@@ -142,7 +164,7 @@ BoundedContext Auth {
 
         ValueObject Password {
             - string password
-            // от 8 символов, 1 цифра, 1 спец. символ, остальное инглиш, нахуй русский
+            // от 8 символов, 1 цифра, 1 спец. символ, только латиница
         }
 
         ValueObject FirstName {
@@ -174,7 +196,7 @@ BoundedContext Auth {
             // (Нужна ли валидация?)
         }
 
-        ValueObject Directions {
+        ValueObject Directions { 
             - List<Direction> directions
         }
 
@@ -183,14 +205,14 @@ BoundedContext Auth {
             // Выбор из выпадающего списка (Города)
         }
 
-        ValueObject Locations {
-            - List<Location> locations
-        }
+        // ValueObject Locations {
+        //     - List<Location> locations
+        // }
 
         ValueObject Title {
             - string title
             // Название компании
-            //
+            // от 1 до 100 символов
         }
 
         ValueObject FoundationDate {
@@ -202,13 +224,13 @@ BoundedContext Auth {
         ValueObject AboutCompany {
             - string aboutCompany
             // Максимально количество символов 300 
-            // Необязательное поле
         }
 
         ValueObject TypeCompany {
             - string typeCompany
             // Предложенные варианты
         }
+        
 
         ValueObject TypesCompany {
             - List<TypesCompany> typesCompany
@@ -216,7 +238,7 @@ BoundedContext Auth {
 
         ValueObject Skill {
             - string skill
-            // Не 
+            // Не более 30 символов
         }
 
         ValueObject ExpectedSkills {
@@ -233,8 +255,9 @@ BoundedContext Auth {
         }
 
         ValueObject Photo {
-            - string photoUrl
-            // ???
+           - List<byte> bytes
+            // jpg, jpeg, png
+            // Ограничение по размеру до 4 мб
         }
 
         ValueObject AboutPractice {
@@ -262,34 +285,36 @@ BoundedContext Auth {
             - required Account account
         }
         
-        Entity AccountStudent {
+        Entity AccountStudentCreated {
             aggregateRoot
 
-            - Login login
-            - Password password
-            - FirstName firstName
-            - LastName lastName
-            - BornDate bornDate
-            - Education education
-            - Location location
+            - required Login login
+            - required Password password
+            - required FirstName firsftName
+            - required LastName lastName
+            - required BornDate bornDate
+            - required Education education
+            - required Location location
         }
 
-        Entity AccountCompany {
+        Entity AccountCompanyCreated {
             aggregateRoot
 
-            - Title title
-            - FoundationDate foundationDate
-            - AboutCompany aboutCompany
-            - Login login
-            - Password password
-            - TypeCompany typeCompany
-            - Location location 
-            - Contract contract
-            - Photo photo
-            - ExpectedSkills expectedSkills
-            - AboutPractice aboutPractice
-            - Directions directions
-            - AboutProjects aboutProjects
+            - required Title title
+            - optional FoundationDate foundationDate
+            - optional AboutCompany aboutCompany
+            - required Login login
+            - required Password password
+            - required TypeCompany typeCompany
+            - required Location location 
+            
+            // Пукнты для вакансии:
+            - optional Contract contract
+            - optional Photo photo
+            - optional ExpectedSkills expectedSkills
+            - optional AboutPractice aboutPractice
+            - optional Directions directions
+            - optional AboutProjects aboutProjects
         }
     }
 }
@@ -302,16 +327,6 @@ BoundedContext AccountChange {
         ValueObject Uuid {
             - string uuid
             // Айди генерится библиотекой
-        }
-
-        ValueObject Login {
-            - string login
-            // Количество символов 8-30
-        }
-
-        ValueObject Password {
-            - string password
-            // от 8 символов, 1 цифра, 1 спец. символ, остальное инглиш, нахуй русский
         }
 
         ValueObject FirstName {
@@ -327,8 +342,8 @@ BoundedContext AccountChange {
         }
 
         ValueObject BornDate {
-            - date bornDate
-            // ??? не раньше 1900 года
+             - int bornDate (Unix timestamp)
+            // Не ранее 1900 и не позднее акт. даты
         }
 
         ValueObject Education {
@@ -367,14 +382,13 @@ BoundedContext AccountChange {
         }
 
         ValueObject FoundationDate {
-            - int foundationDate
-            - Не раньше 1900 года
+            - int foundationDate (Unix timestamp)
+            // Не позднее акт. даты
         }
 
         ValueObject AboutCompany {
             - string aboutCompany
             // Максимально количество символов 800
-            // Необязательное поле
         }
 
         ValueObject TypeCompany {
@@ -406,7 +420,6 @@ BoundedContext AccountChange {
 
         ValueObject Photo {
             - List<byte> bytes
-            // ???
             // jpg, jpeg, png
             // Ограничение по размеру до 4 мб
         }
@@ -436,34 +449,34 @@ BoundedContext AccountChange {
             - Date timestamp
         }
         
-        Entity AccountStudent {
+        Entity AccountStudentChanged {
             aggregateRoot
 
-            - Login login
-            - Password password
-            - FirstName firstName
-            - LastName lastName
-            - BornDate bornDate
-            - Education education
-            - Location location
+            - required FirstName firstName
+            - required LastName lastName
+            - required BornDate bornDate
+            - required Education education
+            - required Location location
         }
 
-        Entity AccountCompany {
+        Entity AccountCompanyChanged {
             aggregateRoot
 
-            - Title title
-            - FoundationDate foundationDate
-            - AboutCompany aboutCompany
-            - Login login
-            - Password password
-            - TypeCompany typeCompany
-            - Location location 
-            - Contract contract
-            - Photo photo
-            - ExpectedSkills expectedSkills
-            - AboutPractice aboutPractice
-            - Directions directions
-            - AboutProjects aboutProjects
+            - required Title title
+            - optional FoundationDate foundationDate
+            - optional AboutCompany aboutCompany
+            - required Login login
+            - required Password password
+            - required TypeCompany typeCompany
+            - required Location location 
+            
+            // Пукнты для вакансии:
+            - optional Contract contract
+            - optional Photo photo
+            - optional ExpectedSkills expectedSkills
+            - optional AboutPractice aboutPractice
+            - optional Directions directions
+            - optional AboutProjects aboutProjects
         }
     }
 }
@@ -473,8 +486,8 @@ BoundedContext Request {
     type FEATURE
 
     aggregate RequestAggregate {
-        ValueObject Uuid {
-            string uuid 
+        ValueObject RequestId {
+            string uuid
             // Айди генерится библиотекой
         }
 
@@ -494,6 +507,15 @@ BoundedContext Request {
         }
     }
 
+    Entity Request {
+        aggregateRoot
+
+        - required RequestId requestId
+        - required ResumeId resumeId
+        - required CompanyId companyId
+        - required Status status
+    }
+
     CommandEvent SendRequest extends @AbstractResumeCommand
     DomainEvent RequestSended {
         - Request request
@@ -506,15 +528,23 @@ BoundedContext SelectionRequests {
     domainVisionStatement "SelectionRequests realizes the following subdomains: SelectionRequests"
     type FEATURE
 
+    ValueObject RequestId {
+        string requestId
+    }
+
     ValueObject Status {
             int status 
             // Целочисленное значение от 0 до 3 (0 - not read, 1 - read, 2 - accepted, 3 - refused)
     }
+    
+    Entity SelectionRequest {
+        - required RequestId requestId 
+        - required Status status
+    }
 
     CommandEvent ChangeRequestStatus extends @AbstractResumeCommand
     DomainEvent ChangeRequestStatus {
-        - RequestId requestId 
-        - Status status
+        - SelectionRequest selectionRequest
         - Date timestamp
     }
 

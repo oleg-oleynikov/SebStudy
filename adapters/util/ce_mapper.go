@@ -5,14 +5,16 @@ import (
 	"fmt"
 	"sync"
 
-	cloudevents "github.com/cloudevents/sdk-go/v2"
+	"github.com/google/uuid"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/anypb"
+	v1 "open-cluster-management.io/sdk-go/pkg/cloudevents/generic/options/grpc/protobuf/v1"
 )
 
 type EventType string
 
-type CeToEvent func(ctx context.Context, cloudEvent cloudevents.Event) (interface{}, error)
-type EventToCe func(eventType, source string, e interface{}) (cloudevents.Event, error)
+type CeToEvent func(ctx context.Context, cloudEvent *v1.CloudEvent) (interface{}, error)
+type EventToCe func(eventType, source string, e interface{}) (*v1.CloudEvent, error)
 
 const (
 	EVENT   EventType = "event"
@@ -43,9 +45,8 @@ func GetCeMapperInstance() *CeMapper {
 	return instance1
 }
 
-func (cm *CeMapper) MapToEvent(ctx context.Context, c cloudevents.Event) (interface{}, error) {
-	// log.Println(c.Data())
-	handler, err := cm.Get(c.Type())
+func (cm *CeMapper) MapToEvent(ctx context.Context, c *v1.CloudEvent) (interface{}, error) {
+	handler, err := cm.Get(c.Type)
 	if err != nil {
 		return nil, err
 	}
@@ -58,15 +59,15 @@ func (cm *CeMapper) MapToEvent(ctx context.Context, c cloudevents.Event) (interf
 	return cmd, nil
 }
 
-func (cm *CeMapper) MapToCloudEvent(e interface{}, eventType, source string) (cloudevents.Event, error) {
+func (cm *CeMapper) MapToCloudEvent(e interface{}, eventType, source string) (*v1.CloudEvent, error) {
 	handler, err := cm.GetToCe(eventType)
 	if err != nil {
-		return cloudevents.Event{}, err
+		return &v1.CloudEvent{}, err
 	}
 
 	cloudEvent, err := handler(eventType, source, e)
 	if err != nil {
-		return cloudevents.Event{}, err
+		return &v1.CloudEvent{}, err
 	}
 
 	return cloudEvent, nil
@@ -120,16 +121,24 @@ func (c *CeMapper) GetEventType(ceType string) (EventType, error) {
 	return typeEvent, fmt.Errorf("type %s does not exist", ceType)
 }
 
-func InitCloudEvent(eventType, source string, mes proto.Message) cloudevents.Event {
-	cloudEvent := cloudevents.Event{}
-	cloudEvent.SetSpecVersion("1.0")
-	cloudEvent.SetType(eventType)
-	cloudEvent.SetSource(source)
-	// b, _ := proto.Marshal(mes)
-	// var protoBytes []byte = make([]byte, base64.StdEncoding.EncodedLen(len(b)))
-	// base64.StdEncoding.Encode(protoBytes, b)
-	// cloudEvent.SetData("application/protobuf", protoBytes)
-	cloudEvent.SetData("application/json", mes)
+func InitCloudEvent(eventType, source string, mes proto.Message) (*v1.CloudEvent, error) {
+	eventId, err := uuid.NewV7()
+	if err != nil {
+		return nil, err
+	}
 
-	return cloudEvent
+	protoEvent, err := anypb.New(mes)
+	if err != nil {
+		return nil, err
+	}
+
+	return &v1.CloudEvent{
+		Id:          eventId.String(),
+		Source:      source,
+		SpecVersion: "1.0",
+		Type:        eventType,
+		Data: &v1.CloudEvent_ProtoData{
+			ProtoData: protoEvent,
+		},
+	}, nil
 }

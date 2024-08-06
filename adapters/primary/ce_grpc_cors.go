@@ -44,18 +44,27 @@ func (c *CorsGrpc) WithAllowedOrigins(origins ...string) *CorsGrpc {
 	return c
 }
 
-func (c *CorsGrpc) WithAllowedMethods(methods ...string) *CorsGrpc {
-	corsCheckAllowedMethods := func(md metadata.MD) error {
-		log.Println(md.Get("method")[0])
-		return nil
-	}
+// func (c *CorsGrpc) WithAllowedMethods(methods ...string) *CorsGrpc {
+// 	if len(methods) == 0 {
+// 		log.Printf("allowed methods is empty")
+// 		return c
+// 	}
+// 	corsCheckAllowedMethods := func(md metadata.MD) error {
+// 		log.Println(md.Get("method")[0])
+// 		return nil
+// 	}
 
-	c.addCorsCheck(corsCheckAllowedMethods)
-	return nil
-}
+// 	c.addCorsCheck(corsCheckAllowedMethods)
+// 	return c
+// }
 
 func (c *CorsGrpc) WithAllowedHeaders(headers ...string) *CorsGrpc {
-	return nil
+	if len(headers) == 0 {
+		log.Printf("allowed headers is empty")
+		return c
+	}
+
+	return c
 }
 
 func (c *CorsGrpc) BuildHandler() CorsHandler {
@@ -98,20 +107,6 @@ func BuildCorsStreamInterceptor(cors func(ctx context.Context, method string) er
 		return handler(srv, ss)
 	}
 }
-
-// func corsInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-// 	if err := handleCORS(ctx, info.FullMethod); err != nil {
-// 		return nil, err
-// 	}
-// 	return handler(ctx, req)
-// }
-
-// func corsStreamInterceptor(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
-// 	if err := handleCORS(ss.Context(), info.FullMethod); err != nil {
-// 		return err
-// 	}
-// 	return handler(srv, ss)
-// }
 
 func containsString(needle string, haystack []string) bool {
 	for _, s := range haystack {

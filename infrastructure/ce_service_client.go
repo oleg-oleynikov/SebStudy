@@ -12,14 +12,9 @@ import (
 	v1 "open-cluster-management.io/sdk-go/pkg/cloudevents/generic/options/grpc/protobuf/v1"
 )
 
-// var (
-// 	counterEvents = 0
-// )
-
 type CloudeventsServiceClient struct {
 	sync.RWMutex
-	// eventChan  chan *v1.CloudEvent
-	// errChan    chan error
+
 	grpcClient v1.CloudEventServiceClient
 	wg         sync.WaitGroup
 }
@@ -33,17 +28,8 @@ func NewCloudeventsServiceClient(target string) *CloudeventsServiceClient {
 	grpcClient := v1.NewCloudEventServiceClient(conn)
 
 	c := &CloudeventsServiceClient{
-		// eventChan:  make(chan *v1.CloudEvent, 100),
-		// errChan:    make(chan error, 10),
 		grpcClient: grpcClient,
 	}
-
-	// var wg sync.WaitGroup
-	// wg.Add(1)
-	// go func() {
-	// 	defer wg.Done()
-	// 	c.processPublish()
-	// }()
 
 	return c
 }
@@ -58,25 +44,7 @@ func (c *CloudeventsServiceClient) Publish(cloudEvent *v1.CloudEvent) error {
 	return nil
 }
 
-// func (c *CloudeventsServiceClient) processPublish() {
-// 	for event := range c.eventChan {
-// 		backoff := 100 * time.Millisecond
-// 		maxBackoff := 5 * time.Second
-// 		for attempt := 0; attempt < 5; attempt++ {
-// 			_, err := c.grpcClient.Publish(context.TODO(), &v1.PublishRequest{
-// 				Event: event,
-// 			})
-// 			if err == nil {
-// 				break
-// 			}
-// 			log.Printf("Error when publishing event: %s, retrying in %s", err, backoff)
-// 			time.Sleep(backoff)
-// 			backoff = time.Duration(math.Min(float64(backoff*2), float64(maxBackoff)))
-// 		}
-// 	}
-// }
-
-func (c *CloudeventsServiceClient) Subscribe(ctx context.Context, source string) {
+func (c *CloudeventsServiceClient) Subscribe(ctx context.Context, source string, fn func(event *v1.CloudEvent)) {
 	subReq := &v1.SubscriptionRequest{
 		Source: source,
 	}
@@ -100,16 +68,15 @@ func (c *CloudeventsServiceClient) Subscribe(ctx context.Context, source string)
 			c.wg.Add(1)
 			go func() {
 				defer c.wg.Done()
-				c.processEvent(event)
+				fn(event)
+				// c.processEvent(event)
 			}()
 		}
 	}
 }
 
-func (c *CloudeventsServiceClient) processEvent(event *v1.CloudEvent) {
-	c.Lock()
-	defer c.Unlock()
-	log.Printf("Received event: %+v", event)
-	// counterEvents++
-	// log.Println("Отловлено: ", counterEvents)
-}
+// func (c *CloudeventsServiceClient) processEvent(event *v1.CloudEvent) {
+// 	c.Lock()
+// 	defer c.Unlock()
+// 	log.Printf("Received event: %+v", event)
+// }

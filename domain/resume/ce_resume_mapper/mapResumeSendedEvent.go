@@ -10,14 +10,15 @@ import (
 	"context"
 	"fmt"
 
-	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"google.golang.org/protobuf/types/known/timestamppb"
+	v1 "open-cluster-management.io/sdk-go/pkg/cloudevents/generic/options/grpc/protobuf/v1"
 )
 
-var toResumeSendedEvent util.CeToEvent = func(ctx context.Context, c cloudevents.Event) (interface{}, error) {
-	var rs pb.ResumeSended
+var toResumeSendedEvent util.CeToEvent = func(ctx context.Context, c *v1.CloudEvent) (interface{}, error) {
+	// var rs pb.ResumeSended
+	rs := &pb.ResumeSended{}
 
-	if err := infrastructure.DecodeCloudeventData(c, &rs); err != nil {
+	if err := infrastructure.DecodeCloudeventData(c, rs); err != nil {
 		return nil, err
 	}
 
@@ -106,15 +107,15 @@ var toResumeSendedEvent util.CeToEvent = func(ctx context.Context, c cloudevents
 	createdResume := events.NewResumeSended(
 		resumeID, *firstName, *middleName, *lastName, *phoneNumber,
 		education, *aboutMe, skills, *photo, directions,
-		*aboutProjects, *portfolio, *studentGroup, c.Time())
+		*aboutProjects, *portfolio, *studentGroup, rs.CreatedAt.AsTime())
 
 	return createdResume, nil
 }
 
-var toCeResumeSended util.EventToCe = func(eventType, source string, e interface{}) (cloudevents.Event, error) {
+var toCeResumeSended util.EventToCe = func(eventType, source string, e interface{}) (*v1.CloudEvent, error) {
 	event, ok := e.(events.ResumeSended)
 	if !ok {
-		return cloudevents.Event{}, fmt.Errorf("impossible cast")
+		return &v1.CloudEvent{}, fmt.Errorf("impossible cast")
 	}
 
 	// pbEducations := []*pb.Education{}
@@ -165,7 +166,10 @@ var toCeResumeSended util.EventToCe = func(eventType, source string, e interface
 		CreatedAt:     &timestamp,
 	}
 
-	cloudEvent := util.InitCloudEvent(eventType, source, &pbEvent)
+	cloudEvent, err := util.InitCloudEvent(eventType, source, &pbEvent)
+	if err != nil {
+		return nil, err
+	}
 
 	return cloudEvent, nil
 }
