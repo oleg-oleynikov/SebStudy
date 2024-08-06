@@ -3,7 +3,8 @@ package infrastructure
 import (
 	"log"
 
-	cloudevents "github.com/cloudevents/sdk-go/v2"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type ToType func()
@@ -24,8 +25,11 @@ func NewEventHandler(eventBus *EventBus) *EventHandler {
 
 func (eh *EventHandler) Handle(event interface{}, metadata EventMetadata) error { // Пофиксить тему которая касается определения версии
 	eventMes := NewEventMessage(event, metadata, 0)
+	log.Println("Event Handler")
 	log.Println(event)
-	eh.EventBus.Publish(metadata.EventType, eventMes)
+	if err := eh.EventBus.Publish(metadata.EventType, eventMes); err != nil {
+		return err
+	}
 
-	return cloudevents.ResultACK
+	return status.Error(codes.OK, "OK")
 }

@@ -19,7 +19,8 @@ import (
 
 const (
 	// host = "localhost"
-	url = "http://localhost:8080/"
+	// url = "http://localhost:8080/"
+	url = "localhost:50051"
 )
 
 func main() {
@@ -41,12 +42,18 @@ func main() {
 	writeRepo := secondary.NewPostgresAdapter()
 	imageStore := infrastructure.NewImageStore("./uploads")
 	eventStore := infrastructure.NewEsEventStore(eventBus, eventSerde, writeRepo, imageStore)
+
+	// corsOptions := primary.NewCorsGrpcBuilder().WithAllowedOrigins("*").WithAllowedMethods("*").BuildHandler()
+	// corsServerOption := primary.CorsToServerOptions(corsOptions)
+	// ceServiceServer := primary.NewCloudEventServiceServer()
+	// ceServiceServer.Run("tcp", ":50051")
 	// eventStore := infrastructure.NewEsEventStore(eventBus, eventSerde, reindexerAdapter, imageStore)
 
 	// fmt.Println(reindexerAdapter.Get("123"))
-	//
 
-	ceEventSender := secondary.NewCeSenderAdapter(url, ceMapper)
+	serviceClient := infrastructure.NewCloudeventsServiceClient(url)
+
+	ceEventSender := secondary.NewCeSenderAdapter(serviceClient, ceMapper)
 	resumeRepo := resume.NewEventStoreResumeRepo(eventStore)
 
 	resumeCmdHandlers := resume.NewHandlers(ceEventSender, resumeRepo)
@@ -58,7 +65,9 @@ func main() {
 
 	ceAdapter := primary.NewCloudEventsAdapter(dispatcher, eventHandler, ceMapper)
 
-	ceAdapter.Run()
+	ceServiceServer := primary.NewCloudEventServiceServer(ceAdapter)
+	ceServiceServer.Run("tcp", "localhost:50051")
 
 	<-quit
+	ceServiceServer.Shutdown()
 }

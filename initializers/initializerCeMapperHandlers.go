@@ -2,7 +2,7 @@ package initializers
 
 // Подключение функций для ce mapper агрегатов
 import (
-	_ "SebStudy/domain/resume/ce_resume_mapper" // Если над можно убрать, туп закомментив
+	_ "SebStudy/domain/resume/ce_resume_mapper"
 )
 
 func InitializeCeMapperHandlers() {

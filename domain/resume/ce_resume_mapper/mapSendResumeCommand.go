@@ -4,21 +4,30 @@ import (
 	"SebStudy/adapters/util"
 	"SebStudy/domain/resume/commands"
 	"SebStudy/domain/resume/values"
-	"SebStudy/infrastructure"
 	"context"
+	"log"
 
 	pb "SebStudy/proto/resume"
 
-	cloudevents "github.com/cloudevents/sdk-go/v2"
+	v1 "open-cluster-management.io/sdk-go/pkg/cloudevents/generic/options/grpc/protobuf/v1"
 )
 
-var toSendResumeCommand util.CeToEvent = func(ctx context.Context, c cloudevents.Event) (interface{}, error) {
+var toSendResumeCommand util.CeToEvent = func(ctx context.Context, c *v1.CloudEvent) (interface{}, error) {
 
-	var rs pb.ResumeSended
+	log.Println("------------------------------------------")
+	// log.Println("Блять")
+	rs := pb.ResumeSended{}
 
-	if err := infrastructure.DecodeCloudeventData(c, &rs); err != nil {
+	// if err := infrastructure.DecodeCloudeventData(c, &rs); err != nil {
+	// 	return nil, err
+	// }
+
+	if err := c.GetProtoData().UnmarshalTo(&rs); err != nil {
+		log.Println(err)
 		return nil, err
 	}
+
+	log.Println(&rs)
 
 	resumeID := values.NewResumeId(rs.GetResumeId())
 
