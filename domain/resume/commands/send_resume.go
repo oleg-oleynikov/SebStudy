@@ -5,7 +5,7 @@ import (
 	"SebStudy/infrastructure"
 )
 
-type SendResume struct {
+type CreateResume struct {
 	infrastructure.Command
 
 	ResumeId      values.ResumeId
@@ -23,7 +23,7 @@ type SendResume struct {
 	StudentGroup  values.StudentGroup
 }
 
-func NewSendResume(
+func NewCreateResume(
 	resumeId values.ResumeId,
 	firstName values.FirstName,
 	middleName values.MiddleName,
@@ -37,8 +37,8 @@ func NewSendResume(
 	aboutProjects values.AboutProjects,
 	portfolio values.Portfolio,
 	studentGroup values.StudentGroup,
-) *SendResume {
-	return &SendResume{
+) *CreateResume {
+	return &CreateResume{
 		ResumeId:      resumeId,
 		FirstName:     firstName,
 		MiddleName:    middleName,

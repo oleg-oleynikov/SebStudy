@@ -7,28 +7,31 @@ import (
 	"github.com/nats-io/nats.go"
 )
 
-// Возможно потом потребуется оптимизировать это
+type EventBus interface {
+	Publish(topic string, data interface{}) error
+	Subscribe(topic string, handler nats.Handler) error
+}
 
-type EventBus struct {
+type EventBusNats struct {
 	nc          *nats.EncodedConn
 	subscribers map[string]*nats.Subscription
 	mu          sync.Mutex
 }
 
-func NewEventBus(natsURL string) (*EventBus, error) {
+func NewEventBusNats(natsURL string) (*EventBusNats, error) {
 	nc, err := nats.Connect(natsURL)
 	c, _ := nats.NewEncodedConn(nc, nats.JSON_ENCODER)
 	if err != nil {
 		return nil, err
 	}
 
-	return &EventBus{
+	return &EventBusNats{
 		nc:          c,
 		subscribers: make(map[string]*nats.Subscription),
 	}, nil
 }
 
-func (eb *EventBus) Subscribe(topic string, cb nats.Handler) error {
+func (eb *EventBusNats) Subscribe(topic string, cb nats.Handler) error {
 	eb.mu.Lock()
 	defer eb.mu.Unlock()
 
@@ -45,6 +48,6 @@ func (eb *EventBus) Subscribe(topic string, cb nats.Handler) error {
 	return nil
 }
 
-func (eb *EventBus) Publish(topic string, data interface{}) error {
+func (eb *EventBusNats) Publish(topic string, data interface{}) error {
 	return eb.nc.Publish(topic, data)
 }

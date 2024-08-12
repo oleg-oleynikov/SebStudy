@@ -15,8 +15,8 @@ type CommandHandlers struct {
 func NewHandlers(eventSender ports.CeEventSender, repository ResumeRepository) *CommandHandlers {
 	commandHandlers := &CommandHandlers{infrastructure.NewCommandHandler()}
 
-	commandHandlers.Register(commands.SendResume{}, func(c infrastructure.Command, m infrastructure.CommandMetadata) error {
-		cmd := c.(*commands.SendResume)
+	commandHandlers.Register(commands.CreateResume{}, func(c infrastructure.Command, m infrastructure.CommandMetadata) error {
+		cmd := c.(*commands.CreateResume)
 		resume := NewResume()
 
 		aggregateId, err := uuid.NewV7()
@@ -25,7 +25,7 @@ func NewHandlers(eventSender ports.CeEventSender, repository ResumeRepository) *
 		}
 		cmd.ResumeId.Value = aggregateId.String()
 
-		if err := resume.SendResume(cmd, eventSender); err != nil {
+		if err := resume.CreateResume(cmd, eventSender); err != nil {
 			return err
 		}
 

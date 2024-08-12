@@ -12,13 +12,13 @@ type EventStore interface {
 }
 
 type EsEventStore struct {
-	eventBus   *EventBus
+	eventBus   EventBus
 	eventSerde *EventSerde
 	writeRepo  db_ports.WriteModel
 	imageStore *ImageStore
 }
 
-func NewEsEventStore(eventBus *EventBus, eventSerde *EventSerde, writeRepo db_ports.WriteModel, imageStore *ImageStore) *EsEventStore {
+func NewEsEventStore(eventBus EventBus, eventSerde *EventSerde, writeRepo db_ports.WriteModel, imageStore *ImageStore) *EsEventStore {
 	es := &EsEventStore{
 		eventBus:   eventBus,
 		eventSerde: eventSerde,
@@ -26,7 +26,7 @@ func NewEsEventStore(eventBus *EventBus, eventSerde *EventSerde, writeRepo db_po
 		imageStore: imageStore,
 	}
 
-	es.eventBus.Subscribe("resume.sended", func(event EventMessage[events.ResumeSended]) {
+	es.eventBus.Subscribe("resume.sended", func(event EventMessage[events.ResumeCreated]) {
 		imageUrl, err := imageStore.SaveImage(event.Event.Photo.GetPhoto())
 		if err != nil {
 			log.Printf("failed to save image, %s\n", err)

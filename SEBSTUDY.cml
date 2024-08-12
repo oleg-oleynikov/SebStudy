@@ -2,7 +2,7 @@ BoundedContext Resume {
     domainVisionStatement "Resume realizes the following subdomains: Resume"
     type FEATURE
 
-    Aggregate ResumeAggreate {
+    Aggregate Resume {
 
         ValueObject FirstName {
             String firstName
@@ -99,12 +99,6 @@ BoundedContext Resume {
             - Resume resume
         }
 
-        CommandEvent RemoveResume extends @AbstractResumeCommand
-        DomainEvent ResumeRemoved {
-            - Date timestamp
-            - ResumeId resumeId
-        }
-
         Entity Resume {
             aggregateRoot 
 
@@ -115,6 +109,7 @@ BoundedContext Resume {
             - required PhoneNumber phoneNumber
             - required Education education
             - optional AboutMe aboutMe
+            - required BornDate bornDate
             - optional Skills skills
             - optional Photo photo
             - required Directions directions
@@ -151,7 +146,7 @@ BoundedContext Auth {
     domainVisionStatement "Auth realizes the following subdomains: Auth"
     type FEATURE
 
-    Aggregate AccountAggregate { 
+    Aggregate Account { 
         ValueObject Uuid {
             - string uuid
             // Айди генерится библиотекой
@@ -167,154 +162,29 @@ BoundedContext Auth {
             // от 8 символов, 1 цифра, 1 спец. символ, только латиница
         }
 
-        ValueObject FirstName {
-            - string firstName
-            // Не должно быть: [0-9], ъ ь в начале, спец символов, латиница
-            // Количество символов: 1-25 символов
-        }
-
-        ValueObject LastName {
-            - string lastName
-            // Не должно быть: [0-9], ъ ь в начале, спец символов, латиница
-            // Количество символов: 1-25 символов
-        }
-
-        ValueObject BornDate {
-            - int bornDate (Unix timestamp)
-            // Не ранее 1900 и не позднее акт. даты
-        }
-
-        ValueObject Education {
-            - string education
-            // Выбор из выпадающего списка
-            // (Нужна ли валидация?)
-        }
-
-        ValueObject Direction {
-            - string direction
-            // Выбор из выпадающего списка
-            // (Нужна ли валидация?)
-        }
-
-        ValueObject Directions { 
-            - List<Direction> directions
-        }
-
-        ValueObject Location {
-            - string location
-            // Выбор из выпадающего списка (Города)
-        }
-
-        // ValueObject Locations {
-        //     - List<Location> locations
-        // }
-
-        ValueObject Title {
-            - string title
-            // Название компании
-            // от 1 до 100 символов
-        }
-
-        ValueObject FoundationDate {
-            - int foundationDate (Unix timestamp)
-            // Не позднее акт. даты
-
-        }
-
-        ValueObject AboutCompany {
-            - string aboutCompany
-            // Максимально количество символов 300 
-        }
-
-        ValueObject TypeCompany {
-            - string typeCompany
-            // Предложенные варианты
-        }
-        
-
-        ValueObject TypesCompany {
-            - List<TypesCompany> typesCompany
-        }
-
-        ValueObject Skill {
-            - string skill
-            // Не более 30 символов
-        }
-
-        ValueObject ExpectedSkills {
-            - List<Skill> expectedSkills
-        }
-
-        ValueObject Contract {
-            - string contract
-            // Пока хз как реализуем
-        }
-
-        ValueObject Contracts {
-            - List<Contract> contracts
-        }
-
-        ValueObject Photo {
-           - List<byte> bytes
-            // jpg, jpeg, png
-            // Ограничение по размеру до 4 мб
-        }
-
-        ValueObject AboutPractice {
-            - string aboutPractice
-            // Что предстоит делать 
-            // Максимальное количество символов 500
-        }
-
-        ValueObject AboutProjects {
-            String aboutProjects
-            //  О проектах, которые были реализованные другими практикантами
-            // Максимальное количество символов 500
-            // Необязательное поле
-        }
-
         abstract
         CommandEvent AbstractAccountCommand {
             - Account account 
         }
 
-        CommandEvent RegisterAccount extends @AbstractResumeCommand
+        CommandEvent RegisteStudentAccount extends @AbstractResumeCommand
+        CommandEvent RegisteCompanyAccount extends @AbstractResumeCommand
 
-        DomainEvent AccountRegistered {
+        DomainEvent AccountStudentRegistered {
+            - required Date timestamp
+            - required Account account
+        }
+
+        DomainEvent AccountCompanyRegistered {
             - required Date timestamp
             - required Account account
         }
         
-        Entity AccountStudentCreated {
+        Entity Account {
             aggregateRoot
 
             - required Login login
             - required Password password
-            - required FirstName firsftName
-            - required LastName lastName
-            - required BornDate bornDate
-            - required Education education
-            - required Location location
-        }
-
-        Entity AccountCompanyCreated {
-            aggregateRoot
-
-            - required Title title
-            - optional FoundationDate foundationDate
-            - optional AboutCompany aboutCompany
-            - required Login login
-            - required Password password
-            - required TypeCompany typeCompany
-            - required Location location 
-            
-            // Пукнты для вакансии:
-            - optional Contract contract
-            - optional Photo photo
-            - optional ExpectedSkills expectedSkills
-            - optional AboutPractice aboutPractice
-            - optional Directions directions
-            - optional AboutProjects aboutProjects
         }
     }
 }
@@ -323,7 +193,7 @@ BoundedContext AccountChange {
     domainVisionStatement "AccountChange realizes the following subdomains: Account change"
     type FEATURE
 
-    Aggregate AccountAggregate { 
+    Aggregate AccountInfo {
         ValueObject Uuid {
             - string uuid
             // Айди генерится библиотекой
@@ -354,16 +224,6 @@ BoundedContext AccountChange {
 
         ValueObject Educations {
             - List<Education> educations
-        }
-
-        ValueObject Direction {
-            - string direction
-            // Выбор из выпадающего списка
-            // (Нужна ли валидация?)
-        }
-
-        ValueObject Directions {
-            - List<Direction> directions
         }
 
         ValueObject Location {
@@ -400,17 +260,15 @@ BoundedContext AccountChange {
             - List<TypesCompany> typesCompany
         }
 
-        ValueObject Skill {
-            - string skill
-            // Не более 30 символов
+        ValueObject ContractPhoto {
+            - List<Byte> contractPhoto
         }
 
-        ValueObject ExpectedSkills {
-            - List<Skill> expectedSkills
-        }
+        // ValueObject EduacationId 
 
         ValueObject Contract {
-            - string contract
+            - ContractPhoto contractPhoto // фотка контракта
+            - string educationId // id учреждения с которым контракт
             // Пока хз как реализуем
         }
 
@@ -418,10 +276,69 @@ BoundedContext AccountChange {
             - List<Contract> contracts
         }
 
+        abstract
+        CommandEvent AbstractAccountCommand {
+            - Account account 
+        }
+
+        CommandEvent ChangeStudentAccount extends @AbstractResumeCommand
+        CommandEvent ChangeCompanyAccount extends @AbstractResumeCommand
+
+        DomainEvent AccountStudentChanged {
+            - AccountStudentInfo accountStudentInfo
+            - Date timestamp
+        }
+
+        DomainEvent AccountCompanyChanged {
+            - AccountCompanyInfo accountCompanyInfo
+            - Date timestamp
+        }
+        
+        Entity AccountStudentInfo {
+            aggregateRoot
+
+            - required FirstName firstName
+            - required LastName lastName
+            - required BornDate bornDate
+            - required Education education
+            - required Location location
+        }
+
+        Entity AccountCompanyInfo {
+            aggregateRoot
+
+            - required Title title
+            - optional FoundationDate foundationDate
+            - optional AboutCompany aboutCompany
+            - required TypeCompany typeCompany
+            - required Location location
+            - optional Contracts contracts
+        }
+    }
+}
+
+BoundedContext Vacancy {
+    domainVisionStatement "Vacancy realizes the following subdomains: Vacancy"
+    type FEATURE
+
+    aggregate Vacancy {
+        ValueObject VacancyId {
+            string uuid 
+        }
+
         ValueObject Photo {
             - List<byte> bytes
             // jpg, jpeg, png
             // Ограничение по размеру до 4 мб
+        }
+
+        ValueObject Skill {    
+            - string skill
+            // Не более 30 символов
+        }
+
+        ValueObject ExpectedSkills {
+            - List<Skill> expectedSkills
         }
 
         ValueObject AboutPractice {
@@ -437,55 +354,57 @@ BoundedContext AccountChange {
             // Необязательное поле
         }
 
-        abstract
-        CommandEvent AbstractAccountCommand {
-            - Account account 
+        ValueObject Direction {
+            - string direction
+            // Выбор из выпадающего списка
+            // (Нужна ли валидация?)
         }
 
-        CommandEvent ChangeAccount extends @AbstractResumeCommand
-
-        DomainEvent AccountChanged {
-            - Account account
-            - Date timestamp
-        }
-        
-        Entity AccountStudentChanged {
-            aggregateRoot
-
-            - required FirstName firstName
-            - required LastName lastName
-            - required BornDate bornDate
-            - required Education education
-            - required Location location
+        ValueObject Directions {
+            - List<Direction> directions
         }
 
-        Entity AccountCompanyChanged {
-            aggregateRoot
-
-            - required Title title
-            - optional FoundationDate foundationDate
-            - optional AboutCompany aboutCompany
-            - required Login login
-            - required Password password
-            - required TypeCompany typeCompany
-            - required Location location 
-            
-            // Пукнты для вакансии:
-            - optional Contract contract
-            - optional Photo photo
-            - optional ExpectedSkills expectedSkills
-            - optional AboutPractice aboutPractice
-            - optional Directions directions
-            - optional AboutProjects aboutProjects
+        ValueObject CompanyId {
+            string uuid
         }
     }
-}
+
+    Entity Vacancy {
+        aggregateRoot
+
+        // - optional  Contract contract
+        - required Photo photo
+        - required ExpectedSkills expectedSkills
+        - optional AboutPractice aboutPractice
+        - required Directions directions
+        - optional AboutProjects aboutProjects
+        - required CompanyId companyId
+    }
+
+    abstract
+    CommandEvent AbstractVacancyCommand {
+        - Vacancy vacancy 
+    }
+
+    CommandEvent CreateVacancy extends @AbstractVacancyCommand
+    CommandEvent UpdateVacancy extends @AbstractVacancyCommand
+
+    DomainEvent VacancyCreated {
+        - Vacancy vacancy
+        - Date timestamp
+    }
+
+    DomainEvent VacancyUpdated {
+        - Vacancy vacancy
+        - Date timestamp
+    }
+} 
 
 BoundedContext Request {
     domainVisionStatement "Request realizes the following subdomains: Request"
     type FEATURE
 
-    aggregate RequestAggregate {
+    aggregate Request {
         ValueObject RequestId {
             string uuid
             // Айди генерится библиотекой

@@ -1,12 +1,11 @@
 package events
 
 import (
-	// eventsourcing "SebStudy/event_sourcing"
 	"SebStudy/domain/resume/values"
 	"time"
 )
 
-type ResumeSended struct {
+type ResumeCreated struct {
 	ResumeId      values.ResumeId
 	FirstName     values.FirstName
 	MiddleName    values.MiddleName
@@ -23,7 +22,7 @@ type ResumeSended struct {
 	CreatedAt     time.Time
 }
 
-func NewResumeSended(
+func NewResumeCreated(
 	ResumeId values.ResumeId,
 	FirstName values.FirstName,
 	MiddleName values.MiddleName,
@@ -38,8 +37,8 @@ func NewResumeSended(
 	Portfolio values.Portfolio,
 	StudentGroup values.StudentGroup,
 	CreatedAt time.Time,
-) ResumeSended {
-	return ResumeSended{
+) ResumeCreated {
+	return ResumeCreated{
 		ResumeId:      ResumeId,
 		FirstName:     FirstName,
 		MiddleName:    MiddleName,

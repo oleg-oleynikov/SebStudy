@@ -49,7 +49,9 @@ func (s *CloudEventServiceServer) Publish(ctx context.Context, req *protoCloudev
 	}
 
 	go s.processEvents()
+
 	err := s.ceReceiver.ReceiveCloudEvent(event)
+	log.Println(err)
 	return &empty.Empty{}, err
 }
 

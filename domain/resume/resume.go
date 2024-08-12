@@ -56,10 +56,10 @@ func (r *Resume) ToString() []string {
 }
 
 func (r *Resume) registerHandlers() {
-	r.Register(events.ResumeSended{}, func(e interface{}) { r.ResumeSended(e.(events.ResumeSended)) })
+	r.Register(events.ResumeCreated{}, func(e interface{}) { r.ResumeCreated(e.(events.ResumeCreated)) })
 }
 
-func (r *Resume) ResumeSended(e events.ResumeSended) {
+func (r *Resume) ResumeCreated(e events.ResumeCreated) {
 	r.firstName = e.FirstName
 	r.middleName = e.MiddleName
 	r.lastName = e.LastName
@@ -74,9 +74,9 @@ func (r *Resume) ResumeSended(e events.ResumeSended) {
 	r.studentGroup = e.StudentGroup
 }
 
-func (r *Resume) SendResume(c *commands.SendResume, sender ports.CeEventSender) error {
+func (r *Resume) CreateResume(c *commands.CreateResume, sender ports.CeEventSender) error {
 
-	e := events.NewResumeSended(c.ResumeId, c.FirstName, c.MiddleName, c.LastName, c.PhoneNumber, c.Education, c.AboutMe, c.Skills, c.Photo, c.Directions, c.AboutProjects, c.Portfolio, c.StudentGroup, time.Now())
+	e := events.NewResumeCreated(c.ResumeId, c.FirstName, c.MiddleName, c.LastName, c.PhoneNumber, c.Education, c.AboutMe, c.Skills, c.Photo, c.Directions, c.AboutProjects, c.Portfolio, c.StudentGroup, time.Now())
 
 	if err := sender.SendEvent(e, "resume.sended", "domain/resume"); err != nil {
 		return err
