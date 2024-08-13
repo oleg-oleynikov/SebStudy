@@ -14,9 +14,9 @@ import (
 	v1 "open-cluster-management.io/sdk-go/pkg/cloudevents/generic/options/grpc/protobuf/v1"
 )
 
-var toResumeSendedEvent util.CeToEvent = func(ctx context.Context, c *v1.CloudEvent) (interface{}, error) {
+var toResumeCreatedEvent util.CeToEvent = func(ctx context.Context, c *v1.CloudEvent) (interface{}, error) {
 	// var rs pb.ResumeSended
-	rs := &pb.ResumeSended{}
+	rs := &pb.ResumeCreated{}
 
 	if err := infrastructure.DecodeCloudeventData(c, rs); err != nil {
 		return nil, err
@@ -104,7 +104,7 @@ var toResumeSendedEvent util.CeToEvent = func(ctx context.Context, c *v1.CloudEv
 		return nil, err
 	}
 
-	createdResume := events.NewResumeSended(
+	createdResume := events.NewResumeCreated(
 		resumeID, *firstName, *middleName, *lastName, *phoneNumber,
 		education, *aboutMe, skills, *photo, directions,
 		*aboutProjects, *portfolio, *studentGroup, rs.CreatedAt.AsTime())
@@ -113,7 +113,7 @@ var toResumeSendedEvent util.CeToEvent = func(ctx context.Context, c *v1.CloudEv
 }
 
 var toCeResumeSended util.EventToCe = func(eventType, source string, e interface{}) (*v1.CloudEvent, error) {
-	event, ok := e.(events.ResumeSended)
+	event, ok := e.(events.ResumeCreated)
 	if !ok {
 		return &v1.CloudEvent{}, fmt.Errorf("impossible cast")
 	}
@@ -149,7 +149,7 @@ var toCeResumeSended util.EventToCe = func(eventType, source string, e interface
 		Nanos:   int32(event.CreatedAt.Second()),
 	}
 
-	pbEvent := pb.ResumeSended{
+	pbEvent := pb.ResumeCreated{
 		ResumeId:      event.ResumeId.Value,
 		FirstName:     event.FirstName.GetFirstName(),
 		MiddleName:    event.MiddleName.GetMiddleName(),
@@ -176,5 +176,5 @@ var toCeResumeSended util.EventToCe = func(eventType, source string, e interface
 
 func init() {
 	ceMapper := util.GetCeMapperInstance()
-	ceMapper.RegisterEvent("resume.sended", toResumeSendedEvent, toCeResumeSended)
+	ceMapper.RegisterEvent("resume.sended", toResumeCreatedEvent, toCeResumeSended)
 }

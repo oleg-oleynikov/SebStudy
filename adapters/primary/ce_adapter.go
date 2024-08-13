@@ -28,8 +28,6 @@ func NewCloudEventsAdapter(d ports.CeCommandDispatcher, e ports.CeEventHandler, 
 }
 
 func (c *CloudEventsAdapter) ReceiveCloudEvent(event *v1.CloudEvent) error {
-	log.Println(event)
-
 	if _, err := c.CeMapper.GetEventType(event.Type); err != nil {
 		log.Printf("unknown event type: %s\n", err)
 		return status.Errorf(codes.InvalidArgument, "unknown event type: %s", err)
@@ -44,14 +42,15 @@ func (c *CloudEventsAdapter) ReceiveCloudEvent(event *v1.CloudEvent) error {
 
 	if c.CeMapper.IsCommand(event.Type) {
 		err = c.CommandDispatcher.Dispatch(mappedEvent, infrastructure.NewCommandMetadataFromCloudEvent(event))
-		if err != nil {
-			if _, ok := status.FromError(err); ok {
-				return err
-			}
-
-			log.Printf("failed to dispatch command: %v", err)
-			return status.Errorf(codes.Internal, "failed to dispatch command: %v", err)
+		// if err != nil {
+		// log.Println("Бля")
+		if _, ok := status.FromError(err); ok {
+			return err
 		}
+
+		log.Printf("failed to dispatch command: %v", err)
+		return status.Errorf(codes.Internal, "failed to dispatch command: %v", err)
+		// }
 
 	} else if c.CeMapper.IsEvent(event.Type) {
 		err := c.EventDispatcher.Handle(mappedEvent, *infrastructure.NewEventMetadataFromCloudEvent(event))
@@ -63,5 +62,5 @@ func (c *CloudEventsAdapter) ReceiveCloudEvent(event *v1.CloudEvent) error {
 		return status.Errorf(codes.InvalidArgument, "failed to dispatch event: %v", err)
 	}
 
-	return status.Errorf(codes.Canceled, "failed to process event")
+	return status.Errorf(codes.Canceled, "Fuck you slave")
 }

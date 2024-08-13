@@ -99,7 +99,7 @@ func BuildCorsUnaryInterceptor(cors CorsHandler) grpc.UnaryServerInterceptor {
 	}
 }
 
-func BuildCorsStreamInterceptor(cors func(ctx context.Context, method string) error) grpc.StreamServerInterceptor {
+func BuildCorsStreamInterceptor(cors CorsHandler) grpc.StreamServerInterceptor {
 	return func(srv any, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
 		if err := cors(ss.Context(), info.FullMethod); err != nil {
 			return err

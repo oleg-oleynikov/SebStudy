@@ -3,7 +3,9 @@ package main
 import (
 	"SebStudy/infrastructure"
 	resumeProto "SebStudy/proto/resume"
+	"fmt"
 	"log"
+	"os"
 
 	"google.golang.org/protobuf/types/known/anypb"
 	v1 "open-cluster-management.io/sdk-go/pkg/cloudevents/generic/options/grpc/protobuf/v1"
@@ -101,7 +103,14 @@ import (
 // }
 
 func main() {
-	resumeEvent := &resumeProto.ResumeSended{
+
+	imageBytes, err := os.ReadFile("C:/Users/Олег/Desktop/images.jpg")
+	if err != nil {
+		fmt.Println("Картинка хуйня")
+		return
+	}
+
+	resumeEvent := &resumeProto.ResumeCreated{
 		ResumeId:    "dddddddddddddddddd",
 		FirstName:   "Алексей",
 		MiddleName:  "Валерьевич",
@@ -117,8 +126,8 @@ func main() {
 				Skill: "Java",
 			},
 		},
-		Photo: []byte{},
-		// Photo: imageBytes,
+		// Photo: []byte{},
+		Photo: imageBytes,
 		Directions: []*resumeProto.Direction{
 			{
 				Direction: "back-end",
@@ -149,13 +158,11 @@ func main() {
 	}
 
 	client := infrastructure.NewCloudeventsServiceClient("localhost:50051")
-	log.Println(event.GetProtoData().GetTypeUrl())
-	// log.Println(base64.StdEncoding.EncodeToString(event.GetProtoData().Value))
+	// log.Println(event.GetProtoData().GetTypeUrl())
 	log.Println(event.GetProtoData())
-	if err := client.Publish(event); err != nil {
+	if err = client.Publish(event); err != nil {
 		log.Println(err)
 		return
 	}
-
-	log.Println("Чет не так")
+	log.Println(err)
 }

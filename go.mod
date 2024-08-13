@@ -5,6 +5,7 @@ go 1.22.3
 require (
 	github.com/golang/protobuf v1.5.4
 	github.com/google/uuid v1.6.0
+	github.com/joho/godotenv v1.5.1
 	github.com/nats-io/nats.go v1.36.0
 	github.com/restream/reindexer/v3 v3.27.0
 	google.golang.org/grpc v1.65.0

@@ -34,7 +34,7 @@ message Direction {
 //     string studentGroup = 13;
 // }
 
-message ResumeSended {
+message ResumeCreated {
     string resumeId = 1;
     string firstName = 2;
     string middleName = 3;

@@ -7,6 +7,10 @@ import (
 
 // TODO: Изменить на логику когда можешь убрать функционал удалив файл, ну или закоментив содержимое
 
+type CommandHandlerModule interface {
+	RegisterCommands(cmdHandlerMap *CommandHandlerMap)
+}
+
 type CommandHandlerMap struct {
 	handlers map[reflect.Type]func(Command, CommandMetadata) error
 }

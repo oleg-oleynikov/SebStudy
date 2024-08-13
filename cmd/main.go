@@ -12,23 +12,20 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/nats-io/nats.go"
+	"github.com/joho/godotenv"
 
 	"SebStudy/initializers"
 )
 
-const (
-	// host = "localhost"
-	// url = "http://localhost:8080/"
-	url = "localhost:50051"
-)
-
 func main() {
-
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
 
-	eventBus, err := infrastructure.NewEventBus(nats.DefaultURL)
+	if err := godotenv.Load(); err != nil {
+		log.Printf("Failed to load config: %v\n", err)
+	}
+
+	eventBus, err := infrastructure.NewEventBusNats(os.Getenv("NATS_URL"))
 
 	if err != nil {
 		log.Fatalf("failed to connect nats: %s", err)
@@ -40,7 +37,7 @@ func main() {
 	eventSerde := infrastructure.GetEventSerdeInstance()
 	// reindexerAdapter := secondary.NewReindexerAdapter()
 	writeRepo := secondary.NewPostgresAdapter()
-	imageStore := infrastructure.NewImageStore("./uploads")
+	imageStore := infrastructure.NewImageStore(os.Getenv("IMAGE_UPLOAD_PATH"))
 	eventStore := infrastructure.NewEsEventStore(eventBus, eventSerde, writeRepo, imageStore)
 
 	// corsOptions := primary.NewCorsGrpcBuilder().WithAllowedOrigins("*").WithAllowedMethods("*").BuildHandler()
@@ -51,14 +48,13 @@ func main() {
 
 	// fmt.Println(reindexerAdapter.Get("123"))
 
-	serviceClient := infrastructure.NewCloudeventsServiceClient(url)
+	serviceClient := infrastructure.NewCloudeventsServiceClient(os.Getenv("SERVER_URL"))
 
 	ceEventSender := secondary.NewCeSenderAdapter(serviceClient, ceMapper)
 	resumeRepo := resume.NewEventStoreResumeRepo(eventStore)
 
-	resumeCmdHandlers := resume.NewHandlers(ceEventSender, resumeRepo)
-	cmdHandlerMap := infrastructure.NewCommandHandlerMap()
-	cmdHandlerMap.AppendHandlers(resumeCmdHandlers)
+	resumeCmdHandlers := resume.NewResumeCommandHandlers(ceEventSender, resumeRepo)
+	cmdHandlerMap := registerCommandHandlers(resumeCmdHandlers)
 	dispatcher := infrastructure.NewDispatcher(cmdHandlerMap)
 
 	eventHandler := infrastructure.NewEventHandler(eventBus)
@@ -66,8 +62,17 @@ func main() {
 	ceAdapter := primary.NewCloudEventsAdapter(dispatcher, eventHandler, ceMapper)
 
 	ceServiceServer := primary.NewCloudEventServiceServer(ceAdapter)
-	ceServiceServer.Run("tcp", "localhost:50051")
+	ceServiceServer.Run("tcp", os.Getenv("SERVER_URL"))
 
 	<-quit
 	ceServiceServer.Shutdown()
+}
+
+func registerCommandHandlers(cmdHandlers ...infrastructure.CommandHandlerModule) infrastructure.CommandHandlerMap {
+	cmdHandlerMap := infrastructure.NewCommandHandlerMap()
+	for _, handler := range cmdHandlers {
+		handler.RegisterCommands(&cmdHandlerMap)
+	}
+
+	return cmdHandlerMap
 }
