@@ -1,4 +1,4 @@
-package ce_resume_mapper
+package mapping
 
 import (
 	"SebStudy/adapters/util"
@@ -12,7 +12,7 @@ import (
 	v1 "open-cluster-management.io/sdk-go/pkg/cloudevents/generic/options/grpc/protobuf/v1"
 )
 
-var toCreateResumeCommand util.CeToEvent = func(ctx context.Context, c *v1.CloudEvent) (interface{}, error) {
+var toCreateResumeCommand util.CloudeventToEvent = func(_ context.Context, c *v1.CloudEvent) (interface{}, error) {
 
 	rs := pb.ResumeCreated{}
 
@@ -41,16 +41,6 @@ var toCreateResumeCommand util.CeToEvent = func(ctx context.Context, c *v1.Cloud
 	if err != nil {
 		return nil, err
 	}
-
-	// var educations values.Educations
-	// for i := 0; i < len(rs.Educations); i++ {
-	// 	data := rs.Educations[i]
-	// 	education, err := values.NewEducation(data.Education)
-	// 	if err != nil {
-	// 		return nil, err
-	// 	}
-	// 	educations.AppendEducations(*education)
-	// }
 
 	education, err := values.NewEducation(rs.Education)
 	if err != nil {
@@ -108,9 +98,4 @@ var toCreateResumeCommand util.CeToEvent = func(ctx context.Context, c *v1.Cloud
 		*aboutProjects, *portfolio, *studentGroup)
 
 	return createdResume, nil
-}
-
-func init() {
-	ceMapper := util.GetCeMapperInstance()
-	ceMapper.RegisterCommand("resume.send", toCreateResumeCommand)
 }

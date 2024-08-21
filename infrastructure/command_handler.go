@@ -4,7 +4,8 @@ import (
 	"reflect"
 )
 
-type Command interface{}
+type Command interface {
+}
 
 type CommandHandler interface {
 	GetHandlers() map[reflect.Type]func(Command, CommandMetadata) error
@@ -27,5 +28,5 @@ func (c *CommandHandlerBase) GetHandlers() map[reflect.Type]func(Command, Comman
 }
 
 func (c *CommandHandlerBase) Register(command interface{}, f func(Command, CommandMetadata) error) {
-	c.handlers[GetType(command)] = f
+	c.handlers[GetValueType(command)] = f
 }

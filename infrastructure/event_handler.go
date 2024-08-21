@@ -1,31 +1,57 @@
 package infrastructure
 
-import (
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
-)
+import "reflect"
 
-type ToType func()
-
-type EventHandler struct {
-	EventBus EventBus
-	handlers map[string]ToType
+type EventHandler interface {
+	CanHandle(reflect.Type) bool
+	Handle(reflect.Type, interface{}, EventMetadata) error
+	GetHandledTypes() []reflect.Type
 }
 
-func NewEventHandler(eventBus EventBus) *EventHandler {
-	eh := &EventHandler{
-		EventBus: eventBus,
-		handlers: make(map[string]ToType, 0),
-	}
+type EventHandlerBase struct {
+	EventHandler
 
-	return eh
+	handlers     []EventHandlerEnvelope
+	handledTypes map[reflect.Type]bool
 }
 
-func (eh *EventHandler) Handle(event interface{}, metadata EventMetadata) error { // Пофиксить тему которая касается определения версии
-	eventMes := NewEventMessage(event, metadata, 0)
-	if err := eh.EventBus.Publish(metadata.EventType, eventMes); err != nil {
-		return err
+func NewEventHandler() EventHandlerBase {
+	return EventHandlerBase{
+		handledTypes: make(map[reflect.Type]bool, 0),
 	}
+}
 
-	return status.Error(codes.OK, "OK")
+func (p *EventHandlerBase) When(event interface{}, handler func(interface{}, EventMetadata) error) {
+	t := GetValueType(event)
+	p.handlers = append(p.handlers, NewEventHandlerEnvelope(t, handler))
+	p.handledTypes[t] = true
+}
+
+func (p *EventHandlerBase) CanHandle(t reflect.Type) bool {
+	_, exists := p.handledTypes[t]
+	return exists
+}
+
+func (p *EventHandlerBase) Handle(t reflect.Type, event interface{}, m EventMetadata) error {
+	for _, h := range p.handlers {
+		if h.Type == t {
+			err := h.Handler(event, m)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+type EventHandlerEnvelope struct {
+	Type    reflect.Type
+	Handler func(interface{}, EventMetadata) error
+}
+
+func NewEventHandlerEnvelope(t reflect.Type, handler func(interface{}, EventMetadata) error) EventHandlerEnvelope {
+	return EventHandlerEnvelope{
+		Type:    t,
+		Handler: handler,
+	}
 }

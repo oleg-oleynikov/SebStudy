@@ -1,6 +1,8 @@
 package secondary
 
-// Ну типа доделать реализацию коннекта с бд, ну по идее и после этого можно будет доделать eventStore
+import "fmt"
+
+// - Ну типа доделать реализацию коннекта с бд, ну по идее и после этого можно будет доделать eventStore; - СУКА НАОБОРОТ ДОЛБАЕБ; (- я сам с собой если чо)
 type PostgresAdapter struct{}
 
 func NewPostgresAdapter() *PostgresAdapter {
@@ -9,13 +11,13 @@ func NewPostgresAdapter() *PostgresAdapter {
 
 func (pr *PostgresAdapter) Get(aggregateId string) ([]interface{}, error) {
 
-	return nil, nil
+	return nil, fmt.Errorf("not impl")
 }
 
 func (pr *PostgresAdapter) Save(data interface{}) error {
-	return nil
+	return fmt.Errorf("not impl")
 }
 
 func (pr *PostgresAdapter) GetByAggregateId(aggregateId string) ([]interface{}, error) {
-	return nil, nil
+	return nil, fmt.Errorf("not impl")
 }

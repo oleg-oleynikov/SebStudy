@@ -4,9 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"log"
 	"net"
 	"sync"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/golang/protobuf/ptypes/empty"
 	"google.golang.org/grpc"
@@ -50,8 +51,8 @@ func (s *CloudEventServiceServer) Publish(ctx context.Context, req *protoCloudev
 
 	go s.processEvents()
 
-	err := s.ceReceiver.ReceiveCloudEvent(event)
-	log.Println(err)
+	err := s.ceReceiver.ReceiveCloudEvent(ctx, event)
+	log.Debugf("Response with error: %v", err)
 	return &empty.Empty{}, err
 }
 

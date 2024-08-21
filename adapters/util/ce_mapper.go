@@ -3,9 +3,9 @@ package util
 import (
 	"context"
 	"fmt"
-	"sync"
+	"reflect"
 
-	"github.com/google/uuid"
+	"github.com/gofrs/uuid"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
 	v1 "open-cluster-management.io/sdk-go/pkg/cloudevents/generic/options/grpc/protobuf/v1"
@@ -13,112 +13,101 @@ import (
 
 type EventType string
 
-type CeToEvent func(ctx context.Context, cloudEvent *v1.CloudEvent) (interface{}, error)
-type EventToCe func(eventType, source string, e interface{}) (*v1.CloudEvent, error)
+type CloudeventToEvent func(ctx context.Context, cloudEvent *v1.CloudEvent) (interface{}, error)
+type EventToCloudevent func(eventType, source string, event interface{}) (*v1.CloudEvent, error)
 
 const (
-	EVENT   EventType = "event"
-	COMMAND EventType = "command"
+	EVENT   EventType = "DOMAIN_EVENT"
+	COMMAND EventType = "COMMAND_EVENT"
 )
 
-type CeMapper struct {
-	CeToEvent  map[string]CeToEvent
-	EventToCe  map[string]EventToCe
-	eventTypes map[string]EventType
+type CloudeventMapper struct {
+	cloudeventToEvent map[string]CloudeventToEvent
+	eventToCloudEvent map[reflect.Type]EventToCloudevent
+	mappingTypes      map[string]EventType
 }
 
-var (
-	instance1 *CeMapper
-	once1     sync.Once
-)
-
-func GetCeMapperInstance() *CeMapper {
-	once1.Do(func() {
-		c := &CeMapper{}
-		c.CeToEvent = make(map[string]CeToEvent, 0)
-		c.EventToCe = make(map[string]EventToCe, 0)
-		c.eventTypes = make(map[string]EventType, 0)
-
-		instance1 = c
-	})
-
-	return instance1
+func NewCloudeventMapper() *CloudeventMapper {
+	return &CloudeventMapper{
+		cloudeventToEvent: make(map[string]CloudeventToEvent, 0),
+		eventToCloudEvent: make(map[reflect.Type]EventToCloudevent, 0),
+		mappingTypes:      make(map[string]EventType, 0),
+	}
 }
 
-func (cm *CeMapper) MapToEvent(ctx context.Context, c *v1.CloudEvent) (interface{}, error) {
-	handler, err := cm.Get(c.Type)
-	if err != nil {
-		return nil, err
+func (m *CloudeventMapper) GetCloudeventToEvent(cloudeventType string) (CloudeventToEvent, error) {
+	mapper, ok := m.cloudeventToEvent[cloudeventType]
+	if !ok {
+		return nil, fmt.Errorf("cannot find mapper for %s", cloudeventType)
+	}
+	return mapper, nil
+}
+
+func (m *CloudeventMapper) GetEventToCloudevent(eventType reflect.Type) (EventToCloudevent, error) {
+	mapper, ok := m.eventToCloudEvent[eventType]
+	if !ok {
+		return nil, fmt.Errorf("cannot find mapper %s", eventType)
+	}
+	return mapper, nil
+}
+
+func (m *CloudeventMapper) MapEvent(eventType reflect.Type, cloudeventType string, eType EventType, toEvent CloudeventToEvent, toCloudevent EventToCloudevent) error {
+	if cloudeventType == "" {
+		return fmt.Errorf("need ceType")
 	}
 
-	cmd, err := handler(ctx, c)
-	if err != nil {
-		return nil, err
+	if _, exists := m.cloudeventToEvent[cloudeventType]; exists {
+		return fmt.Errorf("already exist %s", cloudeventType)
 	}
 
-	return cmd, nil
-}
-
-func (cm *CeMapper) MapToCloudEvent(e interface{}, eventType, source string) (*v1.CloudEvent, error) {
-	handler, err := cm.GetToCe(eventType)
-	if err != nil {
-		return &v1.CloudEvent{}, err
+	if _, exists := m.eventToCloudEvent[eventType]; exists {
+		return fmt.Errorf("already exist %s", eventType)
 	}
 
-	cloudEvent, err := handler(eventType, source, e)
-	if err != nil {
-		return &v1.CloudEvent{}, err
+	m.cloudeventToEvent[cloudeventType] = toEvent
+	m.eventToCloudEvent[eventType] = toCloudevent
+	m.mappingTypes[cloudeventType] = eType
+
+	return nil
+}
+
+func (m *CloudeventMapper) MapCommand(cloudeventType string, eType EventType, toEvent CloudeventToEvent) error {
+	if cloudeventType == "" {
+		return fmt.Errorf("need ceType")
 	}
 
-	return cloudEvent, nil
-}
-
-func (cm *CeMapper) Get(t string) (CeToEvent, error) {
-	if h, ex := cm.CeToEvent[t]; ex {
-		return h, nil
+	if _, exists := m.cloudeventToEvent[cloudeventType]; exists {
+		return fmt.Errorf("already exist %s", cloudeventType)
 	}
 
-	return nil, fmt.Errorf("handler for {%v} type doesnt exist", t)
+	m.cloudeventToEvent[cloudeventType] = toEvent
+	m.mappingTypes[cloudeventType] = eType
+
+	return nil
 }
 
-func (cm *CeMapper) GetToCe(t string) (EventToCe, error) {
-	if h, ex := cm.EventToCe[t]; ex {
-		return h, nil
+func (m *CloudeventMapper) IsEvent(cloudeventType string) bool {
+	ceType, ok := m.mappingTypes[cloudeventType]
+	if !ok {
+		return false
 	}
-
-	return nil, fmt.Errorf("handler for {%v} type doesnt exist", t)
+	return ceType == EVENT
 }
 
-func (c *CeMapper) register(ceType string, f CeToEvent, typeEvent EventType) {
-	c.CeToEvent[ceType] = f
-	c.eventTypes[ceType] = typeEvent
-}
-
-func (c *CeMapper) RegisterEvent(ceType string, e CeToEvent, ce EventToCe) {
-	c.register(ceType, e, EVENT)
-	c.EventToCe[ceType] = ce
-}
-
-func (c *CeMapper) RegisterCommand(ceType string, e CeToEvent) {
-	c.register(ceType, e, COMMAND)
-}
-
-func (c *CeMapper) IsCommand(ceType string) bool {
-	typeOfEvent, _ := c.GetEventType(ceType)
-	return typeOfEvent == COMMAND
-}
-
-func (c *CeMapper) IsEvent(ceType string) bool {
-	typeOfEvent, _ := c.GetEventType(ceType)
-	return typeOfEvent == EVENT
-}
-
-func (c *CeMapper) GetEventType(ceType string) (EventType, error) {
-	typeEvent, ok := c.eventTypes[ceType]
-	if ok {
-		return typeEvent, nil
+func (m *CloudeventMapper) IsCommand(cloudeventType string) bool {
+	ceType, ok := m.mappingTypes[cloudeventType]
+	if !ok {
+		return false
 	}
-	return typeEvent, fmt.Errorf("type %s does not exist", ceType)
+	return ceType == COMMAND
+}
+
+func GetValueType(t interface{}) reflect.Type {
+	v := reflect.ValueOf(t)
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
+	return v.Type()
 }
 
 func InitCloudEvent(eventType, source string, mes proto.Message) (*v1.CloudEvent, error) {

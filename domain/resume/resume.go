@@ -12,7 +12,6 @@ import (
 type Resume struct {
 	infrastructure.AggregateRootBase
 
-	resumeId      values.ResumeId
 	firstName     values.FirstName
 	middleName    values.MiddleName
 	lastName      values.LastName
@@ -37,23 +36,23 @@ func NewResume() *Resume {
 	return r
 }
 
-func (r *Resume) ToString() []string {
-	return []string{
-		r.resumeId.ToString(), "\n",
-		r.firstName.ToString(), "\n",
-		r.middleName.ToString(), "\n",
-		r.lastName.ToString(), "\n",
-		r.phoneNumber.ToString(), "\n",
-		r.education.ToString(), "\n",
-		r.aboutMe.ToString(), "\n",
-		r.skills.ToString(), "\n",
-		r.photo.ToString(), "\n",
-		r.directions.ToString(), "\n",
-		r.aboutProjects.ToString(), "\n",
-		r.portfolio.ToString(), "\n",
-		r.studentGroup.ToString(), "\n",
-	}
-}
+// func (r *Resume) ToString() []string {
+// 	return []string{
+// 		r.Id, "\n",
+// 		r.firstName.ToString(), "\n",
+// 		r.middleName.ToString(), "\n",
+// 		r.lastName.ToString(), "\n",
+// 		r.phoneNumber.ToString(), "\n",
+// 		r.education.ToString(), "\n",
+// 		r.aboutMe.ToString(), "\n",
+// 		r.skills.ToString(), "\n",
+// 		r.photo.ToString(), "\n",
+// 		r.directions.ToString(), "\n",
+// 		r.aboutProjects.ToString(), "\n",
+// 		r.portfolio.ToString(), "\n",
+// 		r.studentGroup.ToString(), "\n",
+// 	}
+// }
 
 func (r *Resume) registerHandlers() {
 	r.Register(events.ResumeCreated{}, func(e interface{}) { r.ResumeCreated(e.(events.ResumeCreated)) })

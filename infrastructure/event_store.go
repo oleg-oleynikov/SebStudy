@@ -3,12 +3,13 @@ package infrastructure
 import (
 	"SebStudy/domain/resume/events"
 	"SebStudy/ports/db_ports"
-	"log"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type EventStore interface {
 	LoadEvents(aggregateId string) ([]interface{}, error)
-	AppendEvents(CommandMetadata, ...interface{}) error
+	AppendEvents([]interface{}, CommandMetadata) error
 }
 
 type EsEventStore struct {
@@ -26,10 +27,10 @@ func NewEsEventStore(eventBus EventBus, eventSerde *EventSerde, writeRepo db_por
 		imageStore: imageStore,
 	}
 
-	es.eventBus.Subscribe("resume.sended", func(event EventMessage[events.ResumeCreated]) {
+	es.eventBus.Subscribe("resume.sended", func(event EventEnvelope[events.ResumeCreated]) {
 		imageUrl, err := imageStore.SaveImage(event.Event.Photo.GetPhoto())
 		if err != nil {
-			log.Printf("failed to save image, %s\n", err)
+			log.Debugf("failed to save image, %s\n", err)
 			return
 		}
 		event.Event.Photo.SetUrl(imageUrl)
@@ -42,7 +43,7 @@ func NewEsEventStore(eventBus EventBus, eventSerde *EventSerde, writeRepo db_por
 			es.imageStore.DeleteImageByPath(imageUrl)
 			return
 		}
-		log.Printf("Ивент сохранился с id: %s\n", event.Metadata.EventId)
+		// log.Debugf("Ивент сохранился с id: %s\n", event.Metadata.EventId)
 	})
 
 	return es
@@ -57,7 +58,7 @@ func (es *EsEventStore) LoadEvents(aggregateId string) ([]interface{}, error) {
 	return events, nil
 }
 
-func (es *EsEventStore) AppendEvents(m CommandMetadata, events ...interface{}) error {
+func (es *EsEventStore) AppendEvents(events []interface{}, m CommandMetadata) error {
 	// if events == nil || len(events) == 0 {
 	// 	return nil
 	// }

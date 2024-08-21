@@ -2,7 +2,7 @@ package infrastructure
 
 import "reflect"
 
-func GetType(t interface{}) reflect.Type {
+func GetValueType(t interface{}) reflect.Type {
 	v := reflect.ValueOf(t)
 	if reflect.Pointer == v.Kind() {
 		v = v.Elem()

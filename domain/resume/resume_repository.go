@@ -6,4 +6,5 @@ import (
 
 type ResumeRepository interface {
 	Get(resumeId *values.ResumeId) (*Resume, error)
+	// Save()
 }

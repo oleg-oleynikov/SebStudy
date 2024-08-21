@@ -12,13 +12,13 @@ import (
 type CeSenderAdapter struct {
 	Client *infrastructure.CloudeventsServiceClient
 
-	CeMapper *util.CeMapper
+	CloudeventMapper *util.CloudeventMapper
 }
 
-func NewCeSenderAdapter(client *infrastructure.CloudeventsServiceClient, ceMapper *util.CeMapper) *CeSenderAdapter {
+func NewCeSenderAdapter(client *infrastructure.CloudeventsServiceClient, cloudeventMapper *util.CloudeventMapper) *CeSenderAdapter {
 	return &CeSenderAdapter{
-		Client:   client,
-		CeMapper: ceMapper,
+		Client:           client,
+		CloudeventMapper: cloudeventMapper,
 	}
 }
 
@@ -33,14 +33,15 @@ func (c *CeSenderAdapter) SendEvent(e interface{}, eventType, source string) err
 		return status.Errorf(codes.Internal, "failed to send cloudevent: %v", err)
 	}
 
-	return status.Errorf(codes.OK, "OK")
+	return nil
 }
 
 func (c *CeSenderAdapter) newCloudEvent(data interface{}, eventType, source string) (*v1.CloudEvent, error) {
-	cloudEvent, err := c.CeMapper.MapToCloudEvent(data, eventType, source)
+	mapToCloudevent, err := c.CloudeventMapper.GetEventToCloudevent(infrastructure.GetValueType(data))
+
 	if err != nil {
-		return cloudEvent, err
+		return nil, err
 	}
 
-	return cloudEvent, err
+	return mapToCloudevent(eventType, source, data)
 }

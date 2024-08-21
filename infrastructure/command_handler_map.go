@@ -5,24 +5,24 @@ import (
 	"reflect"
 )
 
-// TODO: Изменить на логику когда можешь убрать функционал удалив файл, ну или закоментив содержимое
+type CommandHandle func(Command, CommandMetadata) error
 
 type CommandHandlerModule interface {
 	RegisterCommands(cmdHandlerMap *CommandHandlerMap)
 }
 
 type CommandHandlerMap struct {
-	handlers map[reflect.Type]func(Command, CommandMetadata) error
+	handlers map[reflect.Type]CommandHandle
 }
 
 func NewCommandHandlerMap() CommandHandlerMap {
 	c := CommandHandlerMap{}
-	c.handlers = make(map[reflect.Type]func(Command, CommandMetadata) error, 0)
+	c.handlers = make(map[reflect.Type]CommandHandle, 0)
 
 	return c
 }
 
-func (c *CommandHandlerMap) Get(t reflect.Type) (func(Command, CommandMetadata) error, error) {
+func (c *CommandHandlerMap) Get(t reflect.Type) (CommandHandle, error) {
 	if handler, exists := c.handlers[t]; exists {
 		return handler, nil
 	}
@@ -37,7 +37,3 @@ func (c *CommandHandlerMap) AppendHandlers(commandHandlers ...CommandHandler) {
 		}
 	}
 }
-
-// func (c *CommandHandlerMap) RegisterCommand(valueType reflect.Type, f func(Command, CommandMetadata) error) {
-// 	c.handlers[valueType] = f
-// }

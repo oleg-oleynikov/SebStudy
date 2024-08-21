@@ -1,4 +1,4 @@
-package ce_resume_mapper
+package mapping
 
 import (
 	"SebStudy/adapters/util"
@@ -14,8 +14,7 @@ import (
 	v1 "open-cluster-management.io/sdk-go/pkg/cloudevents/generic/options/grpc/protobuf/v1"
 )
 
-var toResumeCreatedEvent util.CeToEvent = func(ctx context.Context, c *v1.CloudEvent) (interface{}, error) {
-	// var rs pb.ResumeSended
+var toResumeCreated util.CloudeventToEvent = func(ctx context.Context, c *v1.CloudEvent) (interface{}, error) {
 	rs := &pb.ResumeCreated{}
 
 	if err := infrastructure.DecodeCloudeventData(c, rs); err != nil {
@@ -43,16 +42,6 @@ var toResumeCreatedEvent util.CeToEvent = func(ctx context.Context, c *v1.CloudE
 	if err != nil {
 		return nil, err
 	}
-
-	// var educations values.Educations
-	// for i := 0; i < len(rs.Educations); i++ {
-	// 	data := rs.Educations[i]
-	// 	education, err := values.NewEducation(data.Education)
-	// 	if err != nil {
-	// 		return nil, err
-	// 	}
-	// 	educations.AppendEducations(*education)
-	// }
 
 	education, err := values.NewEducation(rs.Education)
 	if err != nil {
@@ -112,21 +101,11 @@ var toResumeCreatedEvent util.CeToEvent = func(ctx context.Context, c *v1.CloudE
 	return createdResume, nil
 }
 
-var toCeResumeSended util.EventToCe = func(eventType, source string, e interface{}) (*v1.CloudEvent, error) {
+var toCloudeventResumeCreated util.EventToCloudevent = func(cloudeventType, source string, e interface{}) (*v1.CloudEvent, error) {
 	event, ok := e.(events.ResumeCreated)
 	if !ok {
 		return &v1.CloudEvent{}, fmt.Errorf("impossible cast")
 	}
-
-	// pbEducations := []*pb.Education{}
-	// educations := event.Educations.GetEducations()
-	// for _, v := range educations {
-	// 	pbEducations = append(pbEducations, &pb.Education{
-	// 		Education: v.GetEducation(),
-	// 	})
-	// }
-
-	// pbEducation := pb.ResumeSended.Education{}
 
 	pbSkills := []*pb.Skill{}
 	skills := event.Skills.GetSkills()
@@ -166,15 +145,10 @@ var toCeResumeSended util.EventToCe = func(eventType, source string, e interface
 		CreatedAt:     &timestamp,
 	}
 
-	cloudEvent, err := util.InitCloudEvent(eventType, source, &pbEvent)
+	cloudEvent, err := util.InitCloudEvent(cloudeventType, source, &pbEvent)
 	if err != nil {
 		return nil, err
 	}
 
 	return cloudEvent, nil
-}
-
-func init() {
-	ceMapper := util.GetCeMapperInstance()
-	ceMapper.RegisterEvent("resume.sended", toResumeCreatedEvent, toCeResumeSended)
 }

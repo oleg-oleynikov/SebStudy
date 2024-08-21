@@ -5,7 +5,8 @@ import (
 	"SebStudy/infrastructure"
 	"SebStudy/ports"
 	"context"
-	"log"
+
+	"github.com/sirupsen/logrus"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -14,53 +15,55 @@ import (
 
 type CloudEventsAdapter struct {
 	CommandDispatcher ports.CeCommandDispatcher
-	EventDispatcher   ports.CeEventHandler
-	CeMapper          *util.CeMapper
+	EventDispatcher   ports.CeEventDispatcher
+	CloudeventMapper  *util.CloudeventMapper
 }
 
-func NewCloudEventsAdapter(d ports.CeCommandDispatcher, e ports.CeEventHandler, ceMapper *util.CeMapper) *CloudEventsAdapter {
+func NewCloudEventsAdapter(d ports.CeCommandDispatcher, e ports.CeEventDispatcher, cloudeventMapper *util.CloudeventMapper) *CloudEventsAdapter {
 	return &CloudEventsAdapter{
 		CommandDispatcher: d,
 		EventDispatcher:   e,
 
-		CeMapper: ceMapper,
+		CloudeventMapper: cloudeventMapper,
 	}
 }
 
-func (c *CloudEventsAdapter) ReceiveCloudEvent(event *v1.CloudEvent) error {
-	if _, err := c.CeMapper.GetEventType(event.Type); err != nil {
-		log.Printf("unknown event type: %s\n", err)
+func (c *CloudEventsAdapter) ReceiveCloudEvent(ctx context.Context, event *v1.CloudEvent) error {
+	// if _, err := c.CloudeventMapper.(event.Type); err != nil {
+	// 	log.Printf("unknown event type: %s\n", err)
+	// 	return status.Errorf(codes.InvalidArgument, "unknown event type: %s", err)
+	// }
+
+	mapper, err := c.CloudeventMapper.GetCloudeventToEvent(event.Type)
+
+	if err != nil {
+		logrus.Printf("unknown event type: %v", err)
 		return status.Errorf(codes.InvalidArgument, "unknown event type: %s", err)
 	}
 
-	mappedEvent, err := c.CeMapper.MapToEvent(context.Background(), event)
-
+	mappedEvent, err := mapper(ctx, event)
 	if err != nil {
-		log.Printf("failed to map cloudevent: %v", err)
-		return status.Errorf(codes.InvalidArgument, "failed to map cloudevent: %s", err)
+		return status.Errorf(codes.Internal, "failed to map cloudevent: %v", err)
 	}
 
-	if c.CeMapper.IsCommand(event.Type) {
+	if c.CloudeventMapper.IsCommand(event.Type) {
 		err = c.CommandDispatcher.Dispatch(mappedEvent, infrastructure.NewCommandMetadataFromCloudEvent(event))
-		// if err != nil {
-		// log.Println("Бля")
 		if _, ok := status.FromError(err); ok {
 			return err
 		}
 
-		log.Printf("failed to dispatch command: %v", err)
+		logrus.Printf("failed to dispatch command: %v", err)
 		return status.Errorf(codes.Internal, "failed to dispatch command: %v", err)
-		// }
 
-	} else if c.CeMapper.IsEvent(event.Type) {
-		err := c.EventDispatcher.Handle(mappedEvent, *infrastructure.NewEventMetadataFromCloudEvent(event))
+	} else if c.CloudeventMapper.IsEvent(event.Type) {
+		err := c.EventDispatcher.Dispatch(mappedEvent, *infrastructure.NewEventMetadataFromCloudEvent(event))
 		if _, ok := status.FromError(err); ok {
 			return err
 		}
 
-		log.Printf("failed to dispatch event: %v", err)
+		logrus.Printf("failed to dispatch event: %v", err)
 		return status.Errorf(codes.InvalidArgument, "failed to dispatch event: %v", err)
 	}
 
-	return status.Errorf(codes.Canceled, "Fuck you slave")
+	return status.Errorf(codes.Canceled, "Something wrong")
 }

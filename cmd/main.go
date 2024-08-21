@@ -5,14 +5,15 @@ import (
 	"SebStudy/adapters/secondary"
 	"SebStudy/adapters/util"
 	"SebStudy/domain/resume"
+	"SebStudy/domain/resume/mapping"
 	"SebStudy/infrastructure"
+	"fmt"
 
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
 
-	"github.com/joho/godotenv"
+	log "github.com/sirupsen/logrus"
 
 	"SebStudy/initializers"
 )
@@ -21,9 +22,10 @@ func main() {
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
 
-	if err := godotenv.Load(); err != nil {
-		log.Printf("Failed to load config: %v\n", err)
-	}
+	initializers.LoadEnvVariables()
+	initializers.InitLogger(os.Getenv("ENV"))
+
+	serverUrl := fmt.Sprintf("%s:%s", os.Getenv("SERVER_ADDRESS"), os.Getenv("SERVER_PORT"))
 
 	eventBus, err := infrastructure.NewEventBusNats(os.Getenv("NATS_URL"))
 
@@ -31,8 +33,10 @@ func main() {
 		log.Fatalf("failed to connect nats: %s", err)
 	}
 
-	ceMapper := util.GetCeMapperInstance()
-	initializers.InitializeCeMapperHandlers()
+	// ceMapper := util.GetCeMapperInstance()
+	// initializers.InitializeCeMapperHandlers()
+	cloudeventMapper := util.NewCloudeventMapper()
+	prepareCloudeventMapper(cloudeventMapper)
 
 	eventSerde := infrastructure.GetEventSerdeInstance()
 	// reindexerAdapter := secondary.NewReindexerAdapter()
@@ -41,25 +45,20 @@ func main() {
 	eventStore := infrastructure.NewEsEventStore(eventBus, eventSerde, writeRepo, imageStore)
 
 	// corsOptions := primary.NewCorsGrpcBuilder().WithAllowedOrigins("*").WithAllowedMethods("*").BuildHandler()
-	// corsServerOption := primary.CorsToServerOptions(corsOptions)
-	// ceServiceServer := primary.NewCloudEventServiceServer()
-	// ceServiceServer.Run("tcp", ":50051")
 	// eventStore := infrastructure.NewEsEventStore(eventBus, eventSerde, reindexerAdapter, imageStore)
 
-	// fmt.Println(reindexerAdapter.Get("123"))
+	serviceClient := infrastructure.NewCloudeventsServiceClient(serverUrl)
 
-	serviceClient := infrastructure.NewCloudeventsServiceClient(os.Getenv("SERVER_URL"))
-
-	ceEventSender := secondary.NewCeSenderAdapter(serviceClient, ceMapper)
+	ceEventSender := secondary.NewCeSenderAdapter(serviceClient, cloudeventMapper)
 	resumeRepo := resume.NewEventStoreResumeRepo(eventStore)
 
 	resumeCmdHandlers := resume.NewResumeCommandHandlers(ceEventSender, resumeRepo)
 	cmdHandlerMap := registerCommandHandlers(resumeCmdHandlers)
 	dispatcher := infrastructure.NewDispatcher(cmdHandlerMap)
 
-	eventHandler := infrastructure.NewEventHandler(eventBus)
+	eventDispatcher := infrastructure.NewEventDispatcher(eventBus)
 
-	ceAdapter := primary.NewCloudEventsAdapter(dispatcher, eventHandler, ceMapper)
+	ceAdapter := primary.NewCloudEventsAdapter(dispatcher, eventDispatcher, cloudeventMapper)
 
 	ceServiceServer := primary.NewCloudEventServiceServer(ceAdapter)
 	ceServiceServer.Run("tcp", os.Getenv("SERVER_URL"))
@@ -75,4 +74,8 @@ func registerCommandHandlers(cmdHandlers ...infrastructure.CommandHandlerModule)
 	}
 
 	return cmdHandlerMap
+}
+
+func prepareCloudeventMapper(cloudeventMapper *util.CloudeventMapper) {
+	mapping.RegisterResumeTypes(cloudeventMapper)
 }
