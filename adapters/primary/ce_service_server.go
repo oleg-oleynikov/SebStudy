@@ -1,13 +1,12 @@
 package primary
 
 import (
+	"SebStudy/infrastructure/logger"
 	"context"
 	"fmt"
 
 	"net"
 	"sync"
-
-	log "github.com/sirupsen/logrus"
 
 	"github.com/golang/protobuf/ptypes/empty"
 	"google.golang.org/grpc"
@@ -45,14 +44,14 @@ func (s *CloudEventServiceServer) Publish(ctx context.Context, req *protoCloudev
 	select {
 	case s.eventChan <- event:
 	default:
-		log.Printf("eventChan is full, dropping event: %v", event)
+		logger.Logger.Printf("eventChan is full, dropping event: %v", event)
 		return nil, fmt.Errorf("eventChan is full, event dropped")
 	}
 
 	go s.processEvents()
 
 	err := s.ceReceiver.ReceiveCloudEvent(ctx, event)
-	log.Debugf("Response with error: %v", err)
+	logger.Logger.Debugf("Response with error: %v", err)
 	return &empty.Empty{}, err
 }
 
@@ -78,7 +77,7 @@ func (s *CloudEventServiceServer) processEvent(event *protoCloudevents.CloudEven
 		select {
 		case eventChan <- event:
 		default:
-			log.Printf("Subscriber queue is full, dropping event")
+			logger.Logger.Printf("Subscriber queue is full, dropping event")
 		}
 	}
 }
@@ -97,7 +96,7 @@ func (s *CloudEventServiceServer) addSubscriber(stream protoCloudevents.CloudEve
 				return
 			}
 			if err := stream.Send(event); err != nil {
-				log.Printf("Failed to send event to subscriber: %v", err)
+				logger.Logger.Printf("Failed to send event to subscriber: %v", err)
 				s.removeSubscriber(stream)
 				return
 			}
@@ -117,14 +116,14 @@ func (s *CloudEventServiceServer) removeSubscriber(subscriber protoCloudevents.C
 }
 
 func (s *CloudEventServiceServer) Subscribe(req *protoCloudevents.SubscriptionRequest, stream protoCloudevents.CloudEventService_SubscribeServer) error {
-	log.Printf("New subscriber: %v", req)
+	logger.Logger.Printf("New subscriber: %v", req)
 	s.addSubscriber(stream)
 
 	<-stream.Context().Done()
 
 	err := stream.Context().Err()
 	if err != nil {
-		log.Printf("Subscriber disconnected: %v\n", err)
+		logger.Logger.Printf("Subscriber disconnected: %v\n", err)
 	}
 
 	s.removeSubscriber(stream)
@@ -134,12 +133,12 @@ func (s *CloudEventServiceServer) Subscribe(req *protoCloudevents.SubscriptionRe
 func (s *CloudEventServiceServer) Run(network string, addr string) {
 	lis, err := net.Listen(network, addr)
 	if err != nil {
-		log.Fatalf("Failed to listen: %v", err)
+		logger.Logger.Fatalf("Failed to listen: %v", err)
 	}
 
 	protoCloudevents.RegisterCloudEventServiceServer(s.server, s)
 
-	log.Printf("Try starting listening server on %s\n", addr)
+	logger.Logger.Printf("Try starting listening server on %s\n", addr)
 	go func() {
 		if err := s.server.Serve(lis); err != nil {
 			fmt.Printf("Failed to serve: %v", err)

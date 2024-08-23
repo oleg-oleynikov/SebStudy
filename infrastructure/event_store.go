@@ -2,24 +2,25 @@ package infrastructure
 
 import (
 	"SebStudy/domain/resume/events"
+	"SebStudy/infrastructure/logger"
 	"SebStudy/ports/db_ports"
-
-	log "github.com/sirupsen/logrus"
 )
 
 type EventStore interface {
-	LoadEvents(aggregateId string) ([]interface{}, error)
-	AppendEvents([]interface{}, CommandMetadata) error
+	AppendEvents(streamName string, version int, m CommandMetadata, events ...interface{}) error
+	AppendEventsToAny(streamName string, m CommandMetadata, events ...interface{}) error
+	LoadEvents(streamName string, version int) ([]interface{}, error)
+	LoadEventsFromStart(streamName string) ([]interface{}, error)
 }
 
 type EsEventStore struct {
 	eventBus   EventBus
-	eventSerde *EventSerde
+	eventSerde *EsEventSerde
 	writeRepo  db_ports.WriteModel
 	imageStore *ImageStore
 }
 
-func NewEsEventStore(eventBus EventBus, eventSerde *EventSerde, writeRepo db_ports.WriteModel, imageStore *ImageStore) *EsEventStore {
+func NewEsEventStore(eventBus EventBus, eventSerde *EsEventSerde, writeRepo db_ports.WriteModel, imageStore *ImageStore) *EsEventStore {
 	es := &EsEventStore{
 		eventBus:   eventBus,
 		eventSerde: eventSerde,
@@ -27,16 +28,22 @@ func NewEsEventStore(eventBus EventBus, eventSerde *EventSerde, writeRepo db_por
 		imageStore: imageStore,
 	}
 
-	es.eventBus.Subscribe("resume.sended", func(event EventEnvelope[events.ResumeCreated]) {
-		imageUrl, err := imageStore.SaveImage(event.Event.Photo.GetPhoto())
-		if err != nil {
-			log.Debugf("failed to save image, %s\n", err)
+	es.eventBus.Subscribe("resume.sended", func(event EventEnvelope) {
+		resumeCreated, ok := (event.Event).(events.ResumeCreated)
+		if !ok {
+			logger.Logger.Debugf("failed to cast event\n")
 			return
 		}
-		event.Event.Photo.SetUrl(imageUrl)
-		data, err := es.eventSerde.Serialize(event.Event, event.Metadata)
+
+		imageUrl, err := imageStore.SaveImage(resumeCreated.Photo.GetPhoto())
 		if err != nil {
-			es.imageStore.DeleteImageByPath(imageUrl)
+			logger.Logger.Debugf("failed to save image, %s\n", err)
+			return
+		}
+		resumeCreated.Photo.SetUrl(imageUrl)
+		data, err := eventSerde.Serialize(event.Event, event.Metadata)
+		if err != nil {
+			imageStore.DeleteImageByPath(imageUrl)
 			return
 		}
 		if err := es.writeRepo.Save(data); err != nil {

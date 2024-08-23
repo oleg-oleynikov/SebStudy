@@ -19,12 +19,14 @@ func NewHandlers(eventSender ports.CeEventSender, repository ResumeRepository) *
 		if err != nil {
 			return err
 		}
+
 		cmd.ResumeId.Value = aggregateId.String()
 
 		if err := resume.CreateResume(cmd, eventSender); err != nil {
 			return err
 		}
 
+		repository.Save(resume, m)
 		return nil
 	})
 
@@ -47,16 +49,18 @@ func NewResumeCommandHandlers(eventSender ports.CeEventSender, repository Resume
 		resume := NewResume()
 
 		aggregateId, err := uuid.NewV7()
+
 		if err != nil {
 			return err
 		}
+
 		cmd.ResumeId.Value = aggregateId.String()
 
 		if err := resume.CreateResume(cmd, eventSender); err != nil {
 			return err
 		}
 
-		return nil
+		return repository.Save(resume, m)
 	})
 
 	return &ResumeCommandHandlers{

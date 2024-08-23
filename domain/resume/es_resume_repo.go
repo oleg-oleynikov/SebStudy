@@ -5,23 +5,27 @@ import (
 	"SebStudy/infrastructure"
 )
 
-type EventStoreResumeRepo struct {
-	eventStore infrastructure.EventStore
+type EsResumeRepo struct {
+	aggregateStore infrastructure.AggregateStore
 }
 
-func NewEventStoreResumeRepo(eventStore infrastructure.EventStore) *EventStoreResumeRepo {
-	return &EventStoreResumeRepo{
-		eventStore: eventStore,
+func NewEsResumeRepo(aggregateStore infrastructure.AggregateStore) *EsResumeRepo {
+	return &EsResumeRepo{
+		aggregateStore: aggregateStore,
 	}
 }
 
-func (es *EventStoreResumeRepo) Get(resumeId *values.ResumeId) (*Resume, error) {
-	events, err := es.eventStore.LoadEvents(resumeId.Value)
+func (es *EsResumeRepo) Get(resumeId *values.ResumeId) (*Resume, error) {
+	resume := NewResume()
+	err := es.aggregateStore.Load(resumeId.Value, resume)
+
 	if err != nil {
 		return nil, err
 	}
-	resume := NewResume()
-	resume.Load(events)
 
 	return resume, nil
+}
+
+func (es *EsResumeRepo) Save(resume *Resume, m infrastructure.CommandMetadata) error {
+	return es.aggregateStore.Save(resume, m)
 }

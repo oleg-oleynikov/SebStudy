@@ -1,13 +1,13 @@
 package infrastructure
 
-type EventEnvelope[T any] struct {
-	Event    T
+type EventEnvelope struct {
+	Event    interface{}
 	Metadata EventMetadata
 	// Version  int
 }
 
-func NewEventEnvelope[T any](event T, metadata EventMetadata, version int) *EventEnvelope[T] {
-	return &EventEnvelope[T]{
+func NewEventEnvelope(event interface{}, metadata EventMetadata, version int) *EventEnvelope {
+	return &EventEnvelope{
 		Event:    event,
 		Metadata: metadata,
 		// Version:  version,

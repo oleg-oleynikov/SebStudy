@@ -13,7 +13,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	log "github.com/sirupsen/logrus"
+	"SebStudy/infrastructure/logger"
 
 	"SebStudy/initializers"
 )
@@ -23,23 +23,21 @@ func main() {
 	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
 
 	initializers.LoadEnvVariables()
-	initializers.InitLogger(os.Getenv("ENV"))
 
 	serverUrl := fmt.Sprintf("%s:%s", os.Getenv("SERVER_ADDRESS"), os.Getenv("SERVER_PORT"))
 
 	eventBus, err := infrastructure.NewEventBusNats(os.Getenv("NATS_URL"))
 
 	if err != nil {
-		log.Fatalf("failed to connect nats: %s", err)
+		logger.Logger.Fatalf("failed to connect nats: %s", err)
 	}
 
-	// ceMapper := util.GetCeMapperInstance()
-	// initializers.InitializeCeMapperHandlers()
 	cloudeventMapper := util.NewCloudeventMapper()
 	prepareCloudeventMapper(cloudeventMapper)
 
-	eventSerde := infrastructure.GetEventSerdeInstance()
-	// reindexerAdapter := secondary.NewReindexerAdapter()
+	aggregateStore := infrastructure.NewEsAggregateStore()
+
+	eventSerde := infrastructure.GetEsEventSerdeInstance()
 	writeRepo := secondary.NewPostgresAdapter()
 	imageStore := infrastructure.NewImageStore(os.Getenv("IMAGE_UPLOAD_PATH"))
 	eventStore := infrastructure.NewEsEventStore(eventBus, eventSerde, writeRepo, imageStore)
@@ -50,7 +48,7 @@ func main() {
 	serviceClient := infrastructure.NewCloudeventsServiceClient(serverUrl)
 
 	ceEventSender := secondary.NewCeSenderAdapter(serviceClient, cloudeventMapper)
-	resumeRepo := resume.NewEventStoreResumeRepo(eventStore)
+	resumeRepo := resume.NewEsResumeRepo(eventStore)
 
 	resumeCmdHandlers := resume.NewResumeCommandHandlers(ceEventSender, resumeRepo)
 	cmdHandlerMap := registerCommandHandlers(resumeCmdHandlers)

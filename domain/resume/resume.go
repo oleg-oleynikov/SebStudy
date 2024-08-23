@@ -74,12 +74,6 @@ func (r *Resume) ResumeCreated(e events.ResumeCreated) {
 }
 
 func (r *Resume) CreateResume(c *commands.CreateResume, sender ports.CeEventSender) error {
-
-	e := events.NewResumeCreated(c.ResumeId, c.FirstName, c.MiddleName, c.LastName, c.PhoneNumber, c.Education, c.AboutMe, c.Skills, c.Photo, c.Directions, c.AboutProjects, c.Portfolio, c.StudentGroup, time.Now())
-
-	if err := sender.SendEvent(e, "resume.sended", "domain/resume"); err != nil {
-		return err
-	}
-
+	r.Raise(events.NewResumeCreated(c.ResumeId, c.FirstName, c.MiddleName, c.LastName, c.PhoneNumber, c.Education, c.AboutMe, c.Skills, c.Photo, c.Directions, c.AboutProjects, c.Portfolio, c.StudentGroup, time.Now()))
 	return nil
 }

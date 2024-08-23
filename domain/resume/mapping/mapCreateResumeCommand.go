@@ -12,7 +12,7 @@ import (
 	v1 "open-cluster-management.io/sdk-go/pkg/cloudevents/generic/options/grpc/protobuf/v1"
 )
 
-var toCreateResumeCommand util.CloudeventToEvent = func(_ context.Context, c *v1.CloudEvent) (interface{}, error) {
+var toCreateResume util.CloudeventToEvent = func(_ context.Context, c *v1.CloudEvent) (interface{}, error) {
 
 	rs := pb.ResumeCreated{}
 
