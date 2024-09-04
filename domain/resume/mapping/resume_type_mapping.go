@@ -10,4 +10,5 @@ func RegisterResumeTypes(m *util.CloudeventMapper) {
 		"resume.create",
 		toCreateResume,
 	)
+
 }

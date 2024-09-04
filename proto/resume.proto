@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-option go_package = "./resume";
-
 package resume;
+
+option go_package = "./pb";
 
 import "google/protobuf/timestamp.proto";
 

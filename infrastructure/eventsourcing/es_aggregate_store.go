@@ -1,4 +1,8 @@
-package infrastructure
+package eventsourcing
+
+import (
+	"SebStudy/infrastructure"
+)
 
 type EsAggregateStore struct {
 	AggregateStore
@@ -6,11 +10,13 @@ type EsAggregateStore struct {
 	store EventStore
 }
 
-func NewEsAggregateStore() *EsAggregateStore {
-	return &EsAggregateStore{}
+func NewEsAggregateStore(eventStore EventStore) *EsAggregateStore {
+	return &EsAggregateStore{
+		store: eventStore,
+	}
 }
 
-func (s *EsAggregateStore) Save(a AggregateRoot, m CommandMetadata) error {
+func (s *EsAggregateStore) Save(a AggregateRoot, m infrastructure.CommandMetadata) error {
 	changes := a.GetChanges()
 	streamName := GetStreamName(a)
 	err := s.store.AppendEvents(streamName, a.GetVersion(), m, changes)
@@ -22,10 +28,9 @@ func (s *EsAggregateStore) Save(a AggregateRoot, m CommandMetadata) error {
 }
 
 func (s *EsAggregateStore) Load(id string, a AggregateRoot) error {
-	version := -1
 	streamName := GetStreamName(a)
 
-	events, err := s.store.LoadEvents(streamName, version)
+	events, err := s.store.LoadEvents(streamName)
 	if err != nil {
 		return err
 	}

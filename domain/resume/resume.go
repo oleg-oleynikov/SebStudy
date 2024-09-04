@@ -4,13 +4,12 @@ import (
 	"SebStudy/domain/resume/commands"
 	"SebStudy/domain/resume/events"
 	"SebStudy/domain/resume/values"
-	"SebStudy/infrastructure"
-	"SebStudy/ports"
+	"SebStudy/infrastructure/eventsourcing"
 	"time"
 )
 
 type Resume struct {
-	infrastructure.AggregateRootBase
+	eventsourcing.AggregateRootBase
 
 	firstName     values.FirstName
 	middleName    values.MiddleName
@@ -28,7 +27,7 @@ type Resume struct {
 
 func NewResume() *Resume {
 	r := &Resume{
-		AggregateRootBase: infrastructure.NewAggregateRootBase(),
+		AggregateRootBase: eventsourcing.NewAggregateRootBase(),
 	}
 
 	r.registerHandlers()
@@ -73,7 +72,7 @@ func (r *Resume) ResumeCreated(e events.ResumeCreated) {
 	r.studentGroup = e.StudentGroup
 }
 
-func (r *Resume) CreateResume(c *commands.CreateResume, sender ports.CeEventSender) error {
+func (r *Resume) CreateResume(c *commands.CreateResume) error {
 	r.Raise(events.NewResumeCreated(c.ResumeId, c.FirstName, c.MiddleName, c.LastName, c.PhoneNumber, c.Education, c.AboutMe, c.Skills, c.Photo, c.Directions, c.AboutProjects, c.Portfolio, c.StudentGroup, time.Now()))
 	return nil
 }

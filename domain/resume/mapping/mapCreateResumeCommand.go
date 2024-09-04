@@ -1,18 +1,15 @@
 package mapping
 
 import (
-	"SebStudy/adapters/util"
 	"SebStudy/domain/resume/commands"
 	"SebStudy/domain/resume/values"
 	"SebStudy/infrastructure"
+	"SebStudy/pb"
 	"context"
-
-	pb "SebStudy/proto/resume"
-
-	v1 "open-cluster-management.io/sdk-go/pkg/cloudevents/generic/options/grpc/protobuf/v1"
+	// pb "SebStudy/proto/resume"
 )
 
-var toCreateResume util.CloudeventToEvent = func(_ context.Context, c *v1.CloudEvent) (interface{}, error) {
+func toCreateResume(_ context.Context, c *pb.CloudEvent) (interface{}, error) {
 
 	rs := pb.ResumeCreated{}
 

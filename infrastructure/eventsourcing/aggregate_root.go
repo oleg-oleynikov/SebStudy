@@ -1,4 +1,4 @@
-package infrastructure
+package eventsourcing
 
 import (
 	"reflect"

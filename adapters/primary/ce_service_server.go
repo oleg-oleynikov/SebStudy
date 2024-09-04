@@ -1,67 +1,88 @@
 package primary
 
 import (
-	"SebStudy/infrastructure/logger"
+	"SebStudy/adapters/util"
+	"SebStudy/infrastructure"
+	"SebStudy/logger"
+	"SebStudy/pb"
+	"SebStudy/ports"
 	"context"
 	"fmt"
 
-	"net"
 	"sync"
 
 	"github.com/golang/protobuf/ptypes/empty"
-	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
-	protoCloudevents "open-cluster-management.io/sdk-go/pkg/cloudevents/generic/options/grpc/protobuf/v1"
+	// pb "open-cluster-management.io/sdk-go/pkg/cloudevents/generic/options/grpc/protobuf/v1"
 )
 
-type CloudEventServiceServer struct {
+type CloudEventService struct {
 	sync.RWMutex
-	protoCloudevents.UnimplementedCloudEventServiceServer
+	pb.UnimplementedCloudEventServiceServer
 
-	server      *grpc.Server
-	subscribers map[protoCloudevents.CloudEventService_SubscribeServer]chan *protoCloudevents.CloudEvent
-	eventChan   chan *protoCloudevents.CloudEvent
-	wg          sync.WaitGroup
-
-	ceReceiver *CloudEventsAdapter
+	log logger.Logger
+	// server      *grpc.Server
+	subscribers       map[pb.CloudEventService_SubscribeServer]chan *pb.CloudEvent
+	eventChan         chan *pb.CloudEvent
+	wg                sync.WaitGroup
+	commandDispatcher ports.CeCommandDispatcher
+	cloudeventMapper  *util.CloudeventMapper
 }
 
-func NewCloudEventServiceServer(ceReceiver *CloudEventsAdapter, opt ...grpc.ServerOption) *CloudEventServiceServer {
-	return &CloudEventServiceServer{
-		server:      grpc.NewServer(opt...),
-		subscribers: make(map[protoCloudevents.CloudEventService_SubscribeServer]chan *protoCloudevents.CloudEvent),
-		eventChan:   make(chan *protoCloudevents.CloudEvent, 100),
-		ceReceiver:  ceReceiver,
+func NewCloudEventService(log logger.Logger, cmdDispatcher ports.CeCommandDispatcher, ceMapper *util.CloudeventMapper /* opt ...grpc.ServerOption*/) *CloudEventService {
+	return &CloudEventService{
+		subscribers:       make(map[pb.CloudEventService_SubscribeServer]chan *pb.CloudEvent),
+		eventChan:         make(chan *pb.CloudEvent, 100),
+		commandDispatcher: cmdDispatcher,
+		cloudeventMapper:  ceMapper,
 	}
 }
 
-func (s *CloudEventServiceServer) StartReceiver() {
-
-}
-
-func (s *CloudEventServiceServer) Publish(ctx context.Context, req *protoCloudevents.PublishRequest) (*emptypb.Empty, error) {
+func (s *CloudEventService) Publish(ctx context.Context, req *pb.PublishRequest) (*emptypb.Empty, error) {
 	event := req.GetEvent()
 	select {
 	case s.eventChan <- event:
 	default:
-		logger.Logger.Printf("eventChan is full, dropping event: %v", event)
+		s.log.Printf("eventChan is full, dropping event: %v", event)
 		return nil, fmt.Errorf("eventChan is full, event dropped")
 	}
 
 	go s.processEvents()
 
-	err := s.ceReceiver.ReceiveCloudEvent(ctx, event)
-	logger.Logger.Debugf("Response with error: %v", err)
+	// err := s.ceReceiver.ReceiveCloudEvent(ctx, event)
+	mapper, err := s.cloudeventMapper.GetCloudeventToEvent(event.Type)
+	if err != nil {
+		s.log.Debugf("unknown event type: %v", err)
+		return &empty.Empty{}, status.Errorf(codes.InvalidArgument, "unknown event type")
+	}
+
+	mappedEvent, err := mapper(ctx, event)
+	if err != nil {
+		s.log.Debugf("failed to map cloudevent: %v", err)
+
+		// return status.Errorf(codes.Internal, "failed to map cloudevent: %v", err)
+		return &empty.Empty{}, status.Errorf(codes.Internal, "failed to map cloudevent")
+	}
+
+	err = s.commandDispatcher.Dispatch(mappedEvent, infrastructure.NewCommandMetadata(event.Id))
+	if _, ok := status.FromError(err); ok {
+		return &empty.Empty{}, err
+	}
+
+	s.log.Debugf("Response with error: %v", err)
+
 	return &empty.Empty{}, err
 }
 
-func (s *CloudEventServiceServer) processEvents() {
+func (s *CloudEventService) processEvents() {
 	for {
 		select {
 		case event := <-s.eventChan:
 			s.RLock()
 			s.wg.Add(1)
-			go func(event *protoCloudevents.CloudEvent) {
+			go func(event *pb.CloudEvent) {
 				defer s.wg.Done()
 				s.processEvent(event)
 			}(event)
@@ -72,21 +93,21 @@ func (s *CloudEventServiceServer) processEvents() {
 	}
 }
 
-func (s *CloudEventServiceServer) processEvent(event *protoCloudevents.CloudEvent) {
+func (s *CloudEventService) processEvent(event *pb.CloudEvent) {
 	for _, eventChan := range s.subscribers {
 		select {
 		case eventChan <- event:
 		default:
-			logger.Logger.Printf("Subscriber queue is full, dropping event")
+			s.log.Printf("Subscriber queue is full, dropping event")
 		}
 	}
 }
 
-func (s *CloudEventServiceServer) addSubscriber(stream protoCloudevents.CloudEventService_SubscribeServer) {
+func (s *CloudEventService) addSubscriber(stream pb.CloudEventService_SubscribeServer) {
 	s.Lock()
 	defer s.Unlock()
 
-	eventChan := make(chan *protoCloudevents.CloudEvent, 100)
+	eventChan := make(chan *pb.CloudEvent, 100)
 	s.subscribers[stream] = eventChan
 
 	go func() {
@@ -96,7 +117,7 @@ func (s *CloudEventServiceServer) addSubscriber(stream protoCloudevents.CloudEve
 				return
 			}
 			if err := stream.Send(event); err != nil {
-				logger.Logger.Printf("Failed to send event to subscriber: %v", err)
+				s.log.Printf("Failed to send event to subscriber: %v", err)
 				s.removeSubscriber(stream)
 				return
 			}
@@ -104,7 +125,7 @@ func (s *CloudEventServiceServer) addSubscriber(stream protoCloudevents.CloudEve
 	}()
 }
 
-func (s *CloudEventServiceServer) removeSubscriber(subscriber protoCloudevents.CloudEventService_SubscribeServer) {
+func (s *CloudEventService) removeSubscriber(subscriber pb.CloudEventService_SubscribeServer) {
 	s.Lock()
 	defer s.Unlock()
 
@@ -115,44 +136,17 @@ func (s *CloudEventServiceServer) removeSubscriber(subscriber protoCloudevents.C
 	}
 }
 
-func (s *CloudEventServiceServer) Subscribe(req *protoCloudevents.SubscriptionRequest, stream protoCloudevents.CloudEventService_SubscribeServer) error {
-	logger.Logger.Printf("New subscriber: %v", req)
+func (s *CloudEventService) Subscribe(req *pb.SubscriptionRequest, stream pb.CloudEventService_SubscribeServer) error {
+	s.log.Printf("New subscriber: %v", req)
 	s.addSubscriber(stream)
 
 	<-stream.Context().Done()
 
 	err := stream.Context().Err()
 	if err != nil {
-		logger.Logger.Printf("Subscriber disconnected: %v\n", err)
+		s.log.Printf("Subscriber disconnected: %v\n", err)
 	}
 
 	s.removeSubscriber(stream)
 	return nil
-}
-
-func (s *CloudEventServiceServer) Run(network string, addr string) {
-	lis, err := net.Listen(network, addr)
-	if err != nil {
-		logger.Logger.Fatalf("Failed to listen: %v", err)
-	}
-
-	protoCloudevents.RegisterCloudEventServiceServer(s.server, s)
-
-	logger.Logger.Printf("Try starting listening server on %s\n", addr)
-	go func() {
-		if err := s.server.Serve(lis); err != nil {
-			fmt.Printf("Failed to serve: %v", err)
-		}
-	}()
-}
-
-func (s *CloudEventServiceServer) Shutdown() {
-	s.server.GracefulStop()
-
-	s.RLock()
-	for sub := range s.subscribers {
-		s.removeSubscriber(sub)
-	}
-	s.RUnlock()
-	s.wg.Wait()
 }

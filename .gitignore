@@ -6,3 +6,4 @@ uploads
 main.exe
 main.exe~
 .env
+infrastructure\testing_jetstream

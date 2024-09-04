@@ -1,11 +1,12 @@
 package main
 
 import (
+	"SebStudy/domain/resume"
 	"SebStudy/domain/resume/events"
 	"SebStudy/domain/resume/values"
+	"SebStudy/infrastructure"
+	"SebStudy/infrastructure/eventsourcing"
 	"context"
-	"encoding/json"
-	"log"
 	"time"
 
 	"github.com/gofrs/uuid"
@@ -15,10 +16,21 @@ import (
 )
 
 func main() {
+
 	// logrus.SetReportCaller(true)
 	logrus.SetLevel(logrus.DebugLevel)
 
 	nc, err := nats.Connect(nats.DefaultURL)
+
+	serde := infrastructure.NewEsEventSerde()
+	eventStore := eventsourcing.NewJetStreamEventStore(nc, serde, "sebstudy")
+
+	aggregateStore := eventsourcing.NewEsAggregateStore(eventStore)
+	// jsCtx, _ := nc.JetStream()
+
+	// eventStore := rt.EventStore("ResumeService")
+
+	// jsCtx.Subscribe()
 
 	if err != nil {
 		logrus.Fatalf("Failed to connect nats: %v", err)
@@ -36,8 +48,9 @@ func main() {
 	}
 
 	cfgStream := jetstream.StreamConfig{
-		Name:      "DOMAIN_EVENTS",
-		Retention: jetstream.WorkQueuePolicy, // Не ебу что делает но еще есть 2 штуки, эта вроде недолго хранит в памяти msg,
+		Name:      "DOMAIN_EVENTS1",
+		Retention: jetstream.LimitsPolicy, // Не ебу что делает но еще есть 2 штуки, эта вроде недолго хранит в памяти msg,
+		Storage:   jetstream.FileStorage,
 		// или до первого потребителя что ли
 		Subjects: []string{"events.>"},
 	}
@@ -51,11 +64,13 @@ func main() {
 		logrus.Fatalf("Что т не так при создании потока %v", err)
 	}
 
+	// st.
+
 	eventUuid, _ := uuid.NewV7()
 
 	event := events.ResumeCreated{
 		ResumeId:    values.NewResumeId(eventUuid.String()),
-		FirstName:   values.FirstName{FirstName: "zombi"},
+		FirstName:   values.FirstName{FirstName: "vitas"},
 		MiddleName:  values.MiddleName{MiddleName: "fucking"},
 		LastName:    values.LastName{LastName: "nigger"},
 		PhoneNumber: values.PhoneNumber{PhoneNumber: "79985342810"},
@@ -74,46 +89,67 @@ func main() {
 		CreatedAt:     time.Now(),
 	}
 
-	eventBytes, err := json.Marshal(event)
-	logrus.Printf("При отправке байтики: %v\n", eventBytes)
+	logrus.Println("")
+
+	resume := resume.NewResume()
+	resume.Raise(event)
+
+	md := infrastructure.CommandMetadata{}
+
+	err = aggregateStore.Save(resume, md)
 
 	if err != nil {
-		logrus.Fatalf("АНЛАК при кодировании ивента в json: %v", err)
+		logrus.Debugf("Failed to save aggregate: %v", err)
+		return
 	}
+	// if err != nil {
+	// 	logrus.Fatalf("АНЛАК при кодировании ивента в json: %v", err)
+	// }
 
-	consCfg := jetstream.ConsumerConfig{
-		Durable:   "domain_event_consumer",
-		AckPolicy: jetstream.AckExplicitPolicy,
-	}
+	// consCfg := jetstream.ConsumerConfig{
+	// 	Durable:   "domain_event_consumer",
+	// 	AckPolicy: jetstream.AckExplicitPolicy,
+	// }
 
-	consumer, err := js.CreateOrUpdateConsumer(ctx, "DOMAIN_EVENTS", consCfg)
-	if err != nil {
-		logrus.Fatalf("Ошибка при создании/обновлении потребителя: %v", err)
-	}
+	// consumer, err := js.CreateOrUpdateConsumer(ctx, "DOMAIN_EVENTS1", consCfg)
+	// if err != nil {
+	// 	logrus.Fatalf("Ошибка при создании/обновлении потребителя: %v", err)
+	// }
 
-	js.PublishAsync("events1.123133214", eventBytes)
+	// js.PublishAsync("events.1", eventBytes, jetstream.WithExpectLastSequence(0))
+	// js.PublishAsync("events.2", eventBytes, jetstream.WithExpectLastSequence(0))
+	// js.PublishAsync("events.3", eventBytes)
 
-	msgs, err := consumer.Fetch(10)
-	if err != nil {
-		logrus.Println("FUCK")
-	}
-	for msg := range msgs.Messages() {
-		logrus.Debugf("Блядство, а это ивент: %v", msg.Data())
+	// msgs, err := consumer.Fetch(10)
+	// if err != nil {
+	// 	logrus.Println("FUCK")
+	// }
 
-		logrus.Debugf("Res: %v", compare(eventBytes, msg.Data()))
+	// for msg := range msgs.Messages() {
+	// 	// logrus.Debugf("Блядство, а это ивент: %v", msg.Data())
 
-		event := events.ResumeCreated{}
-		if err := json.Unmarshal(msg.Data(), &event); err != nil {
-			logrus.Debugf("Ошибочка при десере: %v", err)
-		}
+	// 	// logrus.Debugf("Res: %v", compare(eventBytes, msg.Data()))
 
-		log.Println("CYKA", event)
+	// 	md, err := msg.Metadata()
+	// 	if err != nil {
+	// 		logrus.Debugf("FUCK: %v", err)
+	// 	}
 
-		err := msg.Ack()
-		if err != nil {
-			logrus.Printf("Failed to ack message: %v", err)
-		}
-	}
+	// 	logrus.Debugf("Stream seq: %d, seq: %d, subj: %s", md.Sequence.Stream, md.Sequence.Consumer, msg.Subject())
+
+	// 	event := events.ResumeCreated{}
+	// 	if err := json.Unmarshal(msg.Data(), &event); err != nil {
+	// 		logrus.Debugf("Ошибочка при десере: %v", err)
+	// 		return
+	// 	}
+
+	// 	log.Println("CYKA", event)
+
+	// 	err = msg.Ack()
+	// 	if err != nil {
+	// 		logrus.Printf("Failed to ack message: %v", err)
+	// 	}
+	// }
 }
 
 func compare(arr1 []byte, arr2 []byte) bool {
@@ -128,6 +164,11 @@ func compare(arr1 []byte, arr2 []byte) bool {
 	}
 
 	return true
+}
+
+func createStreamIfDoesNotExist(ctx nats.JetStreamContext, streamName string, cfg jetstream.StreamConfig) error {
+	// ctx.AddStream(&nats.Stream,)
+	return nil
 }
 
 // type EsEventStore struct {

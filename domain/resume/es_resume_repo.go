@@ -3,19 +3,20 @@ package resume
 import (
 	"SebStudy/domain/resume/values"
 	"SebStudy/infrastructure"
+	"SebStudy/infrastructure/eventsourcing"
 )
 
-type EsResumeRepo struct {
-	aggregateStore infrastructure.AggregateStore
+type EsResumeRepository struct {
+	aggregateStore eventsourcing.AggregateStore
 }
 
-func NewEsResumeRepo(aggregateStore infrastructure.AggregateStore) *EsResumeRepo {
-	return &EsResumeRepo{
+func NewEsResumeRepository(aggregateStore eventsourcing.AggregateStore) *EsResumeRepository {
+	return &EsResumeRepository{
 		aggregateStore: aggregateStore,
 	}
 }
 
-func (es *EsResumeRepo) Get(resumeId *values.ResumeId) (*Resume, error) {
+func (es *EsResumeRepository) Get(resumeId *values.ResumeId) (*Resume, error) {
 	resume := NewResume()
 	err := es.aggregateStore.Load(resumeId.Value, resume)
 
@@ -26,6 +27,6 @@ func (es *EsResumeRepo) Get(resumeId *values.ResumeId) (*Resume, error) {
 	return resume, nil
 }
 
-func (es *EsResumeRepo) Save(resume *Resume, m infrastructure.CommandMetadata) error {
+func (es *EsResumeRepository) Save(resume *Resume, m infrastructure.CommandMetadata) error {
 	return es.aggregateStore.Save(resume, m)
 }
