@@ -2,16 +2,19 @@ package eventsourcing
 
 import (
 	"SebStudy/infrastructure"
+	"SebStudy/logger"
 )
 
 type EsAggregateStore struct {
 	AggregateStore
 
+	log   logger.Logger
 	store EventStore
 }
 
-func NewEsAggregateStore(eventStore EventStore) *EsAggregateStore {
+func NewEsAggregateStore(log logger.Logger, eventStore EventStore) *EsAggregateStore {
 	return &EsAggregateStore{
+		log:   log,
 		store: eventStore,
 	}
 }
@@ -19,6 +22,7 @@ func NewEsAggregateStore(eventStore EventStore) *EsAggregateStore {
 func (s *EsAggregateStore) Save(a AggregateRoot, m infrastructure.CommandMetadata) error {
 	changes := a.GetChanges()
 	streamName := GetStreamName(a)
+
 	err := s.store.AppendEvents(streamName, a.GetVersion(), m, changes)
 	if err != nil {
 		return err

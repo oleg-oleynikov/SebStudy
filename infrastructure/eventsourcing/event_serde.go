@@ -8,6 +8,6 @@ import (
 )
 
 type EventSerde interface {
-	Serialize(event interface{}, md *infrastructure.EventMetadata) (*nats.Msg, error)
-	Deserialize(data jetstream.Msg) (interface{}, *infrastructure.CommandMetadata, error)
+	Serialize(streamName string, event interface{}, md *infrastructure.EventMetadata) (*nats.Msg, error)
+	Deserialize(data jetstream.Msg) (interface{}, *infrastructure.EventMetadata, error)
 }

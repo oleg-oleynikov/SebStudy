@@ -50,7 +50,7 @@ func NewEsEventStore(log logger.Logger, eventBus infrastructure.EventBus, eventS
 		}
 		resumeCreated.Photo.SetUrl(imageUrl)
 		// eventEnvelope := infrastructure.NewEventEnvelope(event.Event, event.Metadata)
-		data, err := eventSerde.Serialize(event, nil)
+		data, err := eventSerde.Serialize("", event, nil)
 		if err != nil {
 			imageStore.DeleteImageByPath(imageUrl)
 			return
@@ -80,7 +80,7 @@ func (es *EsEventStore) AppendEvents(events []interface{}, m infrastructure.Comm
 
 	var msgs []*nats.Msg
 	for _, i := range events {
-		serializedEvent, err := es.eventSerde.Serialize(i, nil) // TODO: Доделать EventMetadata
+		serializedEvent, err := es.eventSerde.Serialize("", i, nil) // TODO: Доделать EventMetadata
 		if err != nil {
 			return err
 		}

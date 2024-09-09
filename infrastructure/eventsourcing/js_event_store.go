@@ -22,14 +22,25 @@ type JetStreamEventStore struct {
 	prefix string
 }
 
-func NewJetStreamEventStore(log logger.Logger, nc *nats.Conn, serde EventSerde, prefix string) *JetStreamEventStore {
+func NewJetStreamEventStore(appLogger logger.Logger, nc *nats.Conn, serde EventSerde, prefix string) *JetStreamEventStore {
 	js, err := jetstream.New(nc)
 	if err != nil {
-		log.Fatalf("failed to get nats jetstream: %v", err)
+		appLogger.Fatalf("failed to get nats jetstream: %v", err)
+		return nil
+	}
+
+	if js == nil {
+		appLogger.Fatalf("JetStream is nil")
+		return nil
+	}
+
+	if serde == nil {
+		appLogger.Fatalf("Serde is nil")
 		return nil
 	}
 
 	return &JetStreamEventStore{
+		log:    appLogger,
 		nc:     nc,
 		js:     js,
 		serde:  serde,
@@ -107,7 +118,6 @@ func (es *JetStreamEventStore) loadEvents(streamName string, cfg jetstream.Consu
 }
 
 func (es *JetStreamEventStore) AppendEvents(streamName string, version int, m infrastructure.CommandMetadata, events ...interface{}) error {
-
 	options := jetstream.StreamConfig{
 		Name:      streamName,
 		Retention: jetstream.LimitsPolicy,
@@ -134,7 +144,7 @@ func (es *JetStreamEventStore) appendEvents(streamName string, o jetstream.Strea
 
 	var msgs []*nats.Msg
 	for _, i := range events {
-		msg, err := es.serde.Serialize(i, infrastructure.NewEventMetadataFrom(m))
+		msg, err := es.serde.Serialize(streamName, i, infrastructure.NewEventMetadataFrom(m))
 		if err != nil {
 			return err
 		}
@@ -143,11 +153,7 @@ func (es *JetStreamEventStore) appendEvents(streamName string, o jetstream.Strea
 	}
 
 	for _, msg := range msgs {
-		_, err := es.js.PublishMsgAsync(msg)
-		if err != nil {
-			es.log.Debugf("Error by publish msg: %v", err)
-			return err
-		}
+		es.log.Debugf("Subj publishing msg: %s", msg.Subject)
 	}
 
 	return nil

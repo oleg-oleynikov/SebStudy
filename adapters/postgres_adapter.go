@@ -1,4 +1,4 @@
-package secondary
+package adapters
 
 import "fmt"
 

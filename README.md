@@ -1,4 +1,4 @@
-# SebStudy
+# SebStudy_resume_microservice
 
 # Quickstart
 1. docker-compose build

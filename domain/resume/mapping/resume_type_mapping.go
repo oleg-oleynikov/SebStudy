@@ -1,14 +1,12 @@
 package mapping
 
 import (
-	"SebStudy/adapters/util"
+	"SebStudy/util"
 )
 
-func RegisterResumeTypes(m *util.CloudeventMapper) {
-
+func RegisterResumeTypes(m *util.CloudEventCommandAdapter) {
 	m.MapCommand(
 		"resume.create",
 		toCreateResume,
 	)
-
 }
