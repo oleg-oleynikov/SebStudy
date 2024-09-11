@@ -3,25 +3,30 @@ package resume
 import (
 	"SebStudy/domain/resume/values"
 	"SebStudy/infrastructure"
+	"SebStudy/infrastructure/eventsourcing"
 )
 
-type EventStoreResumeRepo struct {
-	eventStore infrastructure.EventStore
+type EsResumeRepository struct {
+	aggregateStore eventsourcing.AggregateStore
 }
 
-func NewEventStoreResumeRepo(eventStore infrastructure.EventStore) *EventStoreResumeRepo {
-	return &EventStoreResumeRepo{
-		eventStore: eventStore,
+func NewEsResumeRepository(aggregateStore eventsourcing.AggregateStore) *EsResumeRepository {
+	return &EsResumeRepository{
+		aggregateStore: aggregateStore,
 	}
 }
 
-func (es *EventStoreResumeRepo) Get(resumeId *values.ResumeId) (*Resume, error) {
-	events, err := es.eventStore.LoadEvents(resumeId.Value)
+func (es *EsResumeRepository) Get(resumeId *values.ResumeId) (*Resume, error) {
+	resume := NewResume()
+	err := es.aggregateStore.Load(resumeId.Value, resume)
+
 	if err != nil {
 		return nil, err
 	}
-	resume := NewResume()
-	resume.Load(events)
 
 	return resume, nil
+}
+
+func (es *EsResumeRepository) Save(resume *Resume, m infrastructure.CommandMetadata) error {
+	return es.aggregateStore.Save(resume, m)
 }

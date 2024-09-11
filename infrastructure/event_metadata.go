@@ -1,34 +1,35 @@
 package infrastructure
 
-import v1 "open-cluster-management.io/sdk-go/pkg/cloudevents/generic/options/grpc/protobuf/v1"
-
-type DomainEvent interface {
-}
-
 type EventMetadata struct {
-	EventId   string
-	EventType string
-	// Version   int
+	AggregateId string
+	UserId      string
+	// AddOptions  map[string]string
 }
 
-func NewEventMetadata(eventId, eventType string) *EventMetadata {
+func NewEventMetadata(aggregateId string) *EventMetadata {
 	return &EventMetadata{
-		EventId:   eventId,
-		EventType: eventType,
+		AggregateId: aggregateId,
+		// AddOptions:  make(map[string]string),
 	}
 }
 
-// func (em *EventMetadata) SetVersion(version int) {
-// 	em.Version = version
+// func (md *EventMetadata) AddOption(key string, value string) {
+// if _, ex := md.AddOptions[key]; ex {
+// 	return
 // }
 
-func NewEventMetadataFromCloudEvent(c *v1.CloudEvent) *EventMetadata {
-	return &EventMetadata{
-		EventId:   c.Id,
-		EventType: c.Type,
-	}
-}
+// md.AddOptions[key] = value
+// }
 
 func NewEventMetadataFrom(m CommandMetadata) *EventMetadata {
-	return nil
+	md := &EventMetadata{
+		// AggregateId: m.AggregateId,
+	}
+
+	if m.UserId != "" {
+		// md.AddOption("user", m.UserId)
+		md.UserId = m.UserId
+	}
+
+	return md
 }

@@ -1,18 +1,14 @@
 package mapping
 
 import (
-	"SebStudy/adapters/util"
 	"SebStudy/domain/resume/commands"
 	"SebStudy/domain/resume/values"
 	"SebStudy/infrastructure"
+	"SebStudy/pb"
 	"context"
-
-	pb "SebStudy/proto/resume"
-
-	v1 "open-cluster-management.io/sdk-go/pkg/cloudevents/generic/options/grpc/protobuf/v1"
 )
 
-var toCreateResumeCommand util.CloudeventToEvent = func(_ context.Context, c *v1.CloudEvent) (interface{}, error) {
+func toCreateResume(_ context.Context, c *pb.CloudEvent) (interface{}, error) {
 
 	rs := pb.ResumeCreated{}
 
@@ -67,15 +63,18 @@ var toCreateResumeCommand util.CloudeventToEvent = func(_ context.Context, c *v1
 		return nil, err
 	}
 
-	var directions values.Directions
-	for i := 0; i < len(rs.Directions); i++ {
-		data := rs.Directions[i]
-		direction, err := values.NewDirection(data.Direction)
-		if err != nil {
-			return nil, err
-		}
-		directions.AppendDirection(*direction)
+	direction, err := values.NewDirection(rs.GetDirection())
+	if err != nil {
+		return nil, err
 	}
+	// for i := 0; i < len(rs.Directions); i++ {
+	// 	data := rs.Directions[i]
+	// 	direction, err := values.NewDirection(data.Direction)
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+	// 	directions.AppendDirection(*direction)
+	// }
 
 	aboutProjects, err := values.NewAboutProjects(rs.GetAboutProjects())
 	if err != nil {
@@ -87,15 +86,10 @@ var toCreateResumeCommand util.CloudeventToEvent = func(_ context.Context, c *v1
 		return nil, err
 	}
 
-	studentGroup, err := values.NewStudentGroup(rs.GetStudentGroup())
-	if err != nil {
-		return nil, err
-	}
-
 	createdResume := commands.NewCreateResume(
 		resumeID, *firstName, *middleName, *lastName, *phoneNumber,
-		education, *aboutMe, skills, *photo, directions,
-		*aboutProjects, *portfolio, *studentGroup)
+		education, *aboutMe, skills, *photo, *direction,
+		*aboutProjects, *portfolio)
 
 	return createdResume, nil
 }

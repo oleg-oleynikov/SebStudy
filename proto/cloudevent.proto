@@ -4,13 +4,16 @@
 
 syntax = "proto3";
 
-package io.cloudevents.v1;
+package cloudevents;
 
-option go_package = "open-cluster-management.io/sdk-go/cloudevents/generic/options/grpc/protobuf/v1";
+option go_package = "./pb";
 
 import "google/protobuf/empty.proto";
 import "google/protobuf/any.proto";
 import "google/protobuf/timestamp.proto";
+
+// import "google/api/annotations.proto";
+// import "google/api/http.proto";
 
 // CloudEvent is copied from
 // https://github.com/cloudevents/spec/blob/main/cloudevents/formats/protobuf-format.md.
@@ -76,6 +79,11 @@ message SubscriptionRequest {
 }
 
 service CloudEventService {
-  rpc Publish(PublishRequest) returns (google.protobuf.Empty) {}
+  rpc Publish(PublishRequest) returns (google.protobuf.Empty) {
+    // option (google.api.http) = {
+    //   post : "/v1/events:publish"
+    //   body : "*"
+    // };
+  }
   rpc Subscribe(SubscriptionRequest) returns (stream CloudEvent) {}
 }

@@ -1,15 +1,16 @@
 package infrastructure
 
-import (
-	v1 "open-cluster-management.io/sdk-go/pkg/cloudevents/generic/options/grpc/protobuf/v1"
-)
-
 type CommandMetadata struct {
-	CloudEvent *v1.CloudEvent
+	AggregateId string
+	UserId      string
 }
 
-func NewCommandMetadataFromCloudEvent(cloudEvent *v1.CloudEvent) CommandMetadata {
+func NewCommandMetadata(AggregateId string) CommandMetadata {
 	return CommandMetadata{
-		CloudEvent: cloudEvent,
+		AggregateId: AggregateId,
 	}
+}
+
+func (md *CommandMetadata) SetUser(userId string) {
+	md.UserId = userId
 }

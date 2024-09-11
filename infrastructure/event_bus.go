@@ -18,17 +18,13 @@ type EventBusNats struct {
 	mu          sync.Mutex
 }
 
-func NewEventBusNats(natsURL string) (*EventBusNats, error) {
-	nc, err := nats.Connect(natsURL)
-	c, _ := nats.NewEncodedConn(nc, nats.JSON_ENCODER)
-	if err != nil {
-		return nil, err
-	}
+func NewEventBusNats(natsConn *nats.Conn) *EventBusNats {
+	c, _ := nats.NewEncodedConn(natsConn, nats.JSON_ENCODER)
 
 	return &EventBusNats{
 		nc:          c,
 		subscribers: make(map[string]*nats.Subscription),
-	}, nil
+	}
 }
 
 func (eb *EventBusNats) Subscribe(topic string, cb nats.Handler) error {
