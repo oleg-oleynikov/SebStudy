@@ -8,6 +8,7 @@ import (
 	"SebStudy/infrastructure"
 	"SebStudy/infrastructure/eventsourcing"
 	"SebStudy/logger"
+	"fmt"
 
 	// "log"
 
@@ -19,6 +20,15 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+func GenerateUuidWithoutDashes() string {
+	u, _ := uuid.NewV7()
+	bytes, _ := u.MarshalBinary()
+
+	uuidString := fmt.Sprintf("%x", bytes)
+
+	return uuidString
+}
+
 func main() {
 	cfg := config.InitConfig()
 	appLogger := logger.NewAppLogger(cfg.Logger)
@@ -26,7 +36,10 @@ func main() {
 
 	nc, err := nats.Connect(nats.DefaultURL)
 
-	serde := infrastructure.NewEsEventSerde()
+	typeMapper := eventsourcing.NewTypeMapper()
+	resume.RegisterResumeMappingTypes(typeMapper)
+
+	serde := eventsourcing.NewEsEventSerde(appLogger, typeMapper)
 	eventStore := eventsourcing.NewJetStreamEventStore(appLogger, nc, serde, "sebstudy")
 
 	aggregateStore := eventsourcing.NewEsAggregateStore(appLogger, eventStore)
@@ -36,13 +49,13 @@ func main() {
 	}
 
 	if nc == nil || !nc.IsConnected() {
-		appLogger.Fatalf("Fucking fuck")
+		appLogger.Fatalf("nats is disconected")
 	}
 
-	eventUuid, _ := uuid.NewV7()
+	resumeUuid := GenerateUuidWithoutDashes()
 
 	event := events.ResumeCreated{
-		ResumeId:    values.NewResumeId(eventUuid.String()),
+		ResumeId:    values.NewResumeId(resumeUuid),
 		FirstName:   values.FirstName{FirstName: "vitas"},
 		MiddleName:  values.MiddleName{MiddleName: "fucking"},
 		LastName:    values.LastName{LastName: "nigger"},
@@ -52,23 +65,31 @@ func main() {
 		Skills: values.Skills{
 			Skills: []values.Skill{
 				{Skill: "suck dick"},
+				{Skill: "work"},
 			},
 		},
 		Photo:         values.Photo{Url: "", Photo: []byte{0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0}},
-		Directions:    values.Directions{},
+		Direction:     values.Direction{},
 		AboutProjects: values.AboutProjects{AboutProjects: "about projects"},
 		Portfolio:     values.Portfolio{Portfolio: "portfolio"},
-		StudentGroup:  values.StudentGroup{StudentGroup: "IS-32"},
 		CreatedAt:     time.Now(),
 	}
 
-	resume := resume.NewResume()
-	resume.Raise(event)
+	resume1 := resume.NewResume()
+	resume1.Raise(event)
 
 	md := infrastructure.CommandMetadata{AggregateId: "1234"}
 
-	if err := aggregateStore.Save(resume, md); err != nil {
+	if err := aggregateStore.Save(resume1, md); err != nil {
 		logrus.Debugf("Failed to save aggregate: %v", err)
 		return
 	}
+
+	loadingResume := resume.NewResume()
+	if err := aggregateStore.Load(resume1.GetId(), loadingResume); err != nil {
+		appLogger.Fatalf("ОШИБКА ПРИ ЗАГРУЗКЕ АГРЕГАТА: %v", err)
+	}
+
+	appLogger.Debugf("After loading aggregate: %v", loadingResume)
+
 }

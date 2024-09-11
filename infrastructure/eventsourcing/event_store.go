@@ -22,12 +22,12 @@ type EventStore interface {
 type EsEventStore struct {
 	log        logger.Logger
 	eventBus   infrastructure.EventBus
-	eventSerde *infrastructure.EsEventSerde
+	eventSerde *EsEventSerde
 	writeRepo  db_ports.WriteModel
 	imageStore *infrastructure.ImageStore
 }
 
-func NewEsEventStore(log logger.Logger, eventBus infrastructure.EventBus, eventSerde *infrastructure.EsEventSerde, writeRepo db_ports.WriteModel, imageStore *infrastructure.ImageStore) *EsEventStore {
+func NewEsEventStore(log logger.Logger, eventBus infrastructure.EventBus, eventSerde *EsEventSerde, writeRepo db_ports.WriteModel, imageStore *infrastructure.ImageStore) *EsEventStore {
 	es := &EsEventStore{
 		log:        log,
 		eventBus:   eventBus,

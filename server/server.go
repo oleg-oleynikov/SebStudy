@@ -46,7 +46,10 @@ func (s *server) Run() error {
 	setupCloudeventMapper(cloudeventMapper)
 	s.cmdAdapter = cloudeventMapper
 
-	eventSerde := infrastructure.NewEsEventSerde()
+	typeMapper := eventsourcing.NewTypeMapper()
+	resume.RegisterResumeMappingTypes(typeMapper)
+
+	eventSerde := eventsourcing.NewEsEventSerde(s.log, typeMapper)
 	jetstreamEventStore := eventsourcing.NewJetStreamEventStore(s.log, s.nc, eventSerde, "sebstudy")
 	aggregateStore := eventsourcing.NewEsAggregateStore(s.log, jetstreamEventStore)
 
@@ -72,7 +75,7 @@ func (s *server) Run() error {
 }
 
 func setupCloudeventMapper(cloudeventMapper *util.CloudEventCommandAdapter) {
-	mapping.RegisterResumeTypes(cloudeventMapper)
+	mapping.RegisterCloudeventResumeTypes(cloudeventMapper)
 }
 
 func registerCommandHandlers(cmdHandlers ...infrastructure.CommandHandlerModule) infrastructure.CommandHandlerMap {

@@ -38,7 +38,7 @@ func (m *CloudEventCommandAdapter) GetEventToCloudevent(eventType reflect.Type) 
 	return mapper, nil
 }
 
-func (m *CloudEventCommandAdapter) MapCommand(cloudeventType string, toEvent CloudeventToEvent) error {
+func (m *CloudEventCommandAdapter) MapCloudevent(cloudeventType string, toEvent CloudeventToEvent) error {
 	if cloudeventType == "" {
 		return fmt.Errorf("need ceType")
 	}

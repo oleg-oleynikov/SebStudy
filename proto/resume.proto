@@ -14,10 +14,6 @@ message Skill {
     string skill = 1;
 }
 
-message Direction {
-    string direction = 1;
-}
-
 // message Resume {
 //     uint64 resumeId = 1;
 //     string firstName = 2;
@@ -44,7 +40,7 @@ message ResumeCreated {
     string aboutMe = 7;
     repeated Skill skills = 8;
     bytes photo = 9;
-    repeated Direction directions = 10;
+    string direction = 10;
     string aboutProjects = 11;
     string portfolio = 12;
     string studentGroup = 13;

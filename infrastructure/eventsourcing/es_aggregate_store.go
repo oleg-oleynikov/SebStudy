@@ -23,16 +23,17 @@ func (s *EsAggregateStore) Save(a AggregateRoot, m infrastructure.CommandMetadat
 	changes := a.GetChanges()
 	streamName := GetStreamName(a)
 
-	err := s.store.AppendEvents(streamName, a.GetVersion(), m, changes)
+	err := s.store.AppendEvents(streamName, a.GetVersion(), m, changes...)
 	if err != nil {
 		return err
 	}
+
 	a.ClearChanges()
 	return nil
 }
 
-func (s *EsAggregateStore) Load(id string, a AggregateRoot) error {
-	streamName := GetStreamName(a)
+func (s *EsAggregateStore) Load(aggregateId string, a AggregateRoot) error {
+	streamName := GetStreamNameWithId(a, aggregateId)
 
 	events, err := s.store.LoadEvents(streamName)
 	if err != nil {

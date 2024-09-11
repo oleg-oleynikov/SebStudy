@@ -15,10 +15,9 @@ type ResumeCreated struct {
 	AboutMe       values.AboutMe
 	Skills        values.Skills
 	Photo         values.Photo
-	Directions    values.Directions
+	Direction     values.Direction
 	AboutProjects values.AboutProjects
 	Portfolio     values.Portfolio
-	StudentGroup  values.StudentGroup
 	CreatedAt     time.Time
 }
 
@@ -32,10 +31,9 @@ func NewResumeCreated(
 	AboutMe values.AboutMe,
 	Skills values.Skills,
 	Photo values.Photo,
-	Directions values.Directions,
+	Direction values.Direction,
 	AboutProjects values.AboutProjects,
 	Portfolio values.Portfolio,
-	StudentGroup values.StudentGroup,
 	CreatedAt time.Time,
 ) ResumeCreated {
 	return ResumeCreated{
@@ -48,10 +46,9 @@ func NewResumeCreated(
 		AboutMe:       AboutMe,
 		Skills:        Skills,
 		Photo:         Photo,
-		Directions:    Directions,
+		Direction:     Direction,
 		AboutProjects: AboutProjects,
 		Portfolio:     Portfolio,
-		StudentGroup:  StudentGroup,
 		CreatedAt:     CreatedAt,
 	}
 }

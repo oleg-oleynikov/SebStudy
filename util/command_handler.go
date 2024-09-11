@@ -26,7 +26,7 @@ func NewCommandHandler(cmdDispatcher ports.CommandDispatcher, cmdAdapter *CloudE
 }
 
 func (ch *CommandHandler) HandleCommand(ctx context.Context, event *pb.CloudEvent) error {
-	mapper, err := ch.cmdAdapter.GetCloudeventToEvent(event.Type)
+	mapper, err := ch.cmdAdapter.GetCloudeventToEvent(event.GetProtoData().GetTypeUrl())
 	if err != nil {
 		ch.log.Debugf("unknown event type: %v", err)
 		return status.Errorf(codes.InvalidArgument, "unknown event type")

@@ -2,8 +2,6 @@ package eventsourcing
 
 import (
 	"reflect"
-
-	"github.com/google/uuid"
 )
 
 type AggregateRoot interface {
@@ -24,9 +22,7 @@ type AggregateRootBase struct {
 }
 
 func NewAggregateRootBase() AggregateRootBase {
-	uuid, _ := uuid.NewV7()
 	return AggregateRootBase{
-		Id:       uuid.String(),
 		version:  -1,
 		changes:  make([]interface{}, 0),
 		handlers: make(map[reflect.Type]func(interface{}), 0),
@@ -46,7 +42,7 @@ func GetStreamName(a AggregateRoot) string {
 }
 
 func GetStreamNameWithId(a AggregateRoot, id string) string {
-	return getValueType(a).String() + "-" + id
+	return getValueType(a).Name() + "_" + id
 }
 
 func (a *AggregateRootBase) Register(event interface{}, handler func(interface{})) {

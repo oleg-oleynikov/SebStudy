@@ -9,7 +9,6 @@ import (
 
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
-	"github.com/sirupsen/logrus"
 )
 
 type JetStreamEventStore struct {
@@ -49,14 +48,14 @@ func NewJetStreamEventStore(appLogger logger.Logger, nc *nats.Conn, serde EventS
 }
 
 func (es *JetStreamEventStore) GetFullStreamName(streamName string) string {
-	return es.prefix + "." + streamName
+	return fmt.Sprintf("%s_%s", es.prefix, streamName)
 }
 
 func (es *JetStreamEventStore) LoadEvents(streamName string) ([]interface{}, error) {
 	cfg := jetstream.ConsumerConfig{
-		Name:          "consumer." + streamName,
 		DeliverPolicy: jetstream.DeliverAllPolicy,
 		AckPolicy:     jetstream.AckNonePolicy,
+		Durable:       fmt.Sprintf("%s_consumer_%s", es.prefix, streamName),
 	}
 
 	return es.loadEvents(streamName, cfg)
@@ -64,16 +63,21 @@ func (es *JetStreamEventStore) LoadEvents(streamName string) ([]interface{}, err
 
 func (es *JetStreamEventStore) loadEvents(streamName string, cfg jetstream.ConsumerConfig) ([]interface{}, error) {
 
-	streamInfo, err := es.js.Stream(context.Background(), es.GetFullStreamName(streamName))
+	stream, err := es.js.Stream(context.Background(), es.GetFullStreamName(streamName))
 	if err != nil {
 		return nil, fmt.Errorf("failed to get stream info: %w", err)
 	}
 
-	totalMes := int(streamInfo.CachedInfo().State.Msgs)
-	logrus.Debugf("Ивентов в потоке %v", totalMes)
+	streamInfo, err := stream.Info(context.TODO())
+	if err != nil {
+		return nil, err
+	}
+
+	totalMes := int(streamInfo.State.Msgs)
 
 	cons, err := es.js.CreateOrUpdateConsumer(context.Background(), es.GetFullStreamName(streamName), cfg)
 	if err != nil {
+		es.log.Debugf("Failed to create or update consumer: %v", err)
 		return nil, err
 	}
 
@@ -93,7 +97,7 @@ func (es *JetStreamEventStore) loadEvents(streamName string, cfg jetstream.Consu
 		}
 
 		for msg := range batch.Messages() {
-			logrus.Printf("Пока так: %v", msg) // Исправить
+			es.log.Printf("Пока так: %v", msg)
 
 			event, _, err := es.serde.Deserialize(msg)
 			if err != nil {
@@ -106,24 +110,25 @@ func (es *JetStreamEventStore) loadEvents(streamName string, cfg jetstream.Consu
 		}
 
 		if err := batch.Error(); err != nil {
-			logrus.Infof("Ошибка при батче: %v", err) // Исправить
-
-			return nil, fmt.Errorf("batch fetch error: %w", err) // Исправить
+			es.log.Debugf("Ошибка при батче: %v", err)
+			return nil, fmt.Errorf("batch fetch error: %w", err)
 		}
 	}
-
-	logrus.Printf("В итоге на выходе из event store: %v", events) //Если заработает то заменить на logger
 
 	return events, nil
 }
 
 func (es *JetStreamEventStore) AppendEvents(streamName string, version int, m infrastructure.CommandMetadata, events ...interface{}) error {
 	options := jetstream.StreamConfig{
-		Name:      streamName,
+		Name:      es.GetFullStreamName(streamName),
 		Retention: jetstream.LimitsPolicy,
 		Storage:   jetstream.FileStorage,
-		Subjects:  []string{es.GetFullStreamName(fmt.Sprintf("%s.>", streamName))},
+		Subjects:  []string{fmt.Sprintf("%s.>", es.GetFullStreamName(streamName))},
 	}
+
+	es.log.Debugf(fmt.Sprintf("%s.>", es.GetFullStreamName(streamName)))
+
+	es.log.Debugf("В APPEND EVENTS: %s.>", es.GetFullStreamName(streamName))
 
 	if events == nil {
 		return nil
@@ -133,19 +138,24 @@ func (es *JetStreamEventStore) AppendEvents(streamName string, version int, m in
 		events = events[version:]
 	}
 
-	es.log.Debugf("Events which will be published: \n%v", events)
-
-	return es.appendEvents(streamName, options, m, events)
+	return es.appendEvents(streamName, options, m, events...)
 }
 
 func (es *JetStreamEventStore) appendEvents(streamName string, o jetstream.StreamConfig, m infrastructure.CommandMetadata, events ...interface{}) error {
 
-	es.js.UpdateStream(context.Background(), o)
+	_, err := es.js.CreateOrUpdateStream(context.Background(), o)
+	if err != nil {
+		es.log.Debugf("Failed to create or update stream: %v", err)
+	}
+
+	es.log.Debugf("NAME STREAM : %s", o.Name) // DEBUGGGG
 
 	var msgs []*nats.Msg
 	for _, i := range events {
 		msg, err := es.serde.Serialize(streamName, i, infrastructure.NewEventMetadataFrom(m))
+		msg.Subject = es.prefix + "_" + msg.Subject
 		if err != nil {
+			es.log.Debugf("Failed to serialize to nats msg: %v", err)
 			return err
 		}
 
@@ -154,6 +164,10 @@ func (es *JetStreamEventStore) appendEvents(streamName string, o jetstream.Strea
 
 	for _, msg := range msgs {
 		es.log.Debugf("Subj publishing msg: %s", msg.Subject)
+		_, err := es.js.PublishMsgAsync(msg)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

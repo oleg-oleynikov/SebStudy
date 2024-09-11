@@ -6,7 +6,6 @@ import (
 	"SebStudy/infrastructure"
 	"SebStudy/pb"
 	"context"
-	// pb "SebStudy/proto/resume"
 )
 
 func toCreateResume(_ context.Context, c *pb.CloudEvent) (interface{}, error) {
@@ -64,15 +63,18 @@ func toCreateResume(_ context.Context, c *pb.CloudEvent) (interface{}, error) {
 		return nil, err
 	}
 
-	var directions values.Directions
-	for i := 0; i < len(rs.Directions); i++ {
-		data := rs.Directions[i]
-		direction, err := values.NewDirection(data.Direction)
-		if err != nil {
-			return nil, err
-		}
-		directions.AppendDirection(*direction)
+	direction, err := values.NewDirection(rs.GetDirection())
+	if err != nil {
+		return nil, err
 	}
+	// for i := 0; i < len(rs.Directions); i++ {
+	// 	data := rs.Directions[i]
+	// 	direction, err := values.NewDirection(data.Direction)
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+	// 	directions.AppendDirection(*direction)
+	// }
 
 	aboutProjects, err := values.NewAboutProjects(rs.GetAboutProjects())
 	if err != nil {
@@ -84,15 +86,10 @@ func toCreateResume(_ context.Context, c *pb.CloudEvent) (interface{}, error) {
 		return nil, err
 	}
 
-	studentGroup, err := values.NewStudentGroup(rs.GetStudentGroup())
-	if err != nil {
-		return nil, err
-	}
-
 	createdResume := commands.NewCreateResume(
 		resumeID, *firstName, *middleName, *lastName, *phoneNumber,
-		education, *aboutMe, skills, *photo, directions,
-		*aboutProjects, *portfolio, *studentGroup)
+		education, *aboutMe, skills, *photo, *direction,
+		*aboutProjects, *portfolio)
 
 	return createdResume, nil
 }

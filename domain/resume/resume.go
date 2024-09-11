@@ -19,10 +19,9 @@ type Resume struct {
 	aboutMe       values.AboutMe
 	skills        values.Skills
 	photo         values.Photo
-	directions    values.Directions
+	direction     values.Direction
 	aboutProjects values.AboutProjects
 	portfolio     values.Portfolio
-	studentGroup  values.StudentGroup
 }
 
 func NewResume() *Resume {
@@ -35,29 +34,12 @@ func NewResume() *Resume {
 	return r
 }
 
-// func (r *Resume) ToString() []string {
-// 	return []string{
-// 		r.Id, "\n",
-// 		r.firstName.ToString(), "\n",
-// 		r.middleName.ToString(), "\n",
-// 		r.lastName.ToString(), "\n",
-// 		r.phoneNumber.ToString(), "\n",
-// 		r.education.ToString(), "\n",
-// 		r.aboutMe.ToString(), "\n",
-// 		r.skills.ToString(), "\n",
-// 		r.photo.ToString(), "\n",
-// 		r.directions.ToString(), "\n",
-// 		r.aboutProjects.ToString(), "\n",
-// 		r.portfolio.ToString(), "\n",
-// 		r.studentGroup.ToString(), "\n",
-// 	}
-// }
-
 func (r *Resume) registerHandlers() {
 	r.Register(events.ResumeCreated{}, func(e interface{}) { r.ResumeCreated(e.(events.ResumeCreated)) })
 }
 
 func (r *Resume) ResumeCreated(e events.ResumeCreated) {
+	r.Id = e.ResumeId.Value
 	r.firstName = e.FirstName
 	r.middleName = e.MiddleName
 	r.lastName = e.LastName
@@ -66,13 +48,12 @@ func (r *Resume) ResumeCreated(e events.ResumeCreated) {
 	r.aboutMe = e.AboutMe
 	r.skills = e.Skills
 	r.photo = e.Photo
-	r.directions = e.Directions
+	r.direction = e.Direction
 	r.aboutProjects = e.AboutProjects
 	r.portfolio = e.Portfolio
-	r.studentGroup = e.StudentGroup
 }
 
 func (r *Resume) CreateResume(c *commands.CreateResume) error {
-	r.Raise(events.NewResumeCreated(c.ResumeId, c.FirstName, c.MiddleName, c.LastName, c.PhoneNumber, c.Education, c.AboutMe, c.Skills, c.Photo, c.Directions, c.AboutProjects, c.Portfolio, c.StudentGroup, time.Now()))
+	r.Raise(events.NewResumeCreated(c.ResumeId, c.FirstName, c.MiddleName, c.LastName, c.PhoneNumber, c.Education, c.AboutMe, c.Skills, c.Photo, c.Direction, c.AboutProjects, c.Portfolio, time.Now()))
 	return nil
 }
