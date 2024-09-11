@@ -1,7 +1,7 @@
 package server
 
 import (
-	"SebStudy/adapters"
+	"SebStudy/internal/infrastructure/adapters"
 	"SebStudy/pb"
 	"net"
 
