@@ -15,11 +15,11 @@ type CommandHandlerMap struct {
 	handlers map[reflect.Type]CommandHandle
 }
 
-func NewCommandHandlerMap() CommandHandlerMap {
+func NewCommandHandlerMap() *CommandHandlerMap {
 	c := CommandHandlerMap{}
 	c.handlers = make(map[reflect.Type]CommandHandle, 0)
 
-	return c
+	return &c
 }
 
 func (c *CommandHandlerMap) Get(t reflect.Type) (CommandHandle, error) {

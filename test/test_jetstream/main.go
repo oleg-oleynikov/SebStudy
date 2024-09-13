@@ -52,10 +52,10 @@ func main() {
 		appLogger.Fatalf("nats is disconected")
 	}
 
-	// resumeUuid := GenerateUuidWithoutDashes()
+	resumeUuid := GenerateUuidWithoutDashes()
 
 	event := events.ResumeCreated{
-		// ResumeId:    values.NewResumeId(resumeUuid),
+		ResumeId:    resumeUuid,
 		FirstName:   values.FirstName{FirstName: "vitas"},
 		MiddleName:  values.MiddleName{MiddleName: "fucking"},
 		LastName:    values.LastName{LastName: "nigger"},
@@ -68,8 +68,8 @@ func main() {
 				{Skill: "work"},
 			},
 		},
-		Photo:         values.Photo{Url: "", Photo: []byte{0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0}},
-		Direction:     values.Direction{},
+		Photo:         values.Photo{Url: "reereerre", Photo: []byte{0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0}},
+		Direction:     values.Direction{Direction: "xyita"},
 		AboutProjects: values.AboutProjects{AboutProjects: "about projects"},
 		Portfolio:     values.Portfolio{Portfolio: "portfolio"},
 		CreatedAt:     time.Now(),
@@ -78,7 +78,7 @@ func main() {
 	resume1 := resume.NewResume()
 	resume1.Raise(event)
 
-	md := infrastructure.CommandMetadata{AggregateId: "1234"}
+	md := infrastructure.CommandMetadata{AggregateId: resume1.Id}
 
 	if err := aggregateStore.Save(resume1, md); err != nil {
 		logrus.Debugf("Failed to save aggregate: %v", err)
@@ -86,8 +86,8 @@ func main() {
 	}
 
 	loadingResume := resume.NewResume()
-	if err := aggregateStore.Load(resume1.GetId(), loadingResume); err != nil {
-		appLogger.Fatalf("ОШИБКА ПРИ ЗАГРУЗКЕ АГРЕГАТА: %v", err)
+	if err := aggregateStore.Load("0191ea7277f976de937c79f2f018437b", loadingResume); err != nil {
+		appLogger.Fatalf("Хуита: %v", err)
 	}
 
 	appLogger.Debugf("After loading aggregate: %v", loadingResume)

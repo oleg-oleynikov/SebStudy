@@ -38,6 +38,22 @@ func NewJetStreamEventStore(appLogger logger.Logger, nc *nats.Conn, serde EventS
 		return nil
 	}
 
+	// mainStreamCfg := jetstream.StreamConfig{
+	// 	Name:      prefix,
+	// 	Subjects:  []string{prefix + ".>"},
+	// 	Retention: jetstream.LimitsPolicy,
+	// 	Storage:   jetstream.FileStorage,
+	// 	RePublish: &jetstream.RePublish{
+	// 		Source:      ">",
+	// 		Destination: "projection.>",
+	// 	},
+	// }
+
+	// _, err = js.CreateOrUpdateStream(context.Background(), mainStreamCfg)
+	// if err != nil {
+	// 	appLogger.Fatalf("Failed to create or update main stream: %v", err)
+	// }
+
 	return &JetStreamEventStore{
 		log:    appLogger,
 		nc:     nc,
@@ -51,11 +67,14 @@ func (es *JetStreamEventStore) GetFullStreamName(streamName string) string {
 	return fmt.Sprintf("%s_%s", es.prefix, streamName)
 }
 
+func (es *JetStreamEventStore) GetFullSubject(streamName string) string {
+	return fmt.Sprintf("%s.%s.>", es.prefix, streamName)
+}
+
 func (es *JetStreamEventStore) LoadEvents(streamName string) ([]interface{}, error) {
 	cfg := jetstream.ConsumerConfig{
 		DeliverPolicy: jetstream.DeliverAllPolicy,
 		AckPolicy:     jetstream.AckNonePolicy,
-		Durable:       fmt.Sprintf("%s_consumer_%s", es.prefix, streamName),
 	}
 
 	return es.loadEvents(streamName, cfg)
@@ -81,6 +100,13 @@ func (es *JetStreamEventStore) loadEvents(streamName string, cfg jetstream.Consu
 		return nil, err
 	}
 
+	defer func() {
+		err := es.js.DeleteConsumer(context.Background(), es.GetFullStreamName(streamName), cons.CachedInfo().Name)
+		if err != nil {
+			es.log.Debugf("Failed to delete ephemeral consumer: %v", err)
+		}
+	}()
+
 	batchSize := 100
 	var events []interface{}
 
@@ -97,8 +123,6 @@ func (es *JetStreamEventStore) loadEvents(streamName string, cfg jetstream.Consu
 		}
 
 		for msg := range batch.Messages() {
-			es.log.Printf("Пока так: %v", msg)
-
 			event, _, err := es.serde.Deserialize(msg)
 			if err != nil {
 				return nil, err
@@ -110,8 +134,8 @@ func (es *JetStreamEventStore) loadEvents(streamName string, cfg jetstream.Consu
 		}
 
 		if err := batch.Error(); err != nil {
-			es.log.Debugf("Ошибка при батче: %v", err)
-			return nil, fmt.Errorf("batch fetch error: %w", err)
+			es.log.Debugf("Batch fetch error: %v", err)
+			return nil, fmt.Errorf("batch fetch error: %v", err)
 		}
 	}
 
@@ -124,6 +148,10 @@ func (es *JetStreamEventStore) AppendEvents(streamName string, version int, m in
 		Retention: jetstream.LimitsPolicy,
 		Storage:   jetstream.FileStorage,
 		Subjects:  []string{fmt.Sprintf("%s.>", es.GetFullStreamName(streamName))},
+		// RePublish: &jetstream.RePublish{
+		// 	Source:      ">",
+		// 	Destination: "projection.>",
+		// },
 	}
 
 	if events == nil {
@@ -168,7 +196,7 @@ func (es *JetStreamEventStore) appendEvents(streamName string, o jetstream.Strea
 }
 
 func ackMsg(cfg jetstream.ConsumerConfig, msg jetstream.Msg) {
-	if cfg.AckPolicy != jetstream.AckNonePolicy {
+	if cfg.AckPolicy == jetstream.AckExplicitPolicy {
 		msg.Ack()
 	}
 }

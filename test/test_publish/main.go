@@ -1,6 +1,10 @@
 package main
 
 import (
+	"SebStudy/config"
+	"SebStudy/internal/domain/resume"
+	"SebStudy/internal/infrastructure/eventsourcing"
+	"SebStudy/logger"
 	"SebStudy/pb"
 	"context"
 	"encoding/base64"
@@ -9,6 +13,8 @@ import (
 	"log"
 	"sync"
 
+	"github.com/nats-io/nats.go"
+	"github.com/nats-io/nats.go/jetstream"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/types/known/anypb"
@@ -20,15 +26,19 @@ func main() {
 
 	resumeEvent := &pb.ResumeCreated{
 		// ResumeId:      "1212111",
-		FirstName:     "олег",
-		MiddleName:    "олейников",
-		LastName:      "игоревич",
-		PhoneNumber:   "79885352919",
-		Education:     "ш",
+		FirstName:   "Олег",
+		MiddleName:  "О",
+		LastName:    "Оыыыы",
+		PhoneNumber: "79985342810",
+		Photo:       []byte{0, 0, 1, 0, 3, 12, 255, 1, 0, 12},
+		Skills: []*pb.Skill{
+			{Skill: "fffff"},
+		},
+		Education:     "PTY",
 		AboutMe:       "м",
 		AboutProjects: "а",
 		Portfolio:     "л",
-		StudentGroup:  "ь",
+		StudentGroup:  "ьggg",
 		CreatedAt:     timestamppb.Now(),
 	}
 
@@ -50,6 +60,27 @@ func main() {
 	}
 
 	client.Publish(cloudevent)
+
+	cfg := config.InitConfig()
+	log := logger.NewAppLogger(cfg.Logger)
+	log.InitLogger()
+
+	nc, _ := nats.Connect(nats.DefaultURL)
+	typeMapper := eventsourcing.NewTypeMapper()
+	resume.RegisterResumeMappingTypes(typeMapper)
+	serde := eventsourcing.NewEsEventSerde(log, typeMapper)
+
+	eventStore := eventsourcing.NewJetStreamEventStore(log, nc, serde, "sebstudy")
+	aggregateStore := eventsourcing.NewEsAggregateStore(log, eventStore)
+
+	resume := resume.NewResume()
+	aggregateStore.Load("0191e67595a17633960283162bffe3c6", resume)
+
+	js, _ := jetstream.New(nc)
+	stream, err := js.Stream(context.Background(), "0191e67647dd7ccc9cd8f21c423a9615")
+	log.Println(stream)
+	// resume.
+	log.Debugf("БЛЯТТЬ: %v", resume)
 }
 
 var (

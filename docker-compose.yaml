@@ -1,19 +1,24 @@
-services:
+# version: '3.8'
 
+services:
   nats:
     image: nats:latest
     ports:
       - "4222:4222"
-    entrypoint: ["nats-server"]
+    volumes:
+      - ./nats-config.conf:/etc/nats/nats-config.conf
+    entrypoint: ["nats-server", "-c", "/etc/nats/nats-config.conf"]
 
   app:
     build:
       context: .
       dockerfile: ./Dockerfile
     ports:
-      - "8080:8080"
+      - "50051:50051"
     environment:
       - NATS_URL=nats://nats:4222
+    env_file:
+      - .env
     restart: always
     depends_on:
       - nats  

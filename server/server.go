@@ -7,8 +7,10 @@ import (
 	"SebStudy/internal/infrastructure"
 	"SebStudy/internal/infrastructure/eventsourcing"
 	"SebStudy/internal/infrastructure/ports"
+	"SebStudy/internal/infrastructure/projections"
 	"SebStudy/internal/infrastructure/util"
 	"SebStudy/logger"
+	"context"
 	"os"
 	"os/signal"
 	"syscall"
@@ -43,20 +45,27 @@ func (s *server) Run() error {
 	s.log.Infof("Nats connected, on %s", s.cfg.NatsUrl)
 
 	cloudeventMapper := util.NewCloudEventCommandAdapter()
-	setupCloudeventMapper(cloudeventMapper)
+	mapping.RegisterCloudeventResumeTypes(cloudeventMapper)
+
 	s.cmdAdapter = cloudeventMapper
 
 	typeMapper := eventsourcing.NewTypeMapper()
 	resume.RegisterResumeMappingTypes(typeMapper)
 
 	eventSerde := eventsourcing.NewEsEventSerde(s.log, typeMapper)
+	subManager := projections.NewSubscriptionManager(s.log, s.nc, eventSerde, nil)
+	if err = subManager.Start(context.Background()); err != nil {
+		s.log.Fatalf("sub manager stopped working with err: %v", err)
+	}
+
 	jetstreamEventStore := eventsourcing.NewJetStreamEventStore(s.log, s.nc, eventSerde, "sebstudy")
 	aggregateStore := eventsourcing.NewEsAggregateStore(s.log, jetstreamEventStore)
 
 	resumeRepo := resume.NewEsResumeRepository(aggregateStore)
 	resumeCmdHandlers := resume.NewResumeCommandHandlers(resumeRepo)
 
-	cmdHandlerMap := registerCommandHandlers(resumeCmdHandlers)
+	cmdHandlerMap := infrastructure.NewCommandHandlerMap()
+	resumeCmdHandlers.RegisterCommands(cmdHandlerMap)
 	dispatcher := infrastructure.NewDispatcher(cmdHandlerMap)
 	s.cmdDispatcher = dispatcher
 
@@ -72,17 +81,4 @@ func (s *server) Run() error {
 	grpcServer.GracefulStop()
 
 	return nil
-}
-
-func setupCloudeventMapper(cloudeventMapper *util.CloudEventCommandAdapter) {
-	mapping.RegisterCloudeventResumeTypes(cloudeventMapper)
-}
-
-func registerCommandHandlers(cmdHandlers ...infrastructure.CommandHandlerModule) infrastructure.CommandHandlerMap {
-	cmdHandlerMap := infrastructure.NewCommandHandlerMap()
-	for _, handler := range cmdHandlers {
-		handler.RegisterCommands(&cmdHandlerMap)
-	}
-
-	return cmdHandlerMap
 }

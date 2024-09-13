@@ -8,4 +8,5 @@ FROM alpine:latest
 RUN apk add --no-cache nats-server
 WORKDIR /app
 COPY --from=builder /app/main .
+COPY --from=builder /app/.env .
 CMD ["sh", "-c", "nats-server & ./main"]

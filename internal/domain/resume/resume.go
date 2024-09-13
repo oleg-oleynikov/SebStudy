@@ -54,6 +54,7 @@ func (r *Resume) ResumeCreated(e events.ResumeCreated) {
 }
 
 func (r *Resume) CreateResume(c *commands.CreateResume) error {
+	// id := r.GenerateUuidWithoutDashes()
 	r.Raise(events.NewResumeCreated(r.GenerateUuidWithoutDashes(), c.FirstName, c.MiddleName, c.LastName, c.PhoneNumber, c.Education, c.AboutMe, c.Skills, c.Photo, c.Direction, c.AboutProjects, c.Portfolio, time.Now()))
 	return nil
 }
