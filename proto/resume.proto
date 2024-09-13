@@ -23,6 +23,5 @@ message ResumeCreated {
     string direction = 10;
     string aboutProjects = 11;
     string portfolio = 12;
-    string studentGroup = 13;
     google.protobuf.Timestamp createdAt=14;
 }

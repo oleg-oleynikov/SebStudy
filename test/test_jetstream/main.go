@@ -5,7 +5,6 @@ import (
 	"SebStudy/internal/domain/resume"
 	"SebStudy/internal/domain/resume/events"
 	"SebStudy/internal/domain/resume/values"
-	"SebStudy/internal/infrastructure"
 	"SebStudy/internal/infrastructure/eventsourcing"
 	"SebStudy/logger"
 	"fmt"
@@ -17,7 +16,6 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/nats-io/nats.go"
-	"github.com/sirupsen/logrus"
 )
 
 func GenerateUuidWithoutDashes() string {
@@ -78,15 +76,15 @@ func main() {
 	resume1 := resume.NewResume()
 	resume1.Raise(event)
 
-	md := infrastructure.CommandMetadata{AggregateId: resume1.Id}
+	// md := infrastructure.CommandMetadata{AggregateId: resume1.Id}
 
-	if err := aggregateStore.Save(resume1, md); err != nil {
-		logrus.Debugf("Failed to save aggregate: %v", err)
-		return
-	}
+	// if err := aggregateStore.Save(resume1, md); err != nil {
+	// 	logrus.Debugf("Failed to save aggregate: %v", err)
+	// 	return
+	// }
 
 	loadingResume := resume.NewResume()
-	if err := aggregateStore.Load("0191ea7277f976de937c79f2f018437b", loadingResume); err != nil {
+	if err := aggregateStore.Load("0191eb2ec94f7f3ba6571029e808f8ac", loadingResume); err != nil {
 		appLogger.Fatalf("Хуита: %v", err)
 	}
 

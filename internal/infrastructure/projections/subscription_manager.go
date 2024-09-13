@@ -51,6 +51,7 @@ func (m *SubscriptionManager) Start(ctx context.Context) error {
 		AckPolicy:     jetstream.AckExplicitPolicy,
 		AckWait:       45 * time.Second,
 		ReplayPolicy:  jetstream.ReplayInstantPolicy,
+		Durable:       "projection_consumer",
 	}
 
 	consumer, err := m.js.CreateOrUpdateConsumer(ctx, "projection_stream", consumerConfig)
@@ -59,44 +60,42 @@ func (m *SubscriptionManager) Start(ctx context.Context) error {
 		return err
 	}
 
-	go func(cons jetstream.Consumer) {
+	go func() {
 		for {
 
-			if cons.CachedInfo().NumPending > 0 {
+			consumerInfo, err := consumer.Info(context.Background())
+			if err != nil {
+				m.log.Fatalf("Failed to get consumer info: %v", err)
+			}
 
-				batch, err := cons.Fetch(10, jetstream.FetchMaxWait(5*time.Second))
+			if consumerInfo.NumPending > 0 {
+				m.log.Debugf("Получена информация: %v", consumerInfo.NumPending)
+				batch, err := consumer.Fetch(10, jetstream.FetchMaxWait(5*time.Second))
 				if err != nil {
 					m.log.Fatalf("Failed to batch messages for projection: %v", err)
 					break
 				}
 
-				if len(batch.Messages()) == 0 {
-					continue
-				}
-
-				m.log.Debugf("Пришло чет") // DEBUGGGG
-
 				for msg := range batch.Messages() {
-					m.log.Debugf("Received message: %s", string(msg.Data())) // DEBUGGGG
-					event, _, err := m.serde.Deserialize(msg)
+					event, metadata, err := m.serde.Deserialize(msg)
 					if err != nil {
 						msg.Nak()
 						m.log.Fatalf("Failed to deserialize msg: %v", err)
 					}
 
-					m.log.Debugf("Event: %v", event) // DEBUGGGG
+					// m.log.Debugf("Event: %v", event) // DEBUGGGG
 
-					// for _, s := range m.subscriptions {
-					// 	s.Project(event, *metadata)
-					// }
+					for _, s := range m.subscriptions {
+						s.Project(event, *metadata)
+					}
 
 					msg.Ack()
 				}
 			} else {
-				time.Sleep(time.Millisecond * 10)
+				time.Sleep(time.Millisecond * 30)
 			}
 		}
-	}(consumer)
+	}()
 
 	return nil
 }

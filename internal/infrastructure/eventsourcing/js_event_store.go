@@ -143,15 +143,16 @@ func (es *JetStreamEventStore) loadEvents(streamName string, cfg jetstream.Consu
 }
 
 func (es *JetStreamEventStore) AppendEvents(streamName string, version int, m infrastructure.CommandMetadata, events ...interface{}) error {
+	subj := fmt.Sprintf("%s.>", es.GetFullStreamName(streamName))
 	options := jetstream.StreamConfig{
 		Name:      es.GetFullStreamName(streamName),
 		Retention: jetstream.LimitsPolicy,
 		Storage:   jetstream.FileStorage,
-		Subjects:  []string{fmt.Sprintf("%s.>", es.GetFullStreamName(streamName))},
-		// RePublish: &jetstream.RePublish{
-		// 	Source:      ">",
-		// 	Destination: "projection.>",
-		// },
+		Subjects:  []string{subj},
+		RePublish: &jetstream.RePublish{
+			Source:      subj,
+			Destination: "projection.>",
+		},
 	}
 
 	if events == nil {

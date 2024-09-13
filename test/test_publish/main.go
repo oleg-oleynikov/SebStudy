@@ -30,15 +30,15 @@ func main() {
 		MiddleName:  "О",
 		LastName:    "Оыыыы",
 		PhoneNumber: "79985342810",
-		Photo:       []byte{0, 0, 1, 0, 3, 12, 255, 1, 0, 12},
+		Education:   "PTY",
+		AboutMe:     "м",
 		Skills: []*pb.Skill{
 			{Skill: "fffff"},
 		},
-		Education:     "PTY",
-		AboutMe:       "м",
+		Photo:         []byte{0, 0, 1, 0, 3, 12, 255, 1, 0, 12},
 		AboutProjects: "а",
 		Portfolio:     "л",
-		StudentGroup:  "ьggg",
+		Direction:     "ь",
 		CreatedAt:     timestamppb.Now(),
 	}
 
@@ -58,6 +58,8 @@ func main() {
 			ProtoData: protoEvent,
 		},
 	}
+
+	log.Println(base64.StdEncoding.EncodeToString(protoEvent.Value))
 
 	client.Publish(cloudevent)
 
