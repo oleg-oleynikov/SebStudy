@@ -4,24 +4,15 @@ package resume;
 
 option go_package = "./pb";
 
-import "google/protobuf/timestamp.proto";
-
 message Skill {
     string skill = 1;
 }
 
 message ResumeCreated {
-    // string resumeId = 1;
-    string firstName = 2;
-    string middleName = 3;
-    string lastName = 4;
-    string phoneNumber = 5;
-    string education = 6;
-    string aboutMe = 7;
-    repeated Skill skills = 8;
-    bytes photo = 9;
-    string direction = 10;
-    string aboutProjects = 11;
-    string portfolio = 12;
-    google.protobuf.Timestamp createdAt=14;
+    string education = 1;
+    string aboutMe = 2;
+    repeated Skill skills = 3;
+    string direction = 4;
+    string aboutProjects = 5;
+    string portfolio = 6;
 }

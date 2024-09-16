@@ -1,37 +1,44 @@
-package projections
+package mongo_projection
 
 import (
+	"SebStudy/config"
+	"SebStudy/internal/domain/resume/events"
+	"SebStudy/internal/infrastructure"
 	"SebStudy/internal/infrastructure/eventsourcing"
+	"SebStudy/internal/infrastructure/repository"
 	"SebStudy/logger"
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 )
 
-type SubscriptionManager struct {
-	log           logger.Logger
-	js            jetstream.JetStream
-	serde         eventsourcing.EventSerde
-	subscriptions []Subscription
+type mongoProjection struct {
+	log       logger.Logger
+	cfg       config.Config
+	js        jetstream.JetStream
+	serde     eventsourcing.EventSerde
+	mongoRepo repository.ResumeMongoRepository
 }
 
-func NewSubscriptionManager(log logger.Logger, nc *nats.Conn, serde eventsourcing.EventSerde, subs ...Subscription) *SubscriptionManager {
+func NewMongoProjection(log logger.Logger, cfg config.Config, nc *nats.Conn, serde eventsourcing.EventSerde, mongoRepo repository.ResumeMongoRepository) *mongoProjection {
 	js, err := jetstream.New(nc)
 	if err != nil {
-		log.Fatalf("Failed to get jetstream for subManager: %v", err)
+		log.Fatalf("(mongoProjection) Failed to get jetstream: %v", err)
 	}
 
-	return &SubscriptionManager{
-		log:           log,
-		js:            js,
-		serde:         serde,
-		subscriptions: subs,
+	return &mongoProjection{
+		log:       log,
+		cfg:       cfg,
+		js:        js,
+		serde:     serde,
+		mongoRepo: mongoRepo,
 	}
 }
 
-func (m *SubscriptionManager) Start(ctx context.Context) error {
+func (m *mongoProjection) Start(ctx context.Context) error {
 
 	streamConfig := jetstream.StreamConfig{
 		Name:      "projection_stream",
@@ -75,17 +82,13 @@ func (m *SubscriptionManager) Start(ctx context.Context) error {
 				}
 
 				for msg := range batch.Messages() {
-					_, _, err := m.serde.Deserialize(msg)
+					event, md, err := m.serde.Deserialize(msg)
 					if err != nil {
 						msg.Nak()
 						m.log.Fatalf("Failed to deserialize msg: %v", err)
 					}
 
-					// m.log.Debugf("Event пришел: %v", event) // DEBUGGGG
-
-					// for _, s := range m.subscriptions {
-					// 	s.Project(event, *metadata)
-					// }
+					m.When(ctx, event, md)
 
 					msg.Ack()
 				}
@@ -96,4 +99,14 @@ func (m *SubscriptionManager) Start(ctx context.Context) error {
 	}()
 
 	return nil
+}
+
+func (m *mongoProjection) When(ctx context.Context, event interface{}, md *infrastructure.EventMetadata) error {
+	switch event.(type) {
+	case events.ResumeCreated:
+		return m.onResumeCreate(ctx, event, md)
+	default:
+		m.log.Debugf("(mongoProjection) When unknown EventType eventType: {%s}")
+		return fmt.Errorf("invalid event type")
+	}
 }

@@ -3,6 +3,7 @@ package main
 import (
 	"SebStudy/config"
 	"SebStudy/internal/domain/resume"
+	"SebStudy/internal/domain/resume/models"
 	"SebStudy/internal/infrastructure/eventsourcing"
 	"SebStudy/logger"
 	"SebStudy/pb"
@@ -18,28 +19,20 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/types/known/anypb"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func main() {
 	client := NewCloudeventsServiceClient("localhost:50051")
 
 	resumeEvent := &pb.ResumeCreated{
-		// ResumeId:      "1212111",
-		FirstName:   "Олег",
-		MiddleName:  "О",
-		LastName:    "Оыыыы",
-		PhoneNumber: "79985342810",
-		Education:   "PTY",
-		AboutMe:     "м",
+		Education: "PTY",
+		AboutMe:   "м",
 		Skills: []*pb.Skill{
 			{Skill: "fffff"},
 		},
-		Photo:         []byte{0, 0, 1, 0, 3, 12, 255, 1, 0, 12},
 		AboutProjects: "а",
 		Portfolio:     "л",
 		Direction:     "ь",
-		CreatedAt:     timestamppb.Now(),
 	}
 
 	protoEvent, err := anypb.New(resumeEvent)
@@ -75,7 +68,7 @@ func main() {
 	eventStore := eventsourcing.NewJetStreamEventStore(log, nc, serde, "sebstudy")
 	aggregateStore := eventsourcing.NewEsAggregateStore(log, eventStore)
 
-	resume := resume.NewResume()
+	resume := models.NewResume()
 	aggregateStore.Load("0191e67595a17633960283162bffe3c6", resume)
 
 	js, _ := jetstream.New(nc)

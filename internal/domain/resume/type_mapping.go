@@ -17,22 +17,12 @@ func RegisterResumeMappingTypes(tm *eventsourcing.TypeMapper) {
 			for _, s := range d["skills"].([]interface{}) {
 				skills = append(skills, values.Skill{Skill: s.(string)})
 			}
-			photoUrl := ""
-			photoUrlFromData := d["photoUrl"]
-			if photoUrlFromData != nil {
-				photoUrl = photoUrlFromData.(string)
-			}
 
 			return events.ResumeCreated{
 				ResumeId:      d["resumeId"].(string),
-				FirstName:     values.FirstName{FirstName: d["firstName"].(string)},
-				MiddleName:    values.MiddleName{MiddleName: d["middleName"].(string)},
-				LastName:      values.LastName{LastName: d["lastName"].(string)},
-				PhoneNumber:   values.PhoneNumber{PhoneNumber: d["phoneNumber"].(string)},
 				Education:     values.Education{Education: d["education"].(string)},
 				AboutMe:       values.AboutMe{AboutMe: d["aboutMe"].(string)},
 				Skills:        values.Skills{Skills: skills},
-				Photo:         values.Photo{Photo: nil, Url: photoUrl},
 				Direction:     values.Direction{Direction: d["direction"].(string)},
 				AboutProjects: values.AboutProjects{AboutProjects: d["aboutProjects"].(string)},
 				Portfolio:     values.Portfolio{Portfolio: d["portfolio"].(string)},
@@ -48,14 +38,9 @@ func RegisterResumeMappingTypes(tm *eventsourcing.TypeMapper) {
 			return "resumeCreated",
 				map[string]interface{}{
 					"resumeId":      t.ResumeId,
-					"firstName":     t.FirstName.GetFirstName(),
-					"middleName":    t.MiddleName.GetMiddleName(),
-					"lastName":      t.LastName.GetLastName(),
-					"phoneNumber":   t.PhoneNumber.GetPhoneNumber(),
 					"education":     t.Education.GetEducation(),
 					"aboutMe":       t.AboutMe.GetAboutMe(),
 					"skills":        skills,
-					"photoUrl":      t.Photo.GetUrl(),
 					"direction":     t.Direction.GetDirection(),
 					"aboutProjects": t.AboutProjects.GetAboutProjects(),
 					"portfolio":     t.Portfolio.GetPortfolio(),

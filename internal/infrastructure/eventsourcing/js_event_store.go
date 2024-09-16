@@ -38,22 +38,6 @@ func NewJetStreamEventStore(appLogger logger.Logger, nc *nats.Conn, serde EventS
 		return nil
 	}
 
-	// mainStreamCfg := jetstream.StreamConfig{
-	// 	Name:      prefix,
-	// 	Subjects:  []string{prefix + ".>"},
-	// 	Retention: jetstream.LimitsPolicy,
-	// 	Storage:   jetstream.FileStorage,
-	// 	RePublish: &jetstream.RePublish{
-	// 		Source:      ">",
-	// 		Destination: "projection.>",
-	// 	},
-	// }
-
-	// _, err = js.CreateOrUpdateStream(context.Background(), mainStreamCfg)
-	// if err != nil {
-	// 	appLogger.Fatalf("Failed to create or update main stream: %v", err)
-	// }
-
 	return &JetStreamEventStore{
 		log:    appLogger,
 		nc:     nc,

@@ -21,7 +21,7 @@ type Config struct {
 	Logger           *logger.Config
 	GRPC             *GRPC
 	Mongo            *mongodb.Config
-	MongoCollections MongoCollections
+	MongoCollections *MongoCollections
 }
 
 type GRPC struct {
@@ -29,7 +29,7 @@ type GRPC struct {
 }
 
 type MongoCollections struct {
-	Orders string
+	Resumes string
 }
 
 func InitConfig() *Config {
@@ -52,19 +52,24 @@ func InitConfig() *Config {
 	}
 
 	mongo := &mongodb.Config{
-		URI:      getEnv("URI", "mongodb://localhost:27017"),
-		Username: getEnv("Username", "admin"),
-		Password: getEnv("Password", "admin"),
-		Db:       "resume",
+		URI:      getEnv("MONGO_URI", "mongodb://localhost:27017"),
+		Username: getEnv("MONGO_USER", "admin"),
+		Password: getEnv("MONGO_PASSWORD", "admin"),
+		Db:       getEnv("MONGO_DB", "resume"),
+	}
+
+	mongoCollections := &MongoCollections{
+		Resumes: getEnv("MONGO", "resumes"),
 	}
 
 	return &Config{
-		ImageUploadPath: getEnv("IMAGE_UPLOAD_PATH", "./uploads"),
-		NatsUrl:         getEnv("NATS_URL", "nats://127.0.0.1:4222"),
-		ServerPort:      getEnv("SERVER_PORT", "50051"),
-		Logger:          loggerConfig,
-		GRPC:            grpc,
-		Mongo:           mongo,
+		ImageUploadPath:  getEnv("IMAGE_UPLOAD_PATH", "./uploads"),
+		NatsUrl:          getEnv("NATS_URL", "nats://127.0.0.1:4222"),
+		ServerPort:       getEnv("SERVER_PORT", "50051"),
+		Logger:           loggerConfig,
+		GRPC:             grpc,
+		Mongo:            mongo,
+		MongoCollections: mongoCollections,
 	}
 }
 

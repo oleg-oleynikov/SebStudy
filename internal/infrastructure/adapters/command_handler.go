@@ -39,7 +39,7 @@ func (ch *CommandHandler) HandleCommand(ctx context.Context, event *pb.CloudEven
 		return status.Errorf(codes.Internal, "failed to map cloudevent")
 	}
 
-	err = ch.cmdDispatcher.Dispatch(mappedEvent, infrastructure.NewCommandMetadata(event.Id))
+	err = ch.cmdDispatcher.Dispatch(mappedEvent, infrastructure.NewCommandMetadata(event.Id)) // CommandMetadata useless хз че с этим делать
 	if err != nil {
 		ch.log.Debugf("Failed to dispatch command: %v", err)
 	}
