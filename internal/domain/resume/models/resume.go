@@ -14,6 +14,7 @@ type Resume struct {
 	education     values.Education
 	aboutMe       values.AboutMe
 	skills        values.Skills
+	birthDate     values.BirthDate
 	direction     values.Direction
 	aboutProjects values.AboutProjects
 	portfolio     values.Portfolio
@@ -38,13 +39,13 @@ func (r *Resume) ResumeCreated(e events.ResumeCreated) {
 	r.education = e.Education
 	r.aboutMe = e.AboutMe
 	r.skills = e.Skills
+	r.birthDate = e.BirthDate
 	r.direction = e.Direction
 	r.aboutProjects = e.AboutProjects
 	r.portfolio = e.Portfolio
 }
 
 func (r *Resume) CreateResume(c *commands.CreateResume) error {
-	// id := r.GenerateUuidWithoutDashes()
-	r.Raise(events.NewResumeCreated(r.GenerateUuidWithoutDashes(), c.Education, c.AboutMe, c.Skills, c.Direction, c.AboutProjects, c.Portfolio, time.Now()))
+	r.Raise(events.NewResumeCreated(r.GenerateUuidWithoutDashes(), c.Education, c.AboutMe, c.Skills, c.BirthDate, c.Direction, c.AboutProjects, c.Portfolio, time.Now()))
 	return nil
 }

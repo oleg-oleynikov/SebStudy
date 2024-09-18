@@ -1,21 +1,15 @@
 package values
 
-import (
-	"fmt"
-)
-
 type ResumeId struct {
-	// resumeId uuid.UUID
-	Value string
+	Id string
 }
 
 func NewResumeId(resumeId string) ResumeId {
-	// id := uuid.New()
 	return ResumeId{
-		Value: resumeId,
+		Id: resumeId,
 	}
 }
 
-func (rID *ResumeId) ToString() string {
-	return fmt.Sprintf("%v", rID)
+func (rID *ResumeId) String() string {
+	return rID.Id
 }

@@ -6,6 +6,7 @@ import (
 	"SebStudy/internal/infrastructure"
 	"SebStudy/pb"
 	"context"
+	"time"
 )
 
 func toCreateResume(ctx context.Context, c *pb.CloudEvent) (interface{}, error) {
@@ -36,6 +37,16 @@ func toCreateResume(ctx context.Context, c *pb.CloudEvent) (interface{}, error) 
 		skills.AppendSkills(*skill)
 	}
 
+	timeBirth, err := time.Parse("2006-01-02", rs.GetBirthDate())
+	if err != nil {
+		return nil, err
+	}
+
+	birthDate, err := values.NewBirthDate(timeBirth)
+	if err != nil {
+		return nil, err
+	}
+
 	direction, err := values.NewDirection(rs.GetDirection())
 	if err != nil {
 		return nil, err
@@ -52,7 +63,7 @@ func toCreateResume(ctx context.Context, c *pb.CloudEvent) (interface{}, error) 
 	}
 
 	createdResume := commands.NewCreateResume(
-		education, *aboutMe, skills, *direction,
+		education, *aboutMe, skills, *birthDate, *direction,
 		*aboutProjects, *portfolio)
 
 	return createdResume, nil

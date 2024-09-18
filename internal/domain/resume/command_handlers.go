@@ -4,6 +4,7 @@ import (
 	"SebStudy/internal/domain/resume/commands"
 	"SebStudy/internal/domain/resume/models"
 	"SebStudy/internal/infrastructure"
+	"fmt"
 )
 
 type ResumeCommandHandlers struct {
@@ -26,6 +27,11 @@ func NewResumeCommandHandlers(repository ResumeRepository) *ResumeCommandHandler
 		}
 
 		return repository.Save(resume, m)
+	})
+
+	commandHandlers.Register(commands.ChangeResume{}, func(c infrastructure.Command, m infrastructure.CommandMetadata) error {
+		_ = c.(*commands.ChangeResume)
+		return fmt.Errorf("does not implement")
 	})
 
 	return &ResumeCommandHandlers{

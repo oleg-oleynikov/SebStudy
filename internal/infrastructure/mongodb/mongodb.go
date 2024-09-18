@@ -22,10 +22,6 @@ type Config struct {
 func NewMongoDbConn(ctx context.Context, cfg Config) (*mongo.Client, error) {
 	client, err := mongo.Connect(context.Background(),
 		options.Client().ApplyURI(cfg.URI).
-			// SetAuth(options.Credential{
-			// 	Username: cfg.Username,
-			// 	Password: cfg.Password,
-			// }).
 			SetConnectTimeout(connectTimeout))
 	if err != nil {
 		return nil, err

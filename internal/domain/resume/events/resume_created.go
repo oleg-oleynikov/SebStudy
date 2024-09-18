@@ -6,15 +6,11 @@ import (
 )
 
 type ResumeCreated struct {
-	ResumeId string
-	// FirstName     values.FirstName
-	// MiddleName    values.MiddleName
-	// LastName      values.LastName
-	// PhoneNumber   values.PhoneNumber
-	Education values.Education
-	AboutMe   values.AboutMe
-	Skills    values.Skills
-	// Photo         values.Photo
+	ResumeId      string
+	Education     values.Education
+	AboutMe       values.AboutMe
+	Skills        values.Skills
+	BirthDate     values.BirthDate
 	Direction     values.Direction
 	AboutProjects values.AboutProjects
 	Portfolio     values.Portfolio
@@ -26,6 +22,7 @@ func NewResumeCreated(
 	Education values.Education,
 	AboutMe values.AboutMe,
 	Skills values.Skills,
+	BirthDate values.BirthDate,
 	Direction values.Direction,
 	AboutProjects values.AboutProjects,
 	Portfolio values.Portfolio,
@@ -36,6 +33,7 @@ func NewResumeCreated(
 		Education:     Education,
 		AboutMe:       AboutMe,
 		Skills:        Skills,
+		BirthDate:     BirthDate,
 		Direction:     Direction,
 		AboutProjects: AboutProjects,
 		Portfolio:     Portfolio,

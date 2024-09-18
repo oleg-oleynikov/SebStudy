@@ -1,6 +1,7 @@
 package infrastructure
 
 import (
+	"SebStudy/pb"
 	"context"
 	"fmt"
 	"io"
@@ -9,13 +10,12 @@ import (
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	v1 "open-cluster-management.io/sdk-go/pkg/cloudevents/generic/options/grpc/protobuf/v1"
 )
 
 type CloudeventsServiceClient struct {
 	sync.RWMutex
 
-	grpcClient v1.CloudEventServiceClient
+	grpcClient pb.CloudEventServiceClient
 	wg         sync.WaitGroup
 }
 
@@ -25,7 +25,7 @@ func NewCloudeventsServiceClient(target string) *CloudeventsServiceClient {
 		log.Printf("Failed to connect: %v", err)
 		return nil
 	}
-	grpcClient := v1.NewCloudEventServiceClient(conn)
+	grpcClient := pb.NewCloudEventServiceClient(conn)
 
 	c := &CloudeventsServiceClient{
 		grpcClient: grpcClient,
@@ -34,8 +34,8 @@ func NewCloudeventsServiceClient(target string) *CloudeventsServiceClient {
 	return c
 }
 
-func (c *CloudeventsServiceClient) Publish(cloudEvent *v1.CloudEvent) error {
-	_, err := c.grpcClient.Publish(context.TODO(), &v1.PublishRequest{
+func (c *CloudeventsServiceClient) Publish(cloudEvent *pb.CloudEvent) error {
+	_, err := c.grpcClient.Publish(context.TODO(), &pb.PublishRequest{
 		Event: cloudEvent,
 	})
 	if err != nil {
@@ -44,8 +44,8 @@ func (c *CloudeventsServiceClient) Publish(cloudEvent *v1.CloudEvent) error {
 	return nil
 }
 
-func (c *CloudeventsServiceClient) Subscribe(ctx context.Context, source string, fn func(event *v1.CloudEvent)) {
-	subReq := &v1.SubscriptionRequest{
+func (c *CloudeventsServiceClient) Subscribe(ctx context.Context, source string, fn func(event *pb.CloudEvent)) {
+	subReq := &pb.SubscriptionRequest{
 		Source: source,
 	}
 

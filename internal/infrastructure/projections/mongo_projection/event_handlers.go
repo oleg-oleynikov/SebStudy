@@ -8,7 +8,7 @@ import (
 	"fmt"
 )
 
-func (o *mongoProjection) onResumeCreate(ctx context.Context, e interface{}, _ *infrastructure.EventMetadata) error {
+func (o *mongoProjection) onResumeCreate(ctx context.Context, e interface{}, md *infrastructure.EventMetadata) error {
 	event, ok := e.(events.ResumeCreated)
 	if !ok {
 		o.log.Debugf("mongoProjection.onResumeCreate: Failed to cast")
@@ -19,21 +19,22 @@ func (o *mongoProjection) onResumeCreate(ctx context.Context, e interface{}, _ *
 		skills = append(skills, s.GetSkill())
 	}
 
-	o.log.Debugf("Добавить BornDate")
 	rp := &models.ResumeProjection{
-		// Education:     event.Education.GetEducation(),
+		Id:            event.ResumeId,
+		Education:     event.Education.GetEducation(),
 		AboutMe:       event.AboutMe.GetAboutMe(),
-		BornDate:      1, // Добавить bornDate
 		Skills:        skills,
+		BirthDate:     event.BirthDate.GetBirthDate(),
 		Direction:     event.Direction.GetDirection(),
 		AboutProjects: event.AboutProjects.GetAboutProjects(),
 		Portfolio:     event.Portfolio.GetPortfolio(),
+		UserId:        md.UserId,
 	}
 
 	return o.mongoRepo.Insert(ctx, rp)
 }
 
-func (o *mongoProjection) onResumeChanged(ctx context.Context, e interface{}) error {
-	o.log.Debugf("mongoProjection.ResumeChanged: Not impl")
-	return fmt.Errorf("not impl")
-}
+// func (o *mongoProjection) onResumeChanged(ctx context.Context, e interface{}) error {
+// 	o.log.Debugf("mongoProjection.ResumeChanged: Not impl")
+// 	return fmt.Errorf("not impl")
+// }

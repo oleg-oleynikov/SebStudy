@@ -1,7 +1,6 @@
 package values
 
 import (
-	"fmt"
 	"net/url"
 )
 
@@ -24,8 +23,8 @@ func isValidPortfolio(portfolio string) bool {
 	return u != nil
 }
 
-func (p Portfolio) ToString() string {
-	return fmt.Sprintf("%s", p)
+func (p Portfolio) String() string {
+	return p.Portfolio
 }
 
 func (p *Portfolio) GetPortfolio() string {

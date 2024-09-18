@@ -19,7 +19,7 @@ func NewEsResumeRepository(aggregateStore eventsourcing.AggregateStore) *EsResum
 
 func (es *EsResumeRepository) Get(resumeId *values.ResumeId) (*models.Resume, error) {
 	resume := models.NewResume()
-	err := es.aggregateStore.Load(resumeId.Value, resume)
+	err := es.aggregateStore.Load(resumeId.Id, resume)
 
 	if err != nil {
 		return nil, err
