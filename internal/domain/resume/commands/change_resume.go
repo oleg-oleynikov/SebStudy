@@ -5,9 +5,10 @@ import (
 	"SebStudy/internal/infrastructure"
 )
 
-type CreateResume struct {
+type ChangeResume struct {
 	infrastructure.Command
 
+	ResumeId      string
 	Education     values.Education
 	AboutMe       values.AboutMe
 	Skills        values.Skills
@@ -17,7 +18,8 @@ type CreateResume struct {
 	Portfolio     values.Portfolio
 }
 
-func NewCreateResume(
+func NewChangeResume(
+	resumeId string,
 	education values.Education,
 	aboutMe values.AboutMe,
 	skills values.Skills,
@@ -25,8 +27,9 @@ func NewCreateResume(
 	direction values.Direction,
 	aboutProjects values.AboutProjects,
 	portfolio values.Portfolio,
-) *CreateResume {
-	return &CreateResume{
+) *ChangeResume {
+	return &ChangeResume{
+		ResumeId:      resumeId,
 		Education:     education,
 		AboutMe:       aboutMe,
 		Skills:        skills,

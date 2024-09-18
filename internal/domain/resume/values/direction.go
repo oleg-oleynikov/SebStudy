@@ -2,7 +2,6 @@ package values
 
 import (
 	"errors"
-	"fmt"
 )
 
 type Direction struct {
@@ -19,24 +18,8 @@ func NewDirection(direction string) (*Direction, error) {
 	}, nil
 }
 
-func (dr *Direction) ToString() string {
-	return fmt.Sprintf("[%s]", dr)
-}
-
-type Directions struct {
-	Directions []Direction
-}
-
-func (d *Directions) AppendDirection(dr Direction) {
-	d.Directions = append(d.Directions, dr)
-}
-
-func (d *Directions) GetDirections() []Direction {
-	return d.Directions
-}
-
-func (dir *Directions) ToString() string {
-	return fmt.Sprintf("[%s]", dir)
+func (dr *Direction) String() string {
+	return dr.Direction
 }
 
 func (d *Direction) GetDirection() string {

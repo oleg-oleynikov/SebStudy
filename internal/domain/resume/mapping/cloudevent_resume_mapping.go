@@ -11,4 +11,9 @@ func RegisterCloudeventResumeTypes(m *util.CloudEventCommandAdapter) {
 		toCreateResume,
 	)
 
+	m.MapCloudevent(
+		"type.googleapis.com/resume.ResumeChanged",
+		toChangeResume,
+	)
+
 }

@@ -6,35 +6,14 @@ import (
 	"SebStudy/internal/infrastructure"
 	"SebStudy/pb"
 	"context"
+	"time"
 )
 
-func toCreateResume(_ context.Context, c *pb.CloudEvent) (interface{}, error) {
+func toCreateResume(ctx context.Context, c *pb.CloudEvent) (interface{}, error) {
 
 	rs := pb.ResumeCreated{}
 
 	if err := infrastructure.DecodeCloudeventData(c, &rs); err != nil {
-		return nil, err
-	}
-
-	// resumeID := values.NewResumeId(rs.GetResumeId())
-
-	firstName, err := values.NewFirstName(rs.GetFirstName())
-	if err != nil {
-		return nil, err
-	}
-
-	lastName, err := values.NewLastName(rs.GetLastName())
-	if err != nil {
-		return nil, err
-	}
-
-	middleName, err := values.NewMiddleName(rs.GetMiddleName())
-	if err != nil {
-		return nil, err
-	}
-
-	phoneNumber, err := values.NewPhoneNumber(rs.GetPhoneNumber())
-	if err != nil {
 		return nil, err
 	}
 
@@ -58,7 +37,12 @@ func toCreateResume(_ context.Context, c *pb.CloudEvent) (interface{}, error) {
 		skills.AppendSkills(*skill)
 	}
 
-	photo, err := values.NewPhoto(rs.GetPhoto(), "")
+	timeBirth, err := time.Parse("2006-01-02", rs.GetBirthDate())
+	if err != nil {
+		return nil, err
+	}
+
+	birthDate, err := values.NewBirthDate(timeBirth)
 	if err != nil {
 		return nil, err
 	}
@@ -67,14 +51,6 @@ func toCreateResume(_ context.Context, c *pb.CloudEvent) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	// for i := 0; i < len(rs.Directions); i++ {
-	// 	data := rs.Directions[i]
-	// 	direction, err := values.NewDirection(data.Direction)
-	// 	if err != nil {
-	// 		return nil, err
-	// 	}
-	// 	directions.AppendDirection(*direction)
-	// }
 
 	aboutProjects, err := values.NewAboutProjects(rs.GetAboutProjects())
 	if err != nil {
@@ -87,8 +63,7 @@ func toCreateResume(_ context.Context, c *pb.CloudEvent) (interface{}, error) {
 	}
 
 	createdResume := commands.NewCreateResume(
-		*firstName, *middleName, *lastName, *phoneNumber,
-		education, *aboutMe, skills, *photo, *direction,
+		education, *aboutMe, skills, *birthDate, *direction,
 		*aboutProjects, *portfolio)
 
 	return createdResume, nil

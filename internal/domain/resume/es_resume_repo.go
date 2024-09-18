@@ -1,6 +1,7 @@
 package resume
 
 import (
+	"SebStudy/internal/domain/resume/models"
 	"SebStudy/internal/domain/resume/values"
 	"SebStudy/internal/infrastructure"
 	"SebStudy/internal/infrastructure/eventsourcing"
@@ -16,9 +17,9 @@ func NewEsResumeRepository(aggregateStore eventsourcing.AggregateStore) *EsResum
 	}
 }
 
-func (es *EsResumeRepository) Get(resumeId *values.ResumeId) (*Resume, error) {
-	resume := NewResume()
-	err := es.aggregateStore.Load(resumeId.Value, resume)
+func (es *EsResumeRepository) Get(resumeId *values.ResumeId) (*models.Resume, error) {
+	resume := models.NewResume()
+	err := es.aggregateStore.Load(resumeId.Id, resume)
 
 	if err != nil {
 		return nil, err
@@ -27,6 +28,6 @@ func (es *EsResumeRepository) Get(resumeId *values.ResumeId) (*Resume, error) {
 	return resume, nil
 }
 
-func (es *EsResumeRepository) Save(resume *Resume, m infrastructure.CommandMetadata) error {
+func (es *EsResumeRepository) Save(resume *models.Resume, m infrastructure.CommandMetadata) error {
 	return es.aggregateStore.Save(resume, m)
 }

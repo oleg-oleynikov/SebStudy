@@ -75,7 +75,12 @@ func (e *EsEventSerde) Serialize(streamName string, event interface{}, m *infras
 }
 
 func (e *EsEventSerde) Deserialize(data jetstream.Msg) (interface{}, *infrastructure.EventMetadata, error) {
-	dataToType, err := e.typeMapper.GetDataToType(data.Headers().Get("eventType"))
+	eventType := data.Headers().Get("eventType")
+	if eventType == "" {
+		return nil, nil, fmt.Errorf("msg not contains header eventType")
+	}
+
+	dataToType, err := e.typeMapper.GetDataToType(eventType)
 	if err != nil {
 		return nil, nil, err
 	}

@@ -8,28 +8,26 @@ import (
 	"io"
 	"log"
 	"sync"
+	"time"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/types/known/anypb"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func main() {
 	client := NewCloudeventsServiceClient("localhost:50051")
 
 	resumeEvent := &pb.ResumeCreated{
-		// ResumeId:      "1212111",
-		FirstName:     "олег",
-		MiddleName:    "олейников",
-		LastName:      "игоревич",
-		PhoneNumber:   "79885352919",
-		Education:     "ш",
-		AboutMe:       "м",
+		Education: "PTY",
+		AboutMe:   "м",
+		Skills: []*pb.Skill{
+			{Skill: "fffff"},
+		},
+		BirthDate:     time.Date(2005, 1, 1, 0, 0, 0, 0, time.Local).Format("2006-01-02"),
 		AboutProjects: "а",
 		Portfolio:     "л",
-		StudentGroup:  "ь",
-		CreatedAt:     timestamppb.Now(),
+		Direction:     "ь",
 	}
 
 	protoEvent, err := anypb.New(resumeEvent)
@@ -49,7 +47,30 @@ func main() {
 		},
 	}
 
+	log.Println(base64.StdEncoding.EncodeToString(protoEvent.Value))
+
 	client.Publish(cloudevent)
+
+	// cfg := config.InitConfig()
+	// log := logger.NewAppLogger(cfg.Logger)
+	// log.InitLogger()
+
+	// nc, _ := nats.Connect(nats.DefaultURL)
+	// typeMapper := eventsourcing.NewTypeMapper()
+	// resume.RegisterResumeMappingTypes(typeMapper)
+	// serde := eventsourcing.NewEsEventSerde(log, typeMapper)
+
+	// eventStore := eventsourcing.NewJetStreamEventStore(log, nc, serde, "sebstudy")
+	// aggregateStore := eventsourcing.NewEsAggregateStore(log, eventStore)
+
+	// resume := models.NewResume()
+	// aggregateStore.Load("0191e67595a17633960283162bffe3c6", resume)
+
+	// js, _ := jetstream.New(nc)
+	// stream, err := js.Stream(context.Background(), "0191e67647dd7ccc9cd8f21c423a9615")
+	// log.Println(stream)
+	// // resume.
+	// log.Debugf("БЛЯТТЬ: %v", resume)
 }
 
 var (

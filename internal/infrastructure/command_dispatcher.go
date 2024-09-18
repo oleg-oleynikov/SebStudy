@@ -5,7 +5,7 @@ import (
 )
 
 type Dispatcher struct {
-	commandHandlerMap CommandHandlerMap
+	commandHandlerMap *CommandHandlerMap
 }
 
 func (d *Dispatcher) Dispatch(command interface{}, metadata CommandMetadata) error {
@@ -17,7 +17,7 @@ func (d *Dispatcher) Dispatch(command interface{}, metadata CommandMetadata) err
 	return handler(command, metadata)
 }
 
-func NewDispatcher(commandHandlerMap CommandHandlerMap) *Dispatcher {
+func NewDispatcher(commandHandlerMap *CommandHandlerMap) *Dispatcher {
 	return &Dispatcher{
 		commandHandlerMap: commandHandlerMap,
 	}

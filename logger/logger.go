@@ -19,15 +19,9 @@ type Logger interface {
 	Error(args ...interface{})
 }
 
-// var (
-// 	Logger LogI
-// )
-
-// func InitLogger() {
-// 	Logger = NewLogger()
-// }
-
 type appLogger struct {
+	Logger
+
 	level   string
 	devMode bool
 	logger  *logrus.Logger
