@@ -1,7 +1,6 @@
 package main
 
 import (
-	"SebStudy/internal/infrastructure"
 	"SebStudy/pb"
 	"encoding/base64"
 	"log"
@@ -11,14 +10,14 @@ import (
 
 func main() {
 
-	client := infrastructure.NewCloudeventsServiceClient("localhost:50051")
+	// client := infrastructure.NewCloudeventsServiceClient("localhost:50051")
 
 	resumeEvent := &pb.ResumeChanged{
 		// ResumeId:  "123456",
 		// Education: "PTY",
 		// AboutMe:   "м",
 		Skills: []*pb.Skill{
-			{Skill: "SUCK DICK VERY NICE"},
+			{Skill: "Типа скилл"},
 		},
 		// BirthDate:     time.Date(2005, 1, 1, 0, 0, 0, 0, time.Local).Format("2006-01-02"),
 		// AboutProjects: "а",
@@ -33,7 +32,7 @@ func main() {
 	}
 	log.Println(base64.StdEncoding.EncodeToString(protoEvent.Value))
 
-	cloudevent := &pb.CloudEvent{
+	_ = &pb.CloudEvent{
 		Id:          "1231312345",
 		Source:      "example.com",
 		SpecVersion: "1.0",
@@ -45,5 +44,5 @@ func main() {
 
 	log.Println(base64.StdEncoding.EncodeToString(protoEvent.Value))
 
-	client.Publish(cloudevent)
+	// client.Publish(cloudevent)
 }

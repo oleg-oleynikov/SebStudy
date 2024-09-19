@@ -1,11 +1,9 @@
 package models
 
 import (
-	"SebStudy/internal/domain/resume/commands"
 	"SebStudy/internal/domain/resume/events"
 	"SebStudy/internal/domain/resume/values"
 	"SebStudy/internal/infrastructure/eventsourcing"
-	"time"
 )
 
 type Resume struct {
@@ -32,20 +30,5 @@ func NewResume() *Resume {
 
 func (r *Resume) registerHandlers() {
 	r.Register(events.ResumeCreated{}, func(e interface{}) { r.ResumeCreated(e.(events.ResumeCreated)) })
-}
-
-func (r *Resume) ResumeCreated(e events.ResumeCreated) {
-	r.Id = e.ResumeId
-	r.education = e.Education
-	r.aboutMe = e.AboutMe
-	r.skills = e.Skills
-	r.birthDate = e.BirthDate
-	r.direction = e.Direction
-	r.aboutProjects = e.AboutProjects
-	r.portfolio = e.Portfolio
-}
-
-func (r *Resume) CreateResume(c *commands.CreateResume) error {
-	r.Raise(events.NewResumeCreated(r.GenerateUuidWithoutDashes(), c.Education, c.AboutMe, c.Skills, c.BirthDate, c.Direction, c.AboutProjects, c.Portfolio, time.Now()))
-	return nil
+	r.Register(events.ResumeChanged{}, func(e interface{}) { r.ResumeChanged(e.(events.ResumeChanged)) })
 }

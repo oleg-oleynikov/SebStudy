@@ -1,41 +1,41 @@
 package commands
 
 import (
-	"SebStudy/internal/domain/resume/values"
+	"SebStudy/config"
+	"SebStudy/internal/domain/resume/models"
 	"SebStudy/internal/infrastructure"
+	"SebStudy/internal/infrastructure/eventsourcing"
+	"SebStudy/logger"
+	"context"
 )
 
-type ChangeResume struct {
-	infrastructure.Command
-
-	ResumeId      string
-	Education     values.Education
-	AboutMe       values.AboutMe
-	Skills        values.Skills
-	BirthDate     values.BirthDate
-	Direction     values.Direction
-	AboutProjects values.AboutProjects
-	Portfolio     values.Portfolio
+type ChangeResumeCommandHandler interface {
+	Handle(ctx context.Context, cmd *ChangeResume, md infrastructure.CommandMetadata) error
 }
 
-func NewChangeResume(
-	resumeId string,
-	education values.Education,
-	aboutMe values.AboutMe,
-	skills values.Skills,
-	birthDate values.BirthDate,
-	direction values.Direction,
-	aboutProjects values.AboutProjects,
-	portfolio values.Portfolio,
-) *ChangeResume {
-	return &ChangeResume{
-		ResumeId:      resumeId,
-		Education:     education,
-		AboutMe:       aboutMe,
-		Skills:        skills,
-		BirthDate:     birthDate,
-		Direction:     direction,
-		AboutProjects: aboutProjects,
-		Portfolio:     portfolio,
+type changeResumeCommandHandler struct {
+	log logger.Logger
+	cfg *config.Config
+	es  eventsourcing.AggregateStore
+}
+
+func NewChangeResumeCommandHandler(log logger.Logger, cfg *config.Config, es eventsourcing.AggregateStore) *changeResumeCommandHandler {
+	return &changeResumeCommandHandler{
+		log: log,
+		cfg: cfg,
+		es:  es,
 	}
+}
+
+func (c *changeResumeCommandHandler) Handle(ctx context.Context, command *ChangeResume, md infrastructure.CommandMetadata) error {
+	resume := models.NewResume()
+	if err := c.es.Load(command.GetAggregateId(), resume); err != nil {
+		return err
+	}
+
+	c.log.Debugf("AFTER LOADING AGGREGATE: %v", resume)
+
+	resume.ChangeResume(command.Education, command.AboutMe, command.Skills, command.BirthDate, command.Direction, command.AboutProjects, command.Portfolio)
+
+	return c.es.Save(resume, md)
 }

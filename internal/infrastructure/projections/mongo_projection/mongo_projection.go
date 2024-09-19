@@ -88,7 +88,9 @@ func (m *mongoProjection) Start(ctx context.Context) error {
 						m.log.Fatalf("Failed to deserialize msg: %v", err)
 					}
 
-					m.When(ctx, event, md)
+					if err = m.When(ctx, event, md); err != nil {
+						m.log.Debugf("%v", err)
+					}
 
 					msg.Ack()
 				}
@@ -102,11 +104,13 @@ func (m *mongoProjection) Start(ctx context.Context) error {
 }
 
 func (m *mongoProjection) When(ctx context.Context, event interface{}, md *infrastructure.EventMetadata) error {
-	switch event.(type) {
+	switch event := event.(type) {
 	case events.ResumeCreated:
 		return m.onResumeCreate(ctx, event, md)
+	case events.ResumeChanged:
+		return m.onResumeChanged(ctx, event, md)
 	default:
-		m.log.Debugf("(mongoProjection) When unknown EventType eventType: {%s}")
+		m.log.Debugf("(mongoProjection) [When unknown EventType] eventType: {%s}")
 		return fmt.Errorf("invalid event type")
 	}
 }

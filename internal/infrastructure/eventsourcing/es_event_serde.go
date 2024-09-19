@@ -39,7 +39,7 @@ func (e *EsEventSerde) Serialize(streamName string, event interface{}, m *infras
 		return nil, err
 	}
 
-	id := GenerateUuidWithoutDashes()
+	id, _ := uuid.NewV7()
 
 	name, jsonData := typeToData(event)
 	dataBytes, err := json.Marshal(jsonData)

@@ -4,8 +4,8 @@ type Education struct {
 	Education string
 }
 
-func NewEducation(education string) (Education, error) {
-	return Education{
+func NewEducation(education string) (*Education, error) {
+	return &Education{
 		Education: education,
 	}, nil
 }
