@@ -1,38 +1,39 @@
 package commands
 
 import (
-	"SebStudy/internal/domain/resume/values"
+	"SebStudy/config"
+	"SebStudy/internal/domain/resume/models"
 	"SebStudy/internal/infrastructure"
+	"SebStudy/internal/infrastructure/eventsourcing"
+	"SebStudy/logger"
+	"context"
 )
 
-type CreateResume struct {
-	infrastructure.Command
-
-	Education     values.Education
-	AboutMe       values.AboutMe
-	Skills        values.Skills
-	BirthDate     values.BirthDate
-	Direction     values.Direction
-	AboutProjects values.AboutProjects
-	Portfolio     values.Portfolio
+type CreateResumeCommandHandler interface {
+	Handle(ctx context.Context, command *CreateResume, md infrastructure.CommandMetadata) error
 }
 
-func NewCreateResume(
-	education values.Education,
-	aboutMe values.AboutMe,
-	skills values.Skills,
-	birthDate values.BirthDate,
-	direction values.Direction,
-	aboutProjects values.AboutProjects,
-	portfolio values.Portfolio,
-) *CreateResume {
-	return &CreateResume{
-		Education:     education,
-		AboutMe:       aboutMe,
-		Skills:        skills,
-		BirthDate:     birthDate,
-		Direction:     direction,
-		AboutProjects: aboutProjects,
-		Portfolio:     portfolio,
+type createResumeCommandHandler struct {
+	log logger.Logger
+	cfg *config.Config
+	es  eventsourcing.AggregateStore
+}
+
+func NewCreateResumeCommandHandler(log logger.Logger, cfg *config.Config, es eventsourcing.AggregateStore) *createResumeCommandHandler {
+	return &createResumeCommandHandler{
+		log: log,
+		cfg: cfg,
+		es:  es,
 	}
+}
+
+func (c *createResumeCommandHandler) Handle(ctx context.Context, command *CreateResume, md infrastructure.CommandMetadata) error {
+	resume := models.NewResume()
+	resume.Id = command.GetAggregateId()
+
+	if err := resume.CreateResume(command.Education, command.AboutMe, command.Skills, command.BirthDate, command.Direction, command.AboutProjects, command.Portfolio); err != nil {
+		return err
+	}
+
+	return c.es.Save(resume, md)
 }

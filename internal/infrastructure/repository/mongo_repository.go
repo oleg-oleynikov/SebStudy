@@ -6,6 +6,7 @@ import (
 	"SebStudy/logger"
 	"context"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -36,6 +37,15 @@ func (m *mongoRepository) Insert(ctx context.Context, resume *models.ResumeProje
 }
 
 func (m *mongoRepository) Update(ctx context.Context, resume *models.ResumeProjection) error {
+
+	ops := options.FindOneAndUpdate()
+	ops.SetReturnDocument(options.After)
+	ops.SetUpsert(false)
+
+	if err := m.getResumesCollection().FindOneAndUpdate(ctx, bson.M{"_id": resume.Id}, bson.M{"$set": resume}, ops).Err(); err != nil {
+		return err
+	}
+
 	return nil
 }
 

@@ -1,24 +1,24 @@
 package infrastructure
 
-import (
-	"fmt"
-)
+// import (
+// 	"fmt"
+// )
 
-type Dispatcher struct {
-	commandHandlerMap *CommandHandlerMap
-}
+// type Dispatcher struct {
+// 	commandHandlerMap *CommandHandlerMap
+// }
 
-func (d *Dispatcher) Dispatch(command interface{}, metadata CommandMetadata) error {
-	handler, err := d.commandHandlerMap.Get(GetValueType(command))
-	if err != nil {
-		return fmt.Errorf("no handler registered")
-	}
+// func (d *Dispatcher) Dispatch(command interface{}, metadata CommandMetadata) error {
+// 	handler, err := d.commandHandlerMap.Get(GetValueType(command))
+// 	if err != nil {
+// 		return fmt.Errorf("no handler registered")
+// 	}
 
-	return handler(command, metadata)
-}
+// 	return handler(command, metadata)
+// }
 
-func NewDispatcher(commandHandlerMap *CommandHandlerMap) *Dispatcher {
-	return &Dispatcher{
-		commandHandlerMap: commandHandlerMap,
-	}
-}
+// func NewDispatcher(commandHandlerMap *CommandHandlerMap) *Dispatcher {
+// 	return &Dispatcher{
+// 		commandHandlerMap: commandHandlerMap,
+// 	}
+// }
