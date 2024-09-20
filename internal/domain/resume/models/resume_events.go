@@ -20,36 +20,43 @@ func (r *Resume) ResumeChanged(e events.ResumeChanged) {
 	education := e.Education.GetEducation()
 	if education != "" && r.education.GetEducation() != education {
 		r.education = e.Education
+		r.Changed = true
 	}
 
 	aboutMe := e.AboutMe.GetAboutMe()
 	if aboutMe != "" && r.aboutMe.GetAboutMe() != aboutMe {
 		r.aboutMe = e.AboutMe
+		r.Changed = true
 	}
 
 	newSkills := e.Skills.GetSkills()
 	if len(newSkills) != 0 || !EqualSkills(newSkills, r.skills.GetSkills()) {
 		r.skills = e.Skills
+		r.Changed = true
 	}
 
 	birthDate := e.BirthDate.GetBirthDate()
 	if birthDate.Compare(r.birthDate.GetBirthDate()) != 0 {
 		r.birthDate = e.BirthDate
+		r.Changed = true
 	}
 
 	direction := e.Direction.GetDirection()
 	if direction != "" && r.direction.GetDirection() != direction {
 		r.direction = e.Direction
+		r.Changed = true
 	}
 
 	aboutProjects := e.AboutProjects.GetAboutProjects()
 	if aboutProjects != "" && r.aboutProjects.GetAboutProjects() != aboutProjects {
 		r.aboutProjects = e.AboutProjects
+		r.Changed = true
 	}
 
 	portfolio := e.Portfolio.GetPortfolio()
 	if portfolio != "" && r.portfolio.GetPortfolio() != portfolio {
 		r.portfolio = e.Portfolio
+		r.Changed = true
 	}
 }
 

@@ -5,6 +5,7 @@ import (
 	"SebStudy/logger"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/joho/godotenv"
 )
@@ -51,11 +52,17 @@ func InitConfig() *Config {
 		Port: getEnv("GRPC_PORT", ":50051"),
 	}
 
+	mongoConnTimeout, err := time.ParseDuration(getEnv("MONGO_CONNECT_TIMEOUT", "5s"))
+	if err != nil {
+		mongoConnTimeout = time.Second * 5
+	}
+
 	mongo := &mongodb.Config{
-		URI:      getEnv("MONGO_URI", "mongodb://localhost:27017"),
-		Username: getEnv("MONGO_USER", "admin"),
-		Password: getEnv("MONGO_PASSWORD", "admin"),
-		Db:       getEnv("MONGO_DB", "resume"),
+		URI:            getEnv("MONGO_URI", "mongodb://localhost:27017"),
+		Username:       getEnv("MONGO_USER", "admin"),
+		Password:       getEnv("MONGO_PASSWORD", "admin"),
+		Db:             getEnv("MONGO_DB", "resume"),
+		ConnectTimeout: mongoConnTimeout,
 	}
 
 	mongoCollections := &MongoCollections{

@@ -34,11 +34,11 @@ func (c *changeResumeCommandHandler) Handle(ctx context.Context, command *Change
 		return err
 	}
 
-	resumeBefore := resume.Copy()
 	resume.ChangeResume(command.Education, command.AboutMe, command.Skills, command.BirthDate, command.Direction, command.AboutProjects, command.Portfolio)
 
-	if !resumeBefore.HasChanged(resume) {
+	if !resume.Changed {
 		return fmt.Errorf("no changes detected")
 	}
+
 	return c.es.Save(resume, md)
 }
