@@ -3,53 +3,50 @@ package main
 import (
 	"SebStudy/pb"
 	"context"
-	"encoding/base64"
 	"fmt"
 	"io"
 	"log"
 	"sync"
-	"time"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/protobuf/types/known/anypb"
 )
 
 func main() {
-	client := NewCloudeventsServiceClient("localhost:50051")
+	// client := NewCloudeventsServiceClient("localhost:50051")
 
-	resumeEvent := &pb.ResumeCreated{
-		Education: "PTY",
-		AboutMe:   "м",
-		Skills: []*pb.Skill{
-			{Skill: "fffff"},
-		},
-		BirthDate:     time.Date(2005, 1, 1, 0, 0, 0, 0, time.Local).Format("2006-01-02"),
-		AboutProjects: "а",
-		Portfolio:     "л",
-		Direction:     "ь",
-	}
+	// resumeEvent := &pb.ResumeCreated{
+	// 	Education: "PTY",
+	// 	AboutMe:   "м",
+	// 	Skills: []*pb.Skill{
+	// 		{Skill: "fffff"},
+	// 	},
+	// 	BirthDate:     time.Date(2005, 1, 1, 0, 0, 0, 0, time.Local).Format("2006-01-02"),
+	// 	AboutProjects: "а",
+	// 	Portfolio:     "л",
+	// 	Direction:     "ь",
+	// }
 
-	protoEvent, err := anypb.New(resumeEvent)
-	if err != nil {
-		log.Println("Failed to cast to anypb")
-		return
-	}
-	log.Println(base64.StdEncoding.EncodeToString(protoEvent.Value))
+	// protoEvent, err := anypb.New(resumeEvent)
+	// if err != nil {
+	// 	log.Println("Failed to cast to anypb")
+	// 	return
+	// }
+	// log.Println(base64.StdEncoding.EncodeToString(protoEvent.Value))
 
-	cloudevent := &pb.CloudEvent{
-		Id:          "1231312345",
-		Source:      "example.com",
-		SpecVersion: "1.0",
-		Type:        "resume.create",
-		Data: &pb.CloudEvent_ProtoData{
-			ProtoData: protoEvent,
-		},
-	}
+	// cloudevent := &pb.CloudEvent{
+	// 	Id:          "1231312345",
+	// 	Source:      "example.com",
+	// 	SpecVersion: "1.0",
+	// 	Type:        "resume.create",
+	// 	Data: &pb.CloudEvent_ProtoData{
+	// 		ProtoData: protoEvent,
+	// 	},
+	// }
 
-	log.Println(base64.StdEncoding.EncodeToString(protoEvent.Value))
+	// log.Println(base64.StdEncoding.EncodeToString(protoEvent.Value))
 
-	client.Publish(cloudevent)
+	// client.Publish(cloudevent)
 
 	// cfg := config.InitConfig()
 	// log := logger.NewAppLogger(cfg.Logger)

@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/gofrs/uuid"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type resumeGrpcService struct {
@@ -159,4 +160,8 @@ func (s *resumeGrpcService) ChangeResume(ctx context.Context, req *pb.ChangeResu
 	}
 
 	return &pb.ChangeResumeRes{}, nil
+}
+
+func (s *resumeGrpcService) GetResumeByAccountId(ctx context.Context, empty *emptypb.Empty) (*pb.GetResumeByAccountIdRes, error) {
+	return nil, nil
 }

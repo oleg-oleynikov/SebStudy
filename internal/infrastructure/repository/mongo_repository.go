@@ -49,6 +49,18 @@ func (m *mongoRepository) Update(ctx context.Context, resume *models.ResumeProje
 	return nil
 }
 
+func (m *mongoRepository) GetByAccountId(ctx context.Context, accountId string) (*models.ResumeProjection, error) {
+
+	var resumeProjection models.ResumeProjection
+	if err := m.getResumesCollection().FindOne(ctx, bson.M{"_id": accountId}).Decode(&resumeProjection); err != nil {
+		return nil, err
+	}
+
+	m.log.Debugf("ResumeProjection: %v", resumeProjection)
+
+	return &resumeProjection, nil
+}
+
 func (m *mongoRepository) getResumesCollection() *mongo.Collection {
 	return m.db.Database(m.cfg.Mongo.Db).Collection(m.cfg.MongoCollections.Resumes)
 }

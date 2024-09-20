@@ -11,6 +11,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -19,8 +20,9 @@ import (
 const _ = grpc.SupportPackageIsVersion8
 
 const (
-	ResumeService_CreateResume_FullMethodName = "/resume.ResumeService/CreateResume"
-	ResumeService_ChangeResume_FullMethodName = "/resume.ResumeService/ChangeResume"
+	ResumeService_CreateResume_FullMethodName         = "/resume.ResumeService/CreateResume"
+	ResumeService_ChangeResume_FullMethodName         = "/resume.ResumeService/ChangeResume"
+	ResumeService_GetResumeByAccountId_FullMethodName = "/resume.ResumeService/GetResumeByAccountId"
 )
 
 // ResumeServiceClient is the client API for ResumeService service.
@@ -29,6 +31,7 @@ const (
 type ResumeServiceClient interface {
 	CreateResume(ctx context.Context, in *CreateResumeReq, opts ...grpc.CallOption) (*CreateResumeRes, error)
 	ChangeResume(ctx context.Context, in *ChangeResumeReq, opts ...grpc.CallOption) (*ChangeResumeRes, error)
+	GetResumeByAccountId(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetResumeByAccountIdRes, error)
 }
 
 type resumeServiceClient struct {
@@ -59,12 +62,23 @@ func (c *resumeServiceClient) ChangeResume(ctx context.Context, in *ChangeResume
 	return out, nil
 }
 
+func (c *resumeServiceClient) GetResumeByAccountId(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetResumeByAccountIdRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetResumeByAccountIdRes)
+	err := c.cc.Invoke(ctx, ResumeService_GetResumeByAccountId_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ResumeServiceServer is the server API for ResumeService service.
 // All implementations must embed UnimplementedResumeServiceServer
 // for forward compatibility
 type ResumeServiceServer interface {
 	CreateResume(context.Context, *CreateResumeReq) (*CreateResumeRes, error)
 	ChangeResume(context.Context, *ChangeResumeReq) (*ChangeResumeRes, error)
+	GetResumeByAccountId(context.Context, *emptypb.Empty) (*GetResumeByAccountIdRes, error)
 	mustEmbedUnimplementedResumeServiceServer()
 }
 
@@ -77,6 +91,9 @@ func (UnimplementedResumeServiceServer) CreateResume(context.Context, *CreateRes
 }
 func (UnimplementedResumeServiceServer) ChangeResume(context.Context, *ChangeResumeReq) (*ChangeResumeRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ChangeResume not implemented")
+}
+func (UnimplementedResumeServiceServer) GetResumeByAccountId(context.Context, *emptypb.Empty) (*GetResumeByAccountIdRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetResumeByAccountId not implemented")
 }
 func (UnimplementedResumeServiceServer) mustEmbedUnimplementedResumeServiceServer() {}
 
@@ -127,6 +144,24 @@ func _ResumeService_ChangeResume_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ResumeService_GetResumeByAccountId_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ResumeServiceServer).GetResumeByAccountId(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ResumeService_GetResumeByAccountId_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ResumeServiceServer).GetResumeByAccountId(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ResumeService_ServiceDesc is the grpc.ServiceDesc for ResumeService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -141,6 +176,10 @@ var ResumeService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ChangeResume",
 			Handler:    _ResumeService_ChangeResume_Handler,
+		},
+		{
+			MethodName: "GetResumeByAccountId",
+			Handler:    _ResumeService_GetResumeByAccountId_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
