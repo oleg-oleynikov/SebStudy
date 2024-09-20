@@ -143,9 +143,9 @@ func (es *JetStreamEventStore) AppendEvents(streamName string, version int, m in
 		return nil
 	}
 
-	if version > 1 {
-		events = events[version:]
-	}
+	// if version > 1 {
+	// 	events = events[version:]
+	// }
 
 	return es.appendEvents(streamName, options, m, events...)
 }
@@ -170,7 +170,6 @@ func (es *JetStreamEventStore) appendEvents(streamName string, o jetstream.Strea
 	}
 
 	for _, msg := range msgs {
-		es.log.Debugf("Subj publishing msg: %s", msg.Subject)
 		_, err := es.js.PublishMsgAsync(msg)
 		if err != nil {
 			return err

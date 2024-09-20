@@ -1,25 +1,25 @@
 BoundedContext Resume {  
-    `domainVisionStatement "Resume realizes the following subdomains: Resume" `
-    `type FEATURE`  
+    domainVisionStatement "Resume realizes the following subdomains: Resume" 
+    type FEATURE  
   
     Aggregate Resume {  
   
         ValueObject FirstName {  
             String firstName  
-            // Не должно быть: [0-9], ъ ь в начале, спец символов, латиница  
-            // Количество символов: 1-25 символов  
+            // Не должно быть: [09], ъ ь в начале, спец символов, латиница  
+            // Количество символов: 125 символов  
         }  
   
         ValueObject LastName {  
             String lastName  
-            // Не должно быть: [0-9], ъ ь в начале, спец символов, латиница  
-            // Количество символов: 1-25 символов  
+            // Не должно быть: [09], ъ ь в начале, спец символов, латиница  
+            // Количество символов: 125 символов  
         }  
   
         ValueObject MiddleName {  
             String middleName  
-            // Не должно быть: [0-9], ъ ьц в начале, спец символов, латиница  
-            // Количество символов: 1-25 символов  
+            // Не должно быть: [09], ъ ьц в начале, спец символов, латиница  
+            // Количество символов: 125 символов  
         }  
   
         ValueObject PhoneNumber {  
@@ -32,7 +32,7 @@ BoundedContext Resume {
         }  
   
         ValueObject BornDate {  
-            - int bornDate (Unix timestamp)  
+             int bornDate //(Unix timestamp)  
             // Не ранее 1900 и не позднее акт. даты  
         }  
   
@@ -85,33 +85,33 @@ BoundedContext Resume {
   
         CommandEvent CreateResume extends @AbstractResumeCommand  
         DomainEvent ResumeCreated {  
-            - Date timestamp  
+            Date timestamp  
             - Resume resume  
         }  
   
         CommandEvent ChangeResume extends @AbstractResumeCommand  
         DomainEvent ResumeChanged {  
-            - Date timestamp  
+            Date timestamp  
             - Resume resume  
         }  
   
         Entity Resume {  
             aggregateRoot   
   
-            - required ResumeId resumeId  
-            - required FirstName firstName d  
-            - required LastName lastName d  
-            - optional MiddleName middleName d  
-            - required PhoneNumber phoneNumber d  
-            - required Education education  
-            - optional AboutMe aboutMe  
-            - required BornDate bornDate  
-            - optional Skills skills  
-            - optional Photo photo d  
-            - required Direction direction  
-            - optional AboutProjects aboutProjects  
-            - optional Portfolio portfolio  
-            // - required StudentId (foreign key to AccountStudent:uuid), передавать в атрибутах  
+             required ResumeId resumeId  
+             required FirstName firstName d  
+             required LastName lastName d  
+             optional MiddleName middleName d  
+             required PhoneNumber phoneNumber d  
+             required Education education  
+             optional AboutMe aboutMe  
+             required BornDate bornDate  
+             optional Skills skills  
+             optional Photo photo d  
+             required Direction direction  
+             optional AboutProjects aboutProjects  
+             optional Portfolio portfolio  
+            //  required StudentId (foreign key to AccountStudent:uuid), передавать в атрибутах  
             /*  
                 ТУТ ПРО JWT  
                 ВАЖНО ОЧЕНЬ  
@@ -126,7 +126,7 @@ BoundedContext Resume {
                             "value": "CgQxMjM0EgV1c2VyMRoFMTIzNDU="  
                         },  
                         "attributes": {  
-                            "jwt": "" //  <- JWT ВОТ ТУТ ЕСЛИ НЕ ПОНЯЛИ  
+                            "jwt": "" //  < JWT ВОТ ТУТ ЕСЛИ НЕ ПОНЯЛИ  
                         },  
                         "source": "example.com",  
                         "spec_version": "1.0",  
@@ -136,145 +136,145 @@ BoundedContext Resume {
             */  
         }  
     }  
-`}  
+} 
   
-`BoundedContext Auth {  
-    `domainVisionStatement "Auth realizes the following subdomains: Auth"`  
-    `type FEATURE  
+BoundedContext Auth {  
+    domainVisionStatement "Auth realizes the following subdomains: Auth"  
+    type FEATURE  
   
     Aggregate Account {  
   
         ValueObject Login {  
-            - string login  
-            // Количество символов 8-30  
+             string login  
+            // Количество символов 830  
         }  
   
         ValueObject Password {  
-            - string password  
+             string password  
             // от 8 символов, 1 цифра, 1 спец. символ, только латиница  
         }  
   
         ValueObject IsCompany {  
-            - bool isCompany  
+             bool isCompany  
         }  
   
         abstract  
         CommandEvent AbstractAccountCommand {  
-            - Account account  
+             Account account  
         }  
         CommandEvent RegisterAccount extends @AbstractResumeCommand  
   
         DomainEvent RegisterAccount {  
-            - required Date timestamp  
-            - required Account account  
+             required Date timestamp  
+             required Account account  
         }  
   
         Entity Account {  
             aggregateRoot  
   
-            - required Login login  
-            - required Password password  
-            - required IsCompany isCompany  
+             required Login login  
+             required Password password  
+             required IsCompany isCompany  
         }  
     }  
-`}  
+}  
   
-`BoundedContext Company {  
-    `domainVisionStatement "Company realizes the following subdomains: Company"  
-    `type FEATURE  
+BoundedContext Company {  
+    domainVisionStatement "Company realizes the following subdomains: Company"  
+    type FEATURE  
   
     Aggregate CompanyAccount{  
         ValueObject Title {  
-            - string title  
+             string title  
             // Название компании  
             // от 1 до 100 символов  
         }  
   
         ValueObject FoundationDate {  
-            - int foundationDate (Unix timestamp)  
+             int foundationDate (Unix timestamp)  
             // Не позднее акт. даты  
         }  
   
         ValueObject AboutCompany {  
-            - string aboutCompany  
+             string aboutCompany  
             // Максимально количество символов 800  
         }  
   
         ValueObject TypeCompany {  
-            - string typeCompany  
+             string typeCompany  
             // Предложенные варианты  
         }  
   
         ValueObject ContractPhoto {  
-            - List<Byte> contractPhoto  
+             List<Byte> contractPhoto  
         }  
   
         ValueObject Contract {  
-            - ContractPhoto contractPhoto // фотка контракта  
-            - string educationId // id учреждения с которым контракт  
+             ContractPhoto contractPhoto // фотка контракта  
+             string educationId // id учреждения с которым контракт  
             // Пока хз как реализуем  
         }  
   
         ValueObject Contracts {  
-            - List<Contract> contracts  
+             List<Contract> contracts  
         }  
   
         ValueObject Location{  
-            - string location  
+             string location  
         }  
         CommandEvent CreateCompanyAccount  
         CommandEvent ChangeCompanyAccount  
     }  
   
     Entity CompanyAccount{  
-        - required Title title  
-        - optional FoundationDate foundationDate  
-        - optional AboutCompany aboutCompany  
-        - required TypeCompany typeCompany  
-        - required Location location  
-        - optional Contracts contracts  
+         required Title title  
+         optional FoundationDate foundationDate  
+         optional AboutCompany aboutCompany  
+         required TypeCompany typeCompany  
+         required Location location  
+         optional Contracts contracts  
     }  
-`}  
+}  
   
-`BoundedContext Student{  
-    `domainVisionStatement "Student realizes the following subdomains: Student"  
-    `type FEATURE  
+BoundedContext Student{  
+    domainVisionStatement "Student realizes the following subdomains: Student"  
+    type FEATURE  
   
     Aggregate StudentAccount{  
         ValueObject FirstName {  
-            - string firstName  
-            // Не должно быть: [0-9], ъ ь в начале, спец символов, латиница  
-            // Количество символов: 1-25 символов  
+             string firstName  
+            // Не должно быть: [09], ъ ь в начале, спец символов, латиница  
+            // Количество символов: 125 символов  
         }  
   
         ValueObject LastName {  
-            - string lastName  
-            // Не должно быть: [0-9], ъ ь в начале, спец символов, латиница  
-            // Количество символов: 1-25 символов  
+             string lastName  
+            // Не должно быть: [09], ъ ь в начале, спец символов, латиница  
+            // Количество символов: 125 символов  
         }  
   
         ValueObject BornDate {  
-             - int bornDate (Unix timestamp)  
+              int bornDate (Unix timestamp)  
             // Не ранее 1900 и не позднее акт. даты  
         }  
   
         ValueObject Education {  
-            - string education  
+             string education  
             // Выбор из выпадающего списка  
             // (Нужна ли валидация?)  
         }  
   
         ValueObject Educations {  
-            - List<Education> educations  
+             List<Education> educations  
         }  
   
         ValueObject Location {  
-            - string location  
+             string location  
             // Выбор из выпадающего списка (Города)  
         }  
   
         ValueObject Locations {  
-            - List<Location> locations  
+             List<Location> locations  
         }  
   
         CommandEvent CreateStudentAccount  
@@ -282,19 +282,19 @@ BoundedContext Resume {
     }  
   
     Entity StudentAccount {  
-    - required FirstName firstName  
-    - required LastName lastName  
-    - required BornDate bornDate  
-    - required Education education  
-    - required Location location  
+     required FirstName firstName  
+     required LastName lastName  
+     required BornDate bornDate  
+     required Education education  
+     required Location location  
     }  
   
-`}  
+}  
   
   
-`BoundedContext Vacancy {  
-    `domainVisionStatement "Vacancy realizes the following subdomains: Vacancy"  
-    `type FEATURE  
+BoundedContext Vacancy {  
+    domainVisionStatement "Vacancy realizes the following subdomains: Vacancy"  
+    type FEATURE  
   
     Aggregate Vacancy {  
         ValueObject VacancyId {  
@@ -302,41 +302,41 @@ BoundedContext Resume {
         }  
   
         ValueObject Photo {  
-            - List<byte> bytes  
+             List<byte> bytes  
             // jpg, jpeg, png  
             // Ограничение по размеру до 4 мб  
         }  
   
         ValueObject Skill {  
-            - string skill  
+             string skill  
             // Не более 30 символов  
         }  
   
         ValueObject ExpectedSkills {  
-            - List<Skill> expectedSkills  
+             List<Skill> expectedSkills  
         }  
   
         ValueObject AboutPractice {  
-            - string aboutPractice  
+             string aboutPractice  
             // Что предстоит делать  
             // Максимальное количество символов 500  
         }  
   
         ValueObject AboutProjects {  
-            - string aboutProjects  
+             string aboutProjects  
             // О проектах, которые были реализованные другими практикантами  
             // Максимальное количество символов 500  
             // Необязательное поле  
         }  
   
         ValueObject Direction {  
-            - string direction  
+             string direction  
             // Выбор из выпадающего списка  
             // (Нужна ли валидация?)  
         }  
   
         ValueObject Directions {  
-            - List<Direction> directions  
+             List<Direction> directions  
         }  
   
         ValueObject CompanyId {  
@@ -347,37 +347,37 @@ BoundedContext Resume {
     Entity Vacancy {  
         aggregateRoot  
   
-        // - optional  Contract contract  
-        - required Photo photo  
-        - required ExpectedSkills expectedSkills  
-        - optional AboutPractice aboutPractice  
-        - required Directions directions  
-        - optional AboutProjects aboutProjects  
-        - required CompanyId companyId  
+        //  optional  Contract contract  
+         required Photo photo  
+         required ExpectedSkills expectedSkills  
+         optional AboutPractice aboutPractice  
+         required Directions directions  
+         optional AboutProjects aboutProjects  
+         required CompanyId companyId  
     }  
   
     abstract  
     CommandEvent AbstractVacancyCommand {  
-        - Vacancy vacancy   
+         Vacancy vacancy   
     }  
   
     CommandEvent CreateVacancy extends @AbstractVacancyCommand  
     CommandEvent UpdateVacancy extends @AbstractVacancyCommand  
   
     DomainEvent VacancyCreated {  
-        - Vacancy vacancy  
-        - Date timestamp  
+         Vacancy vacancy  
+         Date timestamp  
     }  
   
     DomainEvent VacancyUpdated {  
-        - Vacancy vacancy  
-        - Date timestamp  
+         Vacancy vacancy  
+         Date timestamp  
     }  
-`}   
+}   
   
-`BoundedContext Request {  
-    `domainVisionStatement "Request realizes the following subdomains: Request"  
-    `type FEATURE  
+BoundedContext Request {  
+    domainVisionStatement "Request realizes the following subdomains: Request"  
+    type FEATURE  
   
     aggregate Request {  
         ValueObject RequestId {  
@@ -397,30 +397,30 @@ BoundedContext Resume {
   
         ValueObject Status {  
             int status   
-            // Целочисленное значение от 0 до 3 (0 - not read, 1 - read, 2 - accepted, 3 - refused)  
+            // Целочисленное значение от 0 до 3 (0  not read, 1  read, 2  accepted, 3  refused)  
         }  
     }  
   
     Entity Request {  
         aggregateRoot  
   
-        - required RequestId requestId  
-        - required ResumeId resumeId  
-        - required CompanyId companyId  
-        - required Status status  
+         required RequestId requestId  
+         required ResumeId resumeId  
+         required CompanyId companyId  
+         required Status status  
     }  
   
     CommandEvent SendRequest extends @AbstractResumeCommand  
     DomainEvent RequestSended {  
-        - Request request  
-        - Date timestamp  
+         Request request  
+         Date timestamp  
     }  
-`}  
+}  
   
   
-`BoundedContext SelectionRequests {  
-    `domainVisionStatement "SelectionRequests realizes the following subdomains: SelectionRequests"  
-    `type FEATURE  
+BoundedContext SelectionRequests {  
+    domainVisionStatement "SelectionRequests realizes the following subdomains: SelectionRequests"  
+    type FEATURE  
   
     ValueObject RequestId {  
         string requestId  
@@ -428,18 +428,18 @@ BoundedContext Resume {
   
     ValueObject Status {  
             int status   
-            // Целочисленное значение от 0 до 3 (0 - not read, 1 - read, 2 - accepted, 3 - refused)  
+            // Целочисленное значение от 0 до 3 (0  not read, 1  read, 2  accepted, 3  refused)  
     }  
       
     Entity SelectionRequest {  
-        - required RequestId requestId   
-        - required Status status  
+         required RequestId requestId   
+         required Status status  
     }  
   
     CommandEvent ChangeRequestStatus extends @AbstractResumeCommand  
     DomainEvent ChangeRequestStatus {  
-        - SelectionRequest selectionRequest  
-        - Date timestamp  
+         SelectionRequest selectionRequest  
+         Date timestamp  
     }  
   
-`}
+}

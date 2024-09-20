@@ -28,7 +28,7 @@ func (r *Resume) ResumeChanged(e events.ResumeChanged) {
 	}
 
 	newSkills := e.Skills.GetSkills()
-	if len(newSkills) != 0 || !equalSkills(newSkills, r.skills.GetSkills()) {
+	if len(newSkills) != 0 || !EqualSkills(newSkills, r.skills.GetSkills()) {
 		r.skills = e.Skills
 	}
 
@@ -53,7 +53,7 @@ func (r *Resume) ResumeChanged(e events.ResumeChanged) {
 	}
 }
 
-func equalSkills(newSkills []values.Skill, skills []values.Skill) bool {
+func EqualSkills(newSkills []values.Skill, skills []values.Skill) bool {
 	if len(newSkills) != len(skills) {
 		return false
 	}

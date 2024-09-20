@@ -7,6 +7,7 @@ import (
 	"SebStudy/internal/infrastructure/eventsourcing"
 	"SebStudy/logger"
 	"context"
+	"fmt"
 )
 
 type ChangeResumeCommandHandler interface {
@@ -33,9 +34,11 @@ func (c *changeResumeCommandHandler) Handle(ctx context.Context, command *Change
 		return err
 	}
 
-	c.log.Debugf("AFTER LOADING AGGREGATE: %v", resume)
-
+	resumeBefore := resume.Copy()
 	resume.ChangeResume(command.Education, command.AboutMe, command.Skills, command.BirthDate, command.Direction, command.AboutProjects, command.Portfolio)
 
+	if !resumeBefore.HasChanged(resume) {
+		return fmt.Errorf("no changes detected")
+	}
 	return c.es.Save(resume, md)
 }

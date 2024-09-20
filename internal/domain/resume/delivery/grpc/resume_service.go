@@ -120,7 +120,6 @@ func (s *resumeGrpcService) ChangeResume(ctx context.Context, req *pb.ChangeResu
 	}
 
 	birthDate := &values.BirthDate{}
-	s.log.Debugf("Birth date: %v", req.BirthDate)
 	if req.GetBirthDate() != "" {
 		timeBirth, err := time.Parse("2006-01-02", req.GetBirthDate())
 		if err != nil {
