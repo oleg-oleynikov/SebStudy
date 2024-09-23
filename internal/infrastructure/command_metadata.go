@@ -5,9 +5,10 @@ type CommandMetadata struct {
 	UserId      string
 }
 
-func NewCommandMetadata(AggregateId string) CommandMetadata {
+func NewCommandMetadata(AggregateId string, userId string) CommandMetadata {
 	return CommandMetadata{
 		AggregateId: AggregateId,
+		UserId:      userId,
 	}
 }
 

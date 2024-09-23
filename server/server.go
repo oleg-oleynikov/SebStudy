@@ -61,7 +61,7 @@ func (s *server) Run() error {
 
 	eventSerde := eventsourcing.NewEsEventSerde(s.log, typeMapper)
 
-	mongoRepo := repository.NewMongoRepository(s.log, s.cfg, s.mongoClient)
+	mongoRepo := repository.NewResumeMongoRepository(s.log, s.cfg, s.mongoClient)
 	mongoProjection := mongoProjection.NewMongoProjection(s.log, *s.cfg, s.nc, eventSerde, mongoRepo)
 	if err := mongoProjection.Start(context.Background()); err != nil {
 		return err

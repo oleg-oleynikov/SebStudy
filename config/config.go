@@ -23,6 +23,7 @@ type Config struct {
 	GRPC             *GRPC
 	Mongo            *mongodb.Config
 	MongoCollections *MongoCollections
+	AuthServerPort   string
 }
 
 type GRPC struct {
@@ -77,6 +78,7 @@ func InitConfig() *Config {
 		GRPC:             grpc,
 		Mongo:            mongo,
 		MongoCollections: mongoCollections,
+		AuthServerPort:   getEnv("AUTH_SERVER_PORT", "50052"),
 	}
 }
 

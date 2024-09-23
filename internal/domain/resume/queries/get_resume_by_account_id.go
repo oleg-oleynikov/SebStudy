@@ -30,5 +30,10 @@ func NewGetResumeByAccountIdQueryHandler(log logger.Logger, cfg *config.Config, 
 }
 
 func (q *getResumeByAccountIdQueryHandler) Handle(ctx context.Context, query *GetResumeByAccountIdQuery) (*models.ResumeProjection, error) {
-	return nil, nil
+	rp, err := q.mongoRepo.GetByAccountId(ctx, query.AccountId)
+	if err != nil {
+		return nil, err
+	}
+
+	return rp, nil
 }
