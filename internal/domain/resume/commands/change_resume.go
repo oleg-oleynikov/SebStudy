@@ -7,6 +7,7 @@ import (
 	"SebStudy/internal/infrastructure/eventsourcing"
 	"SebStudy/logger"
 	"context"
+	"fmt"
 )
 
 type ChangeResumeCommandHandler interface {
@@ -32,10 +33,13 @@ func (c *changeResumeCommandHandler) Handle(ctx context.Context, command *Change
 	if err := c.es.Load(command.GetAggregateId(), resume); err != nil {
 		return err
 	}
-
-	c.log.Debugf("AFTER LOADING AGGREGATE: %v", resume)
+	resume.Changed = false // TODO: по хорошему чет с этим сделать
 
 	resume.ChangeResume(command.Education, command.AboutMe, command.Skills, command.BirthDate, command.Direction, command.AboutProjects, command.Portfolio)
+
+	if !resume.Changed {
+		return fmt.Errorf("no changes detected")
+	}
 
 	return c.es.Save(resume, md)
 }

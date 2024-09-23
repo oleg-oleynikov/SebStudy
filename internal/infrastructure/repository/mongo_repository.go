@@ -11,7 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type mongoRepository struct {
+type resumeMongoRepository struct {
 	ResumeMongoRepository
 
 	log logger.Logger
@@ -19,15 +19,15 @@ type mongoRepository struct {
 	db  *mongo.Client
 }
 
-func NewMongoRepository(log logger.Logger, cfg *config.Config, db *mongo.Client) *mongoRepository {
-	return &mongoRepository{
+func NewResumeMongoRepository(log logger.Logger, cfg *config.Config, db *mongo.Client) *resumeMongoRepository {
+	return &resumeMongoRepository{
 		log: log,
 		cfg: cfg,
 		db:  db,
 	}
 }
 
-func (m *mongoRepository) Insert(ctx context.Context, resume *models.ResumeProjection) error {
+func (m *resumeMongoRepository) Insert(ctx context.Context, resume *models.ResumeProjection) error {
 	_, err := m.getResumesCollection().InsertOne(ctx, resume, &options.InsertOneOptions{})
 	if err != nil {
 		return err
@@ -36,7 +36,7 @@ func (m *mongoRepository) Insert(ctx context.Context, resume *models.ResumeProje
 	return nil
 }
 
-func (m *mongoRepository) Update(ctx context.Context, resume *models.ResumeProjection) error {
+func (m *resumeMongoRepository) Update(ctx context.Context, resume *models.ResumeProjection) error {
 
 	ops := options.FindOneAndUpdate()
 	ops.SetReturnDocument(options.After)
@@ -49,6 +49,26 @@ func (m *mongoRepository) Update(ctx context.Context, resume *models.ResumeProje
 	return nil
 }
 
-func (m *mongoRepository) getResumesCollection() *mongo.Collection {
+func (m *resumeMongoRepository) GetByAccountId(ctx context.Context, userId string) (*models.ResumeProjection, error) {
+
+	var resumeProjection models.ResumeProjection
+	if err := m.getResumesCollection().FindOne(ctx, bson.M{"userId": userId}).Decode(&resumeProjection); err != nil {
+		return nil, err
+	}
+
+	return &resumeProjection, nil
+}
+
+func (m *resumeMongoRepository) ResumeExistsByAccountId(ctx context.Context, userId string) (bool, error) {
+	filter := bson.M{"userId": userId}
+	count, err := m.getResumesCollection().CountDocuments(ctx, filter)
+	if err != nil {
+		return false, err
+	}
+
+	return count > 0, nil
+}
+
+func (m *resumeMongoRepository) getResumesCollection() *mongo.Collection {
 	return m.db.Database(m.cfg.Mongo.Db).Collection(m.cfg.MongoCollections.Resumes)
 }

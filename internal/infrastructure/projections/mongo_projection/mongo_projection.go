@@ -56,7 +56,7 @@ func (m *mongoProjection) Start(ctx context.Context) error {
 		Name:          "projection_consumer",
 		DeliverPolicy: jetstream.DeliverAllPolicy,
 		AckPolicy:     jetstream.AckExplicitPolicy,
-		AckWait:       45 * time.Second,
+		AckWait:       90 * time.Second,
 		ReplayPolicy:  jetstream.ReplayInstantPolicy,
 		Durable:       "projection_consumer",
 	}
@@ -68,8 +68,9 @@ func (m *mongoProjection) Start(ctx context.Context) error {
 	}
 
 	go func() {
+		ctx := context.Background()
 		for {
-			consumerInfo, err := consumer.Info(context.Background())
+			consumerInfo, err := consumer.Info(ctx)
 			if err != nil {
 				m.log.Fatalf("Failed to get consumer info: %v", err)
 			}

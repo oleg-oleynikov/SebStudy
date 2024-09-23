@@ -8,21 +8,18 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-const (
-	connectTimeout = time.Second * 15
-)
-
 type Config struct {
-	URI      string
-	Username string
-	Password string
-	Db       string
+	URI            string
+	Username       string
+	Password       string
+	Db             string
+	ConnectTimeout time.Duration
 }
 
 func NewMongoDbConn(ctx context.Context, cfg Config) (*mongo.Client, error) {
 	client, err := mongo.Connect(context.Background(),
 		options.Client().ApplyURI(cfg.URI).
-			SetConnectTimeout(connectTimeout))
+			SetConnectTimeout(cfg.ConnectTimeout))
 	if err != nil {
 		return nil, err
 	}

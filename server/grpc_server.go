@@ -5,6 +5,7 @@ import (
 
 	delivery "SebStudy/internal/domain/resume/delivery/grpc"
 	"SebStudy/pb"
+	"SebStudy/pkg/interceptors"
 
 	"google.golang.org/grpc"
 )
@@ -15,7 +16,10 @@ func (s *server) NewResumeGrpcServer() (func() error, *grpc.Server, error) {
 		return nil, nil, err
 	}
 
-	grpcServer := grpc.NewServer()
+	interceptorManager := interceptors.NewInterceptorManager(s.log, s.cfg)
+
+	grpcServer := grpc.NewServer(grpc.ChainUnaryInterceptor(interceptorManager.AuthInterceptor))
+
 	resumeService := delivery.NewResumeGrpcService(s.log, s.rs)
 	pb.RegisterResumeServiceServer(grpcServer, resumeService)
 	// cloudeventService := adapters.NewCloudEventService(s.log, s.cmdDispatcher, s.cmdAdapter)

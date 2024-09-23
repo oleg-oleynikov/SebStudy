@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+package pb;
+
+import "google/protobuf/empty.proto";
+// import "";
+
+option go_package = "./pb";
+
+message Email {
+  string email = 1;
+}
+
+message Password {
+  string password = 1;
+}
+
+message Account {
+  Email email = 1;
+  Password password = 2;
+  bool isCompany = 3;
+}
+
+message LoginData{
+  Email email = 1;
+  Password password = 2;
+}
+message Token{
+  string token = 1;
+}
+
+message RefreshToken{
+  Token refreshToken = 1;
+}
+
+message AccessToken{
+  Token accessToken = 1;
+}
+
+message PairTokens{
+  AccessToken accessToken = 1;
+  RefreshToken refreshToken = 2;
+}
+
+message NewPassword{
+  Password oldPassword = 1;
+  Password password = 2;
+}
+
+message NewEmail{
+  Email email = 1;
+}
+
+message VerifyTokenResponse{
+  bool status = 1;
+  string accountId = 2;
+}
+
+service SSOServerService {
+  rpc SignUp(Account) returns (PairTokens){};
+  rpc Login(LoginData) returns (PairTokens){};
+  rpc VerifyToken (Token) returns (VerifyTokenResponse) {};
+  rpc Logout(google.protobuf.Empty) returns (google.protobuf.Empty) {};
+  rpc RotateTokens(RefreshToken) returns (PairTokens){};
+  rpc ChangePassword(NewPassword) returns (PairTokens) {};
+  rpc ChangeEmail(NewEmail) returns (PairTokens) {};
+}

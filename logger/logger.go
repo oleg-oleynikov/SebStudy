@@ -78,9 +78,9 @@ func (l *appLogger) Fatalf(format string, v ...interface{}) {
 }
 
 func (l *appLogger) Fatal(args ...interface{}) {
-	l.logger.Fatal(args)
+	l.logger.Fatal(args...)
 }
 
 func (l *appLogger) Error(args ...interface{}) {
-	l.logger.Error(args)
+	l.logger.Error(args...)
 }

@@ -16,11 +16,13 @@ type Resume struct {
 	direction     values.Direction
 	aboutProjects values.AboutProjects
 	portfolio     values.Portfolio
+	Changed       bool
 }
 
 func NewResume() *Resume {
 	r := &Resume{
 		AggregateRootBase: eventsourcing.NewAggregateRootBase(),
+		Changed:           false,
 	}
 
 	r.registerHandlers()
