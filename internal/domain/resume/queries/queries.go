@@ -13,7 +13,7 @@ type ResumeQueries struct {
 	GetResumeById           GetResumeByIdQueryHandler
 }
 
-func NewResumeQueries(log logger.Logger, cfg *config.Config, es eventsourcing.AggregateStore, mongoRepo repository.ResumeMongoRepository) *ResumeQueries {
+func NewResumeQueries(log logger.Logger, cfg *config.Config, es eventsourcing.AggregateStore, mongoRepo repository.ResumeRepository) *ResumeQueries {
 	return &ResumeQueries{
 		GetResumeByAccountId:    NewGetResumeByAccountIdQueryHandler(log, cfg, es, mongoRepo),
 		ResumeExistsByAccountId: NewResumeExistsByAccountIdHandler(log, cfg, es, mongoRepo),

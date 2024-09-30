@@ -16,10 +16,10 @@ type getResumeExistsByAccountIdHandler struct {
 	log       logger.Logger
 	cfg       *config.Config
 	es        eventsourcing.AggregateStore
-	mongoRepo repository.ResumeMongoRepository
+	mongoRepo repository.ResumeRepository
 }
 
-func NewResumeExistsByAccountIdHandler(log logger.Logger, cfg *config.Config, es eventsourcing.AggregateStore, mongoRepo repository.ResumeMongoRepository) *getResumeExistsByAccountIdHandler {
+func NewResumeExistsByAccountIdHandler(log logger.Logger, cfg *config.Config, es eventsourcing.AggregateStore, mongoRepo repository.ResumeRepository) *getResumeExistsByAccountIdHandler {
 	return &getResumeExistsByAccountIdHandler{
 		log:       log,
 		cfg:       cfg,

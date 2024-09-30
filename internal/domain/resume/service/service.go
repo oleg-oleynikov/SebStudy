@@ -14,7 +14,7 @@ type ResumeService struct {
 	Queries  *queries.ResumeQueries
 }
 
-func NewResumeService(log logger.Logger, cfg *config.Config, es eventsourcing.AggregateStore, mongoRepo repository.ResumeMongoRepository) *ResumeService {
+func NewResumeService(log logger.Logger, cfg *config.Config, es eventsourcing.AggregateStore, mongoRepo repository.ResumeRepository) *ResumeService {
 	resumeCommands := commands.NewResumeCommands(log, cfg, es)
 	resumeQueries := queries.NewResumeQueries(log, cfg, es, mongoRepo)
 	return &ResumeService{

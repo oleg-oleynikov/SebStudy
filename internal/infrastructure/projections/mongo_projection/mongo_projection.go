@@ -21,10 +21,10 @@ type mongoProjection struct {
 	cfg       config.Config
 	js        jetstream.JetStream
 	serde     eventsourcing.EventSerde
-	mongoRepo repository.ResumeMongoRepository
+	mongoRepo repository.ResumeRepository
 }
 
-func NewMongoProjection(log logger.Logger, cfg config.Config, nc *nats.Conn, serde eventsourcing.EventSerde, mongoRepo repository.ResumeMongoRepository) *mongoProjection {
+func NewMongoProjection(log logger.Logger, cfg config.Config, nc *nats.Conn, serde eventsourcing.EventSerde, mongoRepo repository.ResumeRepository) *mongoProjection {
 	js, err := jetstream.New(nc)
 	if err != nil {
 		log.Fatalf("(mongoProjection) Failed to get jetstream: %v", err)

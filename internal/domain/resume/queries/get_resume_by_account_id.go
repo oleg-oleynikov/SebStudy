@@ -17,10 +17,10 @@ type getResumeByAccountIdQueryHandler struct {
 	log       logger.Logger
 	cfg       *config.Config
 	es        eventsourcing.AggregateStore
-	mongoRepo repository.ResumeMongoRepository
+	mongoRepo repository.ResumeRepository
 }
 
-func NewGetResumeByAccountIdQueryHandler(log logger.Logger, cfg *config.Config, es eventsourcing.AggregateStore, mongoRepo repository.ResumeMongoRepository) *getResumeByAccountIdQueryHandler {
+func NewGetResumeByAccountIdQueryHandler(log logger.Logger, cfg *config.Config, es eventsourcing.AggregateStore, mongoRepo repository.ResumeRepository) *getResumeByAccountIdQueryHandler {
 	return &getResumeByAccountIdQueryHandler{
 		log:       log,
 		cfg:       cfg,
