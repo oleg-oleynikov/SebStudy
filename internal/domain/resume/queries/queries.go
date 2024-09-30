@@ -10,12 +10,14 @@ import (
 type ResumeQueries struct {
 	GetResumeByAccountId    GetResumeByAccountIdQueryHandler
 	ResumeExistsByAccountId ResumeExistsByAccountIdHandler
+	GetResumeById           GetResumeByIdQueryHandler
 }
 
 func NewResumeQueries(log logger.Logger, cfg *config.Config, es eventsourcing.AggregateStore, mongoRepo repository.ResumeMongoRepository) *ResumeQueries {
 	return &ResumeQueries{
 		GetResumeByAccountId:    NewGetResumeByAccountIdQueryHandler(log, cfg, es, mongoRepo),
 		ResumeExistsByAccountId: NewResumeExistsByAccountIdHandler(log, cfg, es, mongoRepo),
+		GetResumeById:           NewGetResumeByIdQueryHandler(log, cfg, es, mongoRepo),
 	}
 }
 
@@ -33,4 +35,12 @@ type ResumeExistsByAccountIdQuery struct {
 
 func NewResumeExistsByAccountId(accountId string) *ResumeExistsByAccountIdQuery {
 	return &ResumeExistsByAccountIdQuery{AccountId: accountId}
+}
+
+type GetResumeByIdQuery struct {
+	ResumeId string
+}
+
+func NewGetResumeByIdQuery(resumeId string) *GetResumeByIdQuery {
+	return &GetResumeByIdQuery{ResumeId: resumeId}
 }

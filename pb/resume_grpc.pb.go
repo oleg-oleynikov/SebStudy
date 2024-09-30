@@ -23,6 +23,7 @@ const (
 	ResumeService_CreateResume_FullMethodName         = "/resume.ResumeService/CreateResume"
 	ResumeService_ChangeResume_FullMethodName         = "/resume.ResumeService/ChangeResume"
 	ResumeService_GetResumeByAccountId_FullMethodName = "/resume.ResumeService/GetResumeByAccountId"
+	ResumeService_GetResumeById_FullMethodName        = "/resume.ResumeService/GetResumeById"
 )
 
 // ResumeServiceClient is the client API for ResumeService service.
@@ -32,6 +33,7 @@ type ResumeServiceClient interface {
 	CreateResume(ctx context.Context, in *CreateResumeReq, opts ...grpc.CallOption) (*CreateResumeRes, error)
 	ChangeResume(ctx context.Context, in *ChangeResumeReq, opts ...grpc.CallOption) (*ChangeResumeRes, error)
 	GetResumeByAccountId(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetResumeByAccountIdRes, error)
+	GetResumeById(ctx context.Context, in *GetResumeByIdReq, opts ...grpc.CallOption) (*GetResumeByIdRes, error)
 }
 
 type resumeServiceClient struct {
@@ -72,6 +74,16 @@ func (c *resumeServiceClient) GetResumeByAccountId(ctx context.Context, in *empt
 	return out, nil
 }
 
+func (c *resumeServiceClient) GetResumeById(ctx context.Context, in *GetResumeByIdReq, opts ...grpc.CallOption) (*GetResumeByIdRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetResumeByIdRes)
+	err := c.cc.Invoke(ctx, ResumeService_GetResumeById_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ResumeServiceServer is the server API for ResumeService service.
 // All implementations must embed UnimplementedResumeServiceServer
 // for forward compatibility
@@ -79,6 +91,7 @@ type ResumeServiceServer interface {
 	CreateResume(context.Context, *CreateResumeReq) (*CreateResumeRes, error)
 	ChangeResume(context.Context, *ChangeResumeReq) (*ChangeResumeRes, error)
 	GetResumeByAccountId(context.Context, *emptypb.Empty) (*GetResumeByAccountIdRes, error)
+	GetResumeById(context.Context, *GetResumeByIdReq) (*GetResumeByIdRes, error)
 	mustEmbedUnimplementedResumeServiceServer()
 }
 
@@ -94,6 +107,9 @@ func (UnimplementedResumeServiceServer) ChangeResume(context.Context, *ChangeRes
 }
 func (UnimplementedResumeServiceServer) GetResumeByAccountId(context.Context, *emptypb.Empty) (*GetResumeByAccountIdRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetResumeByAccountId not implemented")
+}
+func (UnimplementedResumeServiceServer) GetResumeById(context.Context, *GetResumeByIdReq) (*GetResumeByIdRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetResumeById not implemented")
 }
 func (UnimplementedResumeServiceServer) mustEmbedUnimplementedResumeServiceServer() {}
 
@@ -162,6 +178,24 @@ func _ResumeService_GetResumeByAccountId_Handler(srv interface{}, ctx context.Co
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ResumeService_GetResumeById_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetResumeByIdReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ResumeServiceServer).GetResumeById(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ResumeService_GetResumeById_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ResumeServiceServer).GetResumeById(ctx, req.(*GetResumeByIdReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ResumeService_ServiceDesc is the grpc.ServiceDesc for ResumeService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -180,6 +214,10 @@ var ResumeService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetResumeByAccountId",
 			Handler:    _ResumeService_GetResumeByAccountId_Handler,
+		},
+		{
+			MethodName: "GetResumeById",
+			Handler:    _ResumeService_GetResumeById_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

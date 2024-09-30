@@ -46,10 +46,6 @@ func (s *server) Run() error {
 	defer s.nc.Close()
 	s.log.Infof("Nats connected, on %s", s.cfg.NatsUrl)
 
-	// cloudeventMapper := util.NewCloudEventCommandAdapter()
-	// mapping.RegisterCloudeventResumeTypes(cloudeventMapper)
-
-	// s.cmdAdapter = cloudeventMapper
 	mongoDBConn, err := mongodb.NewMongoDbConn(context.Background(), *s.cfg.Mongo)
 	if err != nil {
 		return err
@@ -67,7 +63,7 @@ func (s *server) Run() error {
 		return err
 	}
 
-	jetstreamEventStore := eventsourcing.NewJetStreamEventStore(s.log, s.nc, eventSerde, "sebstudy")
+	jetstreamEventStore := eventsourcing.NewJetStreamEventStore(s.log, s.nc, eventSerde, "sebstudy-")
 	aggregateStore := eventsourcing.NewEsAggregateStore(s.log, jetstreamEventStore)
 
 	resumeService := service.NewResumeService(s.log, s.cfg, aggregateStore, mongoRepo)

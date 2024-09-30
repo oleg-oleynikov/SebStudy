@@ -10,20 +10,15 @@ import (
 	"github.com/joho/godotenv"
 )
 
-var (
-	Cfg *Config
-)
-
 type Config struct {
 	Env              string
 	ImageUploadPath  string
 	NatsUrl          string
-	ServerPort       string
 	Logger           *logger.Config
 	GRPC             *GRPC
 	Mongo            *mongodb.Config
 	MongoCollections *MongoCollections
-	AuthServerPort   string
+	AuthServerURL    string
 }
 
 type GRPC struct {
@@ -50,7 +45,7 @@ func InitConfig() *Config {
 	}
 
 	grpc := &GRPC{
-		Port: getEnv("GRPC_PORT", ":50051"),
+		Port: getEnv("GRPC_PORT", ":50055"),
 	}
 
 	mongoConnTimeout, err := time.ParseDuration(getEnv("MONGO_CONNECT_TIMEOUT", "5s"))
@@ -72,13 +67,12 @@ func InitConfig() *Config {
 
 	return &Config{
 		ImageUploadPath:  getEnv("IMAGE_UPLOAD_PATH", "./uploads"),
-		NatsUrl:          getEnv("NATS_URL", "nats://127.0.0.1:4222"),
-		ServerPort:       getEnv("SERVER_PORT", "50051"),
+		NatsUrl:          getEnv("NATS_URL", "nats://resume-nats:4225"),
 		Logger:           loggerConfig,
 		GRPC:             grpc,
 		Mongo:            mongo,
 		MongoCollections: mongoCollections,
-		AuthServerPort:   getEnv("AUTH_SERVER_PORT", "50052"),
+		AuthServerURL:    getEnv("AUTH_SERVER_URL", "sso-service:50052"),
 	}
 }
 

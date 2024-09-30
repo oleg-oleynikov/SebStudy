@@ -59,6 +59,16 @@ func (m *resumeMongoRepository) GetByAccountId(ctx context.Context, userId strin
 	return &resumeProjection, nil
 }
 
+func (m *resumeMongoRepository) GetById(ctx context.Context, resumeId string) (*models.ResumeProjection, error) {
+
+	var resumeProjection models.ResumeProjection
+	if err := m.getResumesCollection().FindOne(ctx, bson.M{"_id": resumeId}).Decode(&resumeProjection); err != nil {
+		return nil, err
+	}
+
+	return &resumeProjection, nil
+}
+
 func (m *resumeMongoRepository) ResumeExistsByAccountId(ctx context.Context, userId string) (bool, error) {
 	filter := bson.M{"userId": userId}
 	count, err := m.getResumesCollection().CountDocuments(ctx, filter)

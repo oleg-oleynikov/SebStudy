@@ -54,7 +54,7 @@ func GetStreamName(a AggregateRoot) string {
 }
 
 func GetStreamNameWithId(a AggregateRoot, id string) string {
-	return getValueType(a).Name() + "_" + id
+	return getValueType(a).Name() + "-" + id
 }
 
 func (a *AggregateRootBase) Register(event interface{}, handler func(interface{})) {

@@ -17,7 +17,7 @@ type InterceptorManager struct {
 }
 
 func NewInterceptorManager(log logger.Logger, cfg *config.Config) *InterceptorManager {
-	conn, err := grpc.NewClient("localhost:"+cfg.AuthServerPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient(cfg.AuthServerURL, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("Failed to connect: %v", err)
 		return nil

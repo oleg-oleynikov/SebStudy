@@ -196,7 +196,7 @@ func (s *resumeGrpcService) ChangeResume(ctx context.Context, req *pb.ChangeResu
 func (s *resumeGrpcService) GetResumeByAccountId(ctx context.Context, empty *emptypb.Empty) (*pb.GetResumeByAccountIdRes, error) {
 	accountId, ok := ctx.Value(interceptors.AccountIdKey).(string)
 	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "CetResumeByAccountId. Missing token")
+		return nil, status.Error(codes.Unauthenticated, "GetResumeByAccountId. Missing token")
 	}
 
 	query := queries.NewGetResumeByAccountIdQuery(accountId)
@@ -206,6 +206,18 @@ func (s *resumeGrpcService) GetResumeByAccountId(ctx context.Context, empty *emp
 	}
 
 	return &pb.GetResumeByAccountIdRes{
+		Resume: models.ResumeProjectionToProto(rp),
+	}, nil
+}
+
+func (s *resumeGrpcService) GetResumeById(ctx context.Context, req *pb.GetResumeByIdReq) (*pb.GetResumeByIdRes, error) {
+	query := queries.NewGetResumeByIdQuery(req.GetResumeId())
+	rp, err := s.rs.Queries.GetResumeById.Handle(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.GetResumeByIdRes{
 		Resume: models.ResumeProjectionToProto(rp),
 	}, nil
 }

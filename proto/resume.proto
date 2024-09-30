@@ -75,8 +75,17 @@ message GetResumeByAccountIdRes{
     Resume resume = 1;
 }
 
+message GetResumeByIdReq {
+    string resumeId = 1;
+}
+
+message GetResumeByIdRes {
+    Resume resume = 1;
+}
+
 service ResumeService {
     rpc CreateResume(CreateResumeReq) returns (CreateResumeRes){};
     rpc ChangeResume(ChangeResumeReq) returns (ChangeResumeRes){};
     rpc GetResumeByAccountId(google.protobuf.Empty) returns (GetResumeByAccountIdRes){};
+    rpc GetResumeById(GetResumeByIdReq) returns (GetResumeByIdRes){};
 }

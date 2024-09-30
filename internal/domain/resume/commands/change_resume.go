@@ -33,6 +33,7 @@ func (c *changeResumeCommandHandler) Handle(ctx context.Context, command *Change
 	if err := c.es.Load(command.GetAggregateId(), resume); err != nil {
 		return err
 	}
+
 	resume.Changed = false // TODO: по хорошему чет с этим сделать
 
 	resume.ChangeResume(command.Education, command.AboutMe, command.Skills, command.BirthDate, command.Direction, command.AboutProjects, command.Portfolio)

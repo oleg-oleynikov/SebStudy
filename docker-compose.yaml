@@ -1,10 +1,23 @@
 # version: '3.8'
 
 services:
+  app:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - "50055:50055"
+    env_file:
+      - .env
+    restart: always
+    depends_on:
+      - nats  
+      - mongodb
+
   nats:
     image: nats:latest
     ports:
-      - "4223:4222"
+      - "4240:4222"
     volumes:
       - ./nats-config.conf:/etc/nats/nats-config.conf
     entrypoint: ["nats-server", "-c", "/etc/nats/nats-config.conf"]
@@ -21,22 +34,6 @@ services:
         source: mongodb-volume-data
         target: /var/lib/mongodb
 
-  app:
-    build:
-      context: .
-      dockerfile: ./Dockerfile
-    ports:
-      - "50055:50051"
-    environment:
-      - NATS_URL=nats://nats:4222
-    env_file:
-      - .env
-    restart: always
-    depends_on:
-      - nats  
-      - mongodb
-
 volumes:
-  eventstore-volume-data:
-  eventstore-volume-logs:
   mongodb-volume-data:
+

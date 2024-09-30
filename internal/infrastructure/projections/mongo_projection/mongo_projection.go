@@ -9,6 +9,7 @@ import (
 	"SebStudy/logger"
 	"context"
 	"fmt"
+	"reflect"
 	"time"
 
 	"github.com/nats-io/nats.go"
@@ -111,7 +112,7 @@ func (m *mongoProjection) When(ctx context.Context, event interface{}, md *infra
 	case events.ResumeChanged:
 		return m.onResumeChanged(ctx, event, md)
 	default:
-		m.log.Debugf("(mongoProjection) [When unknown EventType] eventType: {%s}")
+		m.log.Debugf("(mongoProjection) [When unknown EventType] eventType: {%s}", reflect.TypeOf(event).Name())
 		return fmt.Errorf("invalid event type")
 	}
 }

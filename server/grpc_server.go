@@ -11,7 +11,7 @@ import (
 )
 
 func (s *server) NewResumeGrpcServer() (func() error, *grpc.Server, error) {
-	l, err := net.Listen("tcp", s.cfg.ServerPort)
+	l, err := net.Listen("tcp", s.cfg.GRPC.Port)
 	if err != nil {
 		return nil, nil, err
 	}
