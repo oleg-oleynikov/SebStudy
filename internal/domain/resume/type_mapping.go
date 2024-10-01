@@ -10,7 +10,7 @@ import (
 
 func RegisterResumeMappingTypes(tm *eventsourcing.TypeMapper) {
 
-	tm.MapEvent(infrastructure.GetValueType(events.ResumeCreated{}), "resumeCreated",
+	tm.MapEvent(infrastructure.GetValueType(events.ResumeCreated{}), "ResumeCreated",
 		func(d map[string]interface{}) interface{} {
 			createdAt, _ := time.Parse("2006-01-02 15:04:05.999999 -0700 MST", d["createdAt"].(string))
 			skills := []values.Skill{}
@@ -39,7 +39,7 @@ func RegisterResumeMappingTypes(tm *eventsourcing.TypeMapper) {
 				skills = append(skills, s.Skill)
 			}
 
-			return "resumeCreated",
+			return "ResumeCreated",
 				map[string]interface{}{
 					"resumeId":      event.ResumeId,
 					"education":     event.Education.GetEducation(),
@@ -53,7 +53,7 @@ func RegisterResumeMappingTypes(tm *eventsourcing.TypeMapper) {
 				}
 		})
 
-	tm.MapEvent(infrastructure.GetValueType(events.ResumeChanged{}), "resumeChanged",
+	tm.MapEvent(infrastructure.GetValueType(events.ResumeChanged{}), "ResumeChanged",
 		func(d map[string]interface{}) interface{} {
 			createdAt, _ := time.Parse("2006-01-02 15:04:05.999999 -0700 MST", d["createdAt"].(string))
 
@@ -87,7 +87,7 @@ func RegisterResumeMappingTypes(tm *eventsourcing.TypeMapper) {
 				skills = append(skills, s.Skill)
 			}
 
-			return "resumeChanged",
+			return "ResumeChanged",
 				map[string]interface{}{
 					"resumeId":      event.ResumeId,
 					"education":     event.Education.GetEducation(),
