@@ -6,9 +6,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/google/uuid"
-	"github.com/nats-io/nats.go"
-	"github.com/nats-io/nats.go/jetstream"
+	"github.com/EventStore/EventStore-Client-Go/esdb"
+	"github.com/gofrs/uuid"
 )
 
 type EsEventSerde struct {
@@ -32,11 +31,11 @@ func GenerateUuidWithoutDashes() string {
 	return uuidString
 }
 
-func (e *EsEventSerde) Serialize(streamName string, event interface{}, m *infrastructure.EventMetadata) (*nats.Msg, error) {
-	typeToData, err := e.typeMapper.GetTypeToData(infrastructure.GetValueType(event))
+func (e *EsEventSerde) Serialize(event interface{}, m *infrastructure.EventMetadata) (esdb.EventData, error) {
+	typeToData, err := e.typeMapper.GetTypeToData(getValueType(event))
 	if err != nil {
 		e.log.Debugf("Failed to get type to data: %v", err)
-		return nil, err
+		return esdb.EventData{}, err
 	}
 
 	id, _ := uuid.NewV7()
@@ -45,58 +44,39 @@ func (e *EsEventSerde) Serialize(streamName string, event interface{}, m *infras
 	dataBytes, err := json.Marshal(jsonData)
 	if err != nil {
 		e.log.Debugf("Failed to marshal event to json: %v", err)
-		return nil, err
+		return esdb.EventData{}, err
 	}
 
 	metadataBytes, err := json.Marshal(m)
 	if err != nil {
 		e.log.Debugf("Failed to marshal event metadata to json: %v", err)
-		return nil, err
+		return esdb.EventData{}, err
 	}
 
-	eventData := NewEventData(dataBytes, metadataBytes)
-	bytes, err := json.Marshal(eventData)
-	if err != nil {
-		e.log.Debugf("Failed serialize to event data: %v", err)
-		return nil, err
+	eventData := esdb.EventData{
+		EventID:     id,
+		EventType:   name,
+		ContentType: esdb.JsonContentType,
+		Data:        dataBytes,
+		Metadata:    metadataBytes,
 	}
 
-	header := nats.Header{
-		"eventType":   {name},
-		"aggregateId": {m.AggregateId},
-		"userId":      {m.UserId},
-	}
-
-	return &nats.Msg{
-		Subject: fmt.Sprintf("%s.%s_%s", streamName, name, id),
-		Data:    bytes,
-		Header:  header,
-	}, nil
+	return eventData, nil
 }
 
-func (e *EsEventSerde) Deserialize(data jetstream.Msg) (interface{}, *infrastructure.EventMetadata, error) {
-	eventType := data.Headers().Get("eventType")
-	if eventType == "" {
-		return nil, nil, fmt.Errorf("msg not contains header eventType")
-	}
-
-	dataToType, err := e.typeMapper.GetDataToType(eventType)
+func (e *EsEventSerde) Deserialize(data *esdb.ResolvedEvent) (interface{}, *infrastructure.EventMetadata, error) {
+	dataToType, err := e.typeMapper.GetDataToType(data.Event.EventType)
 	if err != nil {
-		return nil, nil, err
-	}
-
-	eventData := EventData{}
-	if err := json.Unmarshal(data.Data(), &eventData); err != nil {
 		return nil, nil, err
 	}
 
 	m := map[string]interface{}{}
-	if err := json.Unmarshal(eventData.DataBytes, &m); err != nil {
+	if err := json.Unmarshal(data.Event.Data, &m); err != nil {
 		return nil, nil, err
 	}
 
 	metadata := infrastructure.EventMetadata{}
-	if err := json.Unmarshal(eventData.MetadataBytes, &metadata); err != nil {
+	if err := json.Unmarshal(data.Event.UserMetadata, &metadata); err != nil {
 		return nil, nil, err
 	}
 

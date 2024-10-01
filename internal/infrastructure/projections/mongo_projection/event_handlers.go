@@ -25,7 +25,7 @@ func (o *mongoProjection) onResumeCreate(ctx context.Context, event events.Resum
 		UserId:        md.UserId,
 	}
 
-	return o.mongoRepo.Insert(ctx, rp)
+	return o.resumeRepo.Insert(ctx, rp)
 }
 
 func (o *mongoProjection) onResumeChanged(ctx context.Context, event events.ResumeChanged, md *infrastructure.EventMetadata) error {
@@ -46,5 +46,5 @@ func (o *mongoProjection) onResumeChanged(ctx context.Context, event events.Resu
 		UserId:        md.UserId,
 	}
 
-	return o.mongoRepo.Update(ctx, rp)
+	return o.resumeRepo.Update(ctx, rp)
 }

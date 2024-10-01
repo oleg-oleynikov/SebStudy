@@ -1,7 +1,7 @@
 # version: '3.8'
 
 services:
-  app:
+  resume-server:
     build:
       context: .
       dockerfile: ./Dockerfile
@@ -11,16 +11,28 @@ services:
       - .env
     restart: always
     depends_on:
-      - nats  
+      - eventstore.db
       - mongodb
+      - sso-service
 
-  nats:
-    image: nats:latest
+  eventstore.db:
+    image: eventstore/eventstore:24.2.0-jammy
+    environment:
+      - EVENTSTORE_CLUSTER_SIZE=1
+      - EVENTSTORE_RUN_PROJECTIONS=All
+      - EVENTSTORE_START_STANDARD_PROJECTIONS=true
+      - EVENTSTORE_HTTP_PORT=2113
+      - EVENTSTORE_INSECURE=true
+      - EVENTSTORE_ENABLE_ATOM_PUB_OVER_HTTP=true
     ports:
-      - "4240:4222"
+      - "2114:2113"
     volumes:
-      - ./nats-config.conf:/etc/nats/nats-config.conf
-    entrypoint: ["nats-server", "-c", "/etc/nats/nats-config.conf"]
+      - type: volume
+        source: eventstore-volume-data
+        target: /var/lib/eventstore
+      - type: volume
+        source: eventstore-volume-logs
+        target: /var/log/eventstore
 
   mongodb:
     image: mongodb/mongodb-community-server:6.0-ubi8
@@ -33,7 +45,17 @@ services:
       - type: volume
         source: mongodb-volume-data
         target: /var/lib/mongodb
+  
+  sso-service:
+    image: sso-server-app
+    ports:
+      - "50052:50052"
+    depends_on:
+      - eventstore.db
+      - mongodb
 
 volumes:
   mongodb-volume-data:
+  eventstore-volume-data:
+  eventstore-volume-logs:
 

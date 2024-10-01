@@ -3,11 +3,10 @@ package eventsourcing
 import (
 	"SebStudy/internal/infrastructure"
 
-	"github.com/nats-io/nats.go"
-	"github.com/nats-io/nats.go/jetstream"
+	"github.com/EventStore/EventStore-Client-Go/esdb"
 )
 
 type EventSerde interface {
-	Serialize(streamName string, event interface{}, md *infrastructure.EventMetadata) (*nats.Msg, error)
-	Deserialize(data jetstream.Msg) (interface{}, *infrastructure.EventMetadata, error)
+	Serialize(event interface{}, md *infrastructure.EventMetadata) (esdb.EventData, error)
+	Deserialize(data *esdb.ResolvedEvent) (interface{}, *infrastructure.EventMetadata, error)
 }

@@ -14,19 +14,16 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/nats-io/nats.go"
+	"github.com/EventStore/EventStore-Client-Go/esdb"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type server struct {
 	cfg         *config.Config
 	log         logger.Logger
-	nc          *nats.Conn
+	esdb        *esdb.Client
 	mongoClient *mongo.Client
 	rs          *service.ResumeService
-
-	// cmdDispatcher ports.CommandDispatcher
-	// cmdAdapter    *util.CloudEventCommandAdapter
 }
 
 func NewServer(cfg *config.Config, log logger.Logger) *server {
@@ -37,14 +34,11 @@ func (s *server) Run() error {
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
 
-	natsConn, err := nats.Connect(s.cfg.NatsUrl)
+	esdbCl, err := createESDBClient(s.cfg.EventStoreConnectionString)
 	if err != nil {
 		return err
 	}
-
-	s.nc = natsConn
-	defer s.nc.Close()
-	s.log.Infof("Nats connected, on %s", s.cfg.NatsUrl)
+	s.esdb = esdbCl
 
 	mongoDBConn, err := mongodb.NewMongoDbConn(context.Background(), *s.cfg.Mongo)
 	if err != nil {
@@ -58,24 +52,16 @@ func (s *server) Run() error {
 	eventSerde := eventsourcing.NewEsEventSerde(s.log, typeMapper)
 
 	mongoRepo := repository.NewResumeMongoRepository(s.log, s.cfg, s.mongoClient)
-	mongoProjection := mongoProjection.NewMongoProjection(s.log, *s.cfg, s.nc, eventSerde, mongoRepo)
+	mongoProjection := mongoProjection.NewMongoProjection(s.log, *s.cfg, s.esdb, eventSerde, mongoRepo)
 	if err := mongoProjection.Start(context.Background()); err != nil {
 		return err
 	}
 
-	jetstreamEventStore := eventsourcing.NewJetStreamEventStore(s.log, s.nc, eventSerde, "sebstudy-")
-	aggregateStore := eventsourcing.NewEsAggregateStore(s.log, jetstreamEventStore)
+	eventStore := eventsourcing.NewEsEventStore(s.log, s.esdb, eventSerde, s.cfg.EventStorePrefix)
+	aggregateStore := eventsourcing.NewEsAggregateStore(s.log, eventStore)
 
 	resumeService := service.NewResumeService(s.log, s.cfg, aggregateStore, mongoRepo)
 	s.rs = resumeService
-
-	// resumeRepo := resume.NewEsResumeRepository(aggregateStore)
-	// resumeCmdHandlers := resume.NewResumeCommandHandlers(resumeRepo)
-
-	// cmdHandlerMap := infrastructure.NewCommandHandlerMap()
-	// resumeCmdHandlers.RegisterCommands(cmdHandlerMap)
-	// dispatcher := infrastructure.NewDispatcher(cmdHandlerMap)
-	// s.cmdDispatcher = dispatcher
 
 	s.initMongoDBCollections(context.Background())
 

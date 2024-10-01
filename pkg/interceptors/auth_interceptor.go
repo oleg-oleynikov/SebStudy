@@ -43,7 +43,7 @@ func (m *InterceptorManager) AuthInterceptor(
 	accountId, err := m.callVerifyToken(ctx, accessToken)
 	if err != nil {
 		m.log.Debugf("AuthInterceptor. Failed to call verify token: %v")
-		return nil, status.Error(codes.Internal, "AuthInterceptor. Failed to call verify token")
+		return nil, status.Error(codes.Internal, "AuthInterceptor. Failed to verify token")
 	}
 
 	newCtx := context.WithValue(ctx, AccountIdKey, accountId)
@@ -58,10 +58,12 @@ func (m *InterceptorManager) callVerifyToken(ctx context.Context, accessToken st
 
 	res, err := m.authClient.VerifyToken(ctx, in)
 	if err != nil {
+		m.log.Debugf("(AuthInterceptor) Error: %v", err)
 		return "", err
 	}
 
 	if !res.GetStatus() {
+		m.log.Debugf("(AuthInterceptor) invalid token")
 		return "", fmt.Errorf("invalid token")
 	}
 

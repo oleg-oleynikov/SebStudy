@@ -11,14 +11,15 @@ import (
 )
 
 type Config struct {
-	Env              string
-	ImageUploadPath  string
-	NatsUrl          string
-	Logger           *logger.Config
-	GRPC             *GRPC
-	Mongo            *mongodb.Config
-	MongoCollections *MongoCollections
-	AuthServerURL    string
+	Env                        string
+	Logger                     *logger.Config
+	GRPC                       *GRPC
+	Mongo                      *mongodb.Config
+	MongoCollections           *MongoCollections
+	AuthServerURL              string
+	EventStoreConnectionString string
+	EventStorePrefix           string
+	EventStoreGroupName        string
 }
 
 type GRPC struct {
@@ -66,13 +67,14 @@ func InitConfig() *Config {
 	}
 
 	return &Config{
-		ImageUploadPath:  getEnv("IMAGE_UPLOAD_PATH", "./uploads"),
-		NatsUrl:          getEnv("NATS_URL", "nats://resume-nats:4225"),
-		Logger:           loggerConfig,
-		GRPC:             grpc,
-		Mongo:            mongo,
-		MongoCollections: mongoCollections,
-		AuthServerURL:    getEnv("AUTH_SERVER_URL", "sso-service:50052"),
+		Logger:                     loggerConfig,
+		GRPC:                       grpc,
+		Mongo:                      mongo,
+		MongoCollections:           mongoCollections,
+		AuthServerURL:              getEnv("AUTH_SERVER_URL", "sso-service:50052"),
+		EventStoreConnectionString: getEnv("EVENT_STORE_CONN", "esdb://eventstore.db:2113?tls=false"),
+		EventStorePrefix:           getEnv("EVENT_STORE_PREFIX", "heychar-resume-"),
+		EventStoreGroupName:        getEnv("EVENT_STORE_GROUP_NAME", "resume"),
 	}
 }
 

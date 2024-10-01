@@ -10,94 +10,62 @@ import (
 	"context"
 	"fmt"
 	"reflect"
-	"time"
+	"strings"
 
-	"github.com/nats-io/nats.go"
-	"github.com/nats-io/nats.go/jetstream"
+	"github.com/EventStore/EventStore-Client-Go/esdb"
 )
 
 type mongoProjection struct {
-	log       logger.Logger
-	cfg       config.Config
-	js        jetstream.JetStream
-	serde     eventsourcing.EventSerde
-	mongoRepo repository.ResumeRepository
+	log        logger.Logger
+	cfg        config.Config
+	esdb       *esdb.Client
+	serde      eventsourcing.EventSerde
+	resumeRepo repository.ResumeRepository
 }
 
-func NewMongoProjection(log logger.Logger, cfg config.Config, nc *nats.Conn, serde eventsourcing.EventSerde, mongoRepo repository.ResumeRepository) *mongoProjection {
-	js, err := jetstream.New(nc)
-	if err != nil {
-		log.Fatalf("(mongoProjection) Failed to get jetstream: %v", err)
-	}
-
+func NewMongoProjection(log logger.Logger, cfg config.Config, esdb *esdb.Client, serde eventsourcing.EventSerde, resumeRepo repository.ResumeRepository) *mongoProjection {
 	return &mongoProjection{
-		log:       log,
-		cfg:       cfg,
-		js:        js,
-		serde:     serde,
-		mongoRepo: mongoRepo,
+		log:        log,
+		cfg:        cfg,
+		esdb:       esdb,
+		serde:      serde,
+		resumeRepo: resumeRepo,
 	}
 }
-
 func (m *mongoProjection) Start(ctx context.Context) error {
-
-	streamConfig := jetstream.StreamConfig{
-		Name:      "projection_stream",
-		Subjects:  []string{"projection.>"},
-		Retention: jetstream.WorkQueuePolicy,
-		Storage:   jetstream.MemoryStorage,
-	}
-
-	_, err := m.js.CreateOrUpdateStream(ctx, streamConfig)
+	err := m.CreatePersistentSubscription(ctx, m.cfg.EventStoreGroupName, m.cfg.EventStorePrefix)
 	if err != nil {
-		m.log.Fatalf("Failed to create or update projection stream: %v", err)
+		return err
 	}
 
-	consumerConfig := jetstream.ConsumerConfig{
-		Name:          "projection_consumer",
-		DeliverPolicy: jetstream.DeliverAllPolicy,
-		AckPolicy:     jetstream.AckExplicitPolicy,
-		AckWait:       90 * time.Second,
-		ReplayPolicy:  jetstream.ReplayInstantPolicy,
-		Durable:       "projection_consumer",
-	}
-
-	consumer, err := m.js.CreateOrUpdateConsumer(ctx, "projection_stream", consumerConfig)
+	sub, err := m.ConnectToPersistentSubscription(ctx, m.cfg.EventStoreGroupName)
 	if err != nil {
-		m.log.Debugf("Failed to create or update consumer for projection: %v", err)
 		return err
 	}
 
 	go func() {
-		ctx := context.Background()
 		for {
-			consumerInfo, err := consumer.Info(ctx)
-			if err != nil {
-				m.log.Fatalf("Failed to get consumer info: %v", err)
+			s := sub.Recv()
+			if s.EventAppeared == nil {
+				continue
 			}
 
-			if consumerInfo.NumPending > 0 {
-				batch, err := consumer.Fetch(10, jetstream.FetchMaxWait(5*time.Second))
-				if err != nil {
-					m.log.Fatalf("Failed to batch messages for projection: %v", err)
-					break
-				}
+			eventType := s.EventAppeared.Event.EventType
 
-				for msg := range batch.Messages() {
-					event, md, err := m.serde.Deserialize(msg)
-					if err != nil {
-						msg.Nak()
-						m.log.Fatalf("Failed to deserialize msg: %v", err)
-					}
+			event, md, err := m.serde.Deserialize(s.EventAppeared)
+			if err != nil {
+				m.log.Debugf("failed to deserialize %s: %v", eventType, err)
+				continue
+			}
 
-					if err = m.When(ctx, event, md); err != nil {
-						m.log.Debugf("%v", err)
-					}
+			if err := m.When(ctx, event, md); err != nil {
+				m.log.Debugf("When error: %v", err)
+			}
 
-					msg.Ack()
-				}
-			} else {
-				time.Sleep(time.Millisecond * 30)
+			sub.Ack(s.EventAppeared)
+
+			if s.SubscriptionDropped != nil {
+				panic(s.SubscriptionDropped.Error)
 			}
 		}
 	}()
@@ -115,4 +83,41 @@ func (m *mongoProjection) When(ctx context.Context, event interface{}, md *infra
 		m.log.Debugf("(mongoProjection) [When unknown EventType] eventType: {%s}", reflect.TypeOf(event).Name())
 		return fmt.Errorf("invalid event type")
 	}
+}
+
+func (m *mongoProjection) CreatePersistentSubscription(ctx context.Context, groupName string, streamNamePrefix string) error {
+	opts := esdb.PersistentAllSubscriptionOptions{
+		From: esdb.EndPosition,
+		Filter: &esdb.SubscriptionFilter{
+			Type:     esdb.StreamFilterType,
+			Prefixes: []string{streamNamePrefix},
+		},
+	}
+
+	err := m.esdb.CreatePersistentSubscriptionAll(ctx, groupName, opts)
+	if err != nil {
+		if strings.Contains(err.Error(), "AlreadyExists") {
+			return nil
+		}
+
+		m.log.Debugf("(mongoProjection) error create persistent sub: %v", err)
+		return err
+	}
+
+	return nil
+}
+
+func (m *mongoProjection) ConnectToPersistentSubscription(ctx context.Context, groupName string) (*esdb.PersistentSubscription, error) {
+	opts := esdb.ConnectToPersistentSubscriptionOptions{}
+
+	sub, err := m.esdb.ConnectToPersistentSubscription(ctx, "$all", groupName, opts)
+	if err != nil {
+		if subscriptionError, ok := err.(*esdb.PersistentSubscriptionError); !ok || ok && (subscriptionError.Code != 6) {
+			return nil, err
+		}
+
+		return nil, err
+	}
+
+	return sub, nil
 }
