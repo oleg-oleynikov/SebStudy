@@ -1,6 +1,6 @@
 package eventsourcing
 
-import "SebStudy/internal/infrastructure"
+import "resume-server/internal/infrastructure"
 
 type AggregateStore interface {
 	Save(a AggregateRoot, m infrastructure.CommandMetadata) error

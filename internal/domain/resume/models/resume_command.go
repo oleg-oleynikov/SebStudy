@@ -1,8 +1,8 @@
 package models
 
 import (
-	"SebStudy/internal/domain/resume/events"
-	"SebStudy/internal/domain/resume/values"
+	"resume-server/internal/domain/resume/events"
+	"resume-server/internal/domain/resume/values"
 	"time"
 )
 

@@ -1,10 +1,10 @@
 package mongo_projection
 
 import (
-	"SebStudy/internal/domain/resume/events"
-	"SebStudy/internal/domain/resume/models"
-	"SebStudy/internal/infrastructure"
 	"context"
+	"resume-server/internal/domain/resume/events"
+	"resume-server/internal/domain/resume/models"
+	"resume-server/internal/infrastructure"
 )
 
 func (o *mongoProjection) onResumeCreate(ctx context.Context, event events.ResumeCreated, md *infrastructure.EventMetadata) error {

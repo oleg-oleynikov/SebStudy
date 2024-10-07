@@ -3,9 +3,9 @@ package server
 import (
 	"net"
 
-	delivery "SebStudy/internal/domain/resume/delivery/grpc"
-	"SebStudy/pb"
-	"SebStudy/pkg/interceptors"
+	delivery "resume-server/internal/domain/resume/delivery/grpc"
+	"resume-server/pb"
+	"resume-server/pkg/interceptors"
 
 	"google.golang.org/grpc"
 )
@@ -22,8 +22,6 @@ func (s *server) NewResumeGrpcServer() (func() error, *grpc.Server, error) {
 
 	resumeService := delivery.NewResumeGrpcService(s.log, s.rs)
 	pb.RegisterResumeServiceServer(grpcServer, resumeService)
-	// cloudeventService := adapters.NewCloudEventService(s.log, s.cmdDispatcher, s.cmdAdapter)
-	// pb.RegisterCloudEventServiceServer(grpcServer, cloudeventService)
 
 	go func() {
 		s.log.Infof("gRPC server is listening on port {%s}", s.cfg.GRPC.Port)

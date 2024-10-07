@@ -1,10 +1,10 @@
 package queries
 
 import (
-	"SebStudy/config"
-	"SebStudy/internal/infrastructure/eventsourcing"
-	"SebStudy/internal/infrastructure/repository"
-	"SebStudy/logger"
+	"resume-server/config"
+	"resume-server/internal/infrastructure/eventsourcing"
+	"resume-server/internal/infrastructure/repository"
+	"resume-server/logger"
 )
 
 type ResumeQueries struct {

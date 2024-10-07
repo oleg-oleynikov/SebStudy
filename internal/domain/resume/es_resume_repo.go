@@ -1,10 +1,10 @@
 package resume
 
 import (
-	"SebStudy/internal/domain/resume/models"
-	"SebStudy/internal/domain/resume/values"
-	"SebStudy/internal/infrastructure"
-	"SebStudy/internal/infrastructure/eventsourcing"
+	"resume-server/internal/domain/resume/models"
+	"resume-server/internal/domain/resume/values"
+	"resume-server/internal/infrastructure"
+	"resume-server/internal/infrastructure/eventsourcing"
 )
 
 type EsResumeRepository struct {

@@ -1,11 +1,11 @@
 package commands
 
 import (
-	"SebStudy/config"
-	"SebStudy/internal/domain/resume/values"
-	"SebStudy/internal/infrastructure"
-	"SebStudy/internal/infrastructure/eventsourcing"
-	"SebStudy/logger"
+	"resume-server/config"
+	"resume-server/internal/domain/resume/values"
+	"resume-server/internal/infrastructure"
+	"resume-server/internal/infrastructure/eventsourcing"
+	"resume-server/logger"
 )
 
 type ResumeCommands struct {

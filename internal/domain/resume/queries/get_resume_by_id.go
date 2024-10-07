@@ -1,12 +1,12 @@
 package queries
 
 import (
-	"SebStudy/config"
-	"SebStudy/internal/domain/resume/models"
-	"SebStudy/internal/infrastructure/eventsourcing"
-	"SebStudy/internal/infrastructure/repository"
-	"SebStudy/logger"
 	"context"
+	"resume-server/config"
+	"resume-server/internal/domain/resume/models"
+	"resume-server/internal/infrastructure/eventsourcing"
+	"resume-server/internal/infrastructure/repository"
+	"resume-server/logger"
 )
 
 type GetResumeByIdQueryHandler interface {

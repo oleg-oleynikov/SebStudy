@@ -1,13 +1,13 @@
 package eventsourcing
 
 import (
-	"SebStudy/internal/infrastructure"
-	"SebStudy/logger"
 	"context"
 	"errors"
 	"fmt"
 	"io"
 	"math"
+	"resume-server/internal/infrastructure"
+	"resume-server/logger"
 
 	"github.com/EventStore/EventStore-Client-Go/esdb"
 )

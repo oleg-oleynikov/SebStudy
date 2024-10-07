@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"SebStudy/internal/domain/resume/models"
 	"context"
+	"resume-server/internal/domain/resume/models"
 )
 
 type ResumeRepository interface {

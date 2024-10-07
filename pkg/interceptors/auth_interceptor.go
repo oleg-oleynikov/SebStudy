@@ -1,11 +1,17 @@
 package interceptors
 
 import (
-	"SebStudy/pb"
 	"context"
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
+	"errors"
 	"fmt"
+	"os"
 	"strings"
+	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
@@ -40,10 +46,14 @@ func (m *InterceptorManager) AuthInterceptor(
 		return nil, status.Error(codes.Unauthenticated, "missing token")
 	}
 
-	accountId, err := m.callVerifyToken(ctx, accessToken)
+	claims, err := m.verifyToken(accessToken)
 	if err != nil {
-		m.log.Debugf("AuthInterceptor. Failed to call verify token: %v")
-		return nil, status.Error(codes.Internal, "AuthInterceptor. Failed to verify token")
+		return nil, status.Errorf(codes.Unauthenticated, "failed to get claims: %v", err)
+	}
+
+	accountId, err := claims.GetSubject()
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, "missing subject")
 	}
 
 	newCtx := context.WithValue(ctx, AccountIdKey, accountId)
@@ -51,21 +61,74 @@ func (m *InterceptorManager) AuthInterceptor(
 	return handler(newCtx, req)
 }
 
-func (m *InterceptorManager) callVerifyToken(ctx context.Context, accessToken string) (string, error) {
-	in := &pb.Token{
-		Token: accessToken,
-	}
-
-	res, err := m.authClient.VerifyToken(ctx, in)
+func (m *InterceptorManager) verifyToken(token string) (jwt.MapClaims, error) {
+	publicKey, err := m.getPublicKey()
 	if err != nil {
-		m.log.Debugf("(AuthInterceptor) Error: %v", err)
-		return "", err
+		m.log.Debugf("Failed to read public key: %v", err)
+		return nil, fmt.Errorf("failed to read public key")
 	}
 
-	if !res.GetStatus() {
-		m.log.Debugf("(AuthInterceptor) invalid token")
-		return "", fmt.Errorf("invalid token")
+	parsedToken, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+
+		return publicKey, nil
+	})
+	if err != nil {
+		return nil, err
 	}
 
-	return res.GetAccountId(), nil
+	if claims, ok := parsedToken.Claims.(jwt.MapClaims); ok && parsedToken.Valid {
+		exp, ok := claims["exp"].(float64)
+		if !ok {
+			return nil, errors.New("invalid token expiration time")
+		}
+		if int64(exp) < time.Now().Unix() {
+			return nil, errors.New("token is expired")
+		}
+
+		return claims, nil
+	}
+
+	return nil, errors.New("invalid token")
 }
+
+func (m *InterceptorManager) getPublicKey() (*rsa.PublicKey, error) {
+	keyPath := m.cfg.PublicKeyPath
+	readKey, _ := os.ReadFile(keyPath)
+	block, _ := pem.Decode(readKey)
+	if block == nil {
+		return nil, errors.New("failed to parse PEM block containing the public key")
+	}
+	key, err := x509.ParsePKIXPublicKey(block.Bytes)
+	if err != nil {
+		m.log.Debugf("failed to parse public key", err)
+		return nil, err
+	}
+	publicKey, ok := key.(*rsa.PublicKey)
+	if !ok {
+		m.log.Fatalf("not an RSA public key")
+	}
+
+	return publicKey, nil
+}
+
+// func (m *InterceptorManager) callVerifyToken(ctx context.Context, accessToken string) (string, error) {
+// 	in := &pb.Token{
+// 		Token: accessToken,
+// 	}
+
+// 	res, err := m.authClient.VerifyToken(ctx, in)
+// 	if err != nil {
+// 		m.log.Debugf("(AuthInterceptor) Error: %v", err)
+// 		return "", err
+// 	}
+
+// 	if !res.GetStatus() {
+// 		m.log.Debugf("(AuthInterceptor) invalid token")
+// 		return "", fmt.Errorf("invalid token")
+// 	}
+
+// 	return res.GetAccountId(), nil
+// }

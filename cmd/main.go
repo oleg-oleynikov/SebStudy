@@ -1,10 +1,9 @@
 package main
 
 import (
-	"SebStudy/config"
-	"SebStudy/server"
-
-	"SebStudy/logger"
+	"resume-server/config"
+	"resume-server/logger"
+	"resume-server/server"
 )
 
 func main() {

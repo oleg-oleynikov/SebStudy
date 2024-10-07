@@ -1,12 +1,12 @@
 package service
 
 import (
-	"SebStudy/config"
-	"SebStudy/internal/domain/resume/commands"
-	"SebStudy/internal/domain/resume/queries"
-	"SebStudy/internal/infrastructure/eventsourcing"
-	"SebStudy/internal/infrastructure/repository"
-	"SebStudy/logger"
+	"resume-server/config"
+	"resume-server/internal/domain/resume/commands"
+	"resume-server/internal/domain/resume/queries"
+	"resume-server/internal/infrastructure/eventsourcing"
+	"resume-server/internal/infrastructure/repository"
+	"resume-server/logger"
 )
 
 type ResumeService struct {

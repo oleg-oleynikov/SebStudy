@@ -1,12 +1,12 @@
 package commands
 
 import (
-	"SebStudy/config"
-	"SebStudy/internal/domain/resume/models"
-	"SebStudy/internal/infrastructure"
-	"SebStudy/internal/infrastructure/eventsourcing"
-	"SebStudy/logger"
 	"context"
+	"resume-server/config"
+	"resume-server/internal/domain/resume/models"
+	"resume-server/internal/infrastructure"
+	"resume-server/internal/infrastructure/eventsourcing"
+	"resume-server/logger"
 )
 
 type CreateResumeCommandHandler interface {

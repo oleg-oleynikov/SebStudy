@@ -1,7 +1,7 @@
 package events
 
 import (
-	"SebStudy/internal/domain/resume/values"
+	"resume-server/internal/domain/resume/values"
 	"time"
 )
 

@@ -11,27 +11,6 @@ message Skill {
     string skill = 1;
 }
 
-// message ResumeCreated {
-//     string education = 1;
-//     string aboutMe = 2;
-//     repeated Skill skills = 3;
-//     string birthDate = 4; // YYYY-MM-DD пример: 1990-05-15
-//     string direction = 5;
-//     string aboutProjects = 6;
-//     string portfolio = 7;
-// }
-
-// message ResumeChanged {
-//     string resumeId = 1;
-//     string education = 2;
-//     string aboutMe = 3;
-//     repeated Skill skills = 4;
-//     string birthDate = 5; // YYYY-MM-DD пример: 1990-05-15
-//     string direction = 6;
-//     string aboutProjects = 7;
-//     string portfolio = 8;
-// }
-
 message Resume {
     string resumeId = 1;
     string education = 2;

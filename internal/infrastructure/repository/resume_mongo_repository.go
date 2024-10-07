@@ -1,10 +1,10 @@
 package repository
 
 import (
-	"SebStudy/config"
-	"SebStudy/internal/domain/resume/models"
-	"SebStudy/logger"
 	"context"
+	"resume-server/config"
+	"resume-server/internal/domain/resume/models"
+	"resume-server/logger"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"

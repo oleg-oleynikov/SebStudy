@@ -1,18 +1,18 @@
 package grpc
 
 import (
-	"SebStudy/internal/domain/resume/commands"
-	"SebStudy/internal/domain/resume/models"
-	"SebStudy/internal/domain/resume/queries"
-	"SebStudy/internal/domain/resume/service"
-	"SebStudy/internal/domain/resume/values"
-	"SebStudy/internal/infrastructure"
-	"SebStudy/logger"
-	"SebStudy/pb"
-	"SebStudy/pkg/interceptors"
 	"context"
 	"fmt"
 	"log"
+	"resume-server/internal/domain/resume/commands"
+	"resume-server/internal/domain/resume/models"
+	"resume-server/internal/domain/resume/queries"
+	"resume-server/internal/domain/resume/service"
+	"resume-server/internal/domain/resume/values"
+	"resume-server/internal/infrastructure"
+	"resume-server/logger"
+	"resume-server/pb"
+	"resume-server/pkg/interceptors"
 	"time"
 
 	"github.com/gofrs/uuid"

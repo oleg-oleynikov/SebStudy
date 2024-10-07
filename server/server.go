@@ -1,17 +1,17 @@
 package server
 
 import (
-	"SebStudy/config"
-	"SebStudy/internal/domain/resume"
-	"SebStudy/internal/domain/resume/service"
-	"SebStudy/internal/infrastructure/eventsourcing"
-	"SebStudy/internal/infrastructure/mongodb"
-	mongoProjection "SebStudy/internal/infrastructure/projections/mongo_projection"
-	"SebStudy/internal/infrastructure/repository"
-	"SebStudy/logger"
 	"context"
 	"os"
 	"os/signal"
+	"resume-server/config"
+	"resume-server/internal/domain/resume"
+	"resume-server/internal/domain/resume/service"
+	"resume-server/internal/infrastructure/eventsourcing"
+	"resume-server/internal/infrastructure/mongodb"
+	mongoProjection "resume-server/internal/infrastructure/projections/mongo_projection"
+	"resume-server/internal/infrastructure/repository"
+	"resume-server/logger"
 	"syscall"
 
 	"github.com/EventStore/EventStore-Client-Go/esdb"

@@ -1,8 +1,8 @@
 package eventsourcing
 
 import (
-	"SebStudy/internal/infrastructure"
-	"SebStudy/logger"
+	"resume-server/internal/infrastructure"
+	"resume-server/logger"
 )
 
 type EsAggregateStore struct {

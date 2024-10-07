@@ -1,9 +1,13 @@
 package interceptors
 
 import (
-	"SebStudy/config"
-	"SebStudy/logger"
-	"SebStudy/pb"
+	// "SebStudy/config"
+	// "SebStudy/logger"
+	// "SebStudy/pb"
+
+	"resume-server/config"
+	"resume-server/logger"
+	"resume-server/pb"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"

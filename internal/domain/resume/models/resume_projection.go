@@ -1,7 +1,7 @@
 package models
 
 import (
-	"SebStudy/pb"
+	"resume-server/pb"
 	"time"
 
 	"google.golang.org/protobuf/types/known/timestamppb"

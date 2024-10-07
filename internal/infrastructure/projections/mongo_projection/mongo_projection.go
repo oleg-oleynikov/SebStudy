@@ -1,15 +1,15 @@
 package mongo_projection
 
 import (
-	"SebStudy/config"
-	"SebStudy/internal/domain/resume/events"
-	"SebStudy/internal/infrastructure"
-	"SebStudy/internal/infrastructure/eventsourcing"
-	"SebStudy/internal/infrastructure/repository"
-	"SebStudy/logger"
 	"context"
 	"fmt"
 	"reflect"
+	"resume-server/config"
+	"resume-server/internal/domain/resume/events"
+	"resume-server/internal/infrastructure"
+	"resume-server/internal/infrastructure/eventsourcing"
+	"resume-server/internal/infrastructure/repository"
+	"resume-server/logger"
 	"strings"
 
 	"github.com/EventStore/EventStore-Client-Go/esdb"

@@ -1,9 +1,9 @@
 package config
 
 import (
-	"SebStudy/internal/infrastructure/mongodb"
-	"SebStudy/logger"
 	"os"
+	"resume-server/internal/infrastructure/mongodb"
+	"resume-server/logger"
 	"strconv"
 	"time"
 
@@ -20,6 +20,7 @@ type Config struct {
 	EventStoreConnectionString string
 	EventStorePrefix           string
 	EventStoreGroupName        string
+	PublicKeyPath              string
 }
 
 type GRPC struct {
@@ -75,6 +76,7 @@ func InitConfig() *Config {
 		EventStoreConnectionString: getEnv("EVENT_STORE_CONN", "esdb://eventstore.db:2113?tls=false"),
 		EventStorePrefix:           getEnv("EVENT_STORE_PREFIX", "heychar-resume-"),
 		EventStoreGroupName:        getEnv("EVENT_STORE_GROUP_NAME", "resume"),
+		PublicKeyPath:              getEnv("PUBLIC_KEY_PATH", "certs/jwtRSA256-public.pem"),
 	}
 }
 

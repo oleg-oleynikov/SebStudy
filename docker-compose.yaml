@@ -1,7 +1,7 @@
 # version: '3.8'
 
 services:
-  resume-server:
+  app:
     build:
       context: .
       dockerfile: ./Dockerfile
@@ -11,9 +11,22 @@ services:
       - .env
     restart: always
     depends_on:
-      - eventstore.db
-      - mongodb
-      - sso-service
+      eventstore.db:
+        condition: service_healthy
+      mongodb:
+        condition: service_started
+      sso:
+        condition: service_started
+
+  sso:
+    image: sso-server-app
+    ports:
+      - "50051:50051"
+    depends_on:
+      eventstore.db:
+        condition: service_healthy
+      mongodb:
+        condition: service_started
 
   eventstore.db:
     image: eventstore/eventstore:24.2.0-jammy
@@ -25,7 +38,7 @@ services:
       - EVENTSTORE_INSECURE=true
       - EVENTSTORE_ENABLE_ATOM_PUB_OVER_HTTP=true
     ports:
-      - "2114:2113"
+      - "2113:2113"
     volumes:
       - type: volume
         source: eventstore-volume-data
@@ -33,6 +46,12 @@ services:
       - type: volume
         source: eventstore-volume-logs
         target: /var/log/eventstore
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:2113/health/live"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
 
   mongodb:
     image: mongodb/mongodb-community-server:6.0-ubi8
@@ -40,22 +59,13 @@ services:
       - MONGODB_INITDB_ROOT_USERNAME=user
       - MONGODB_INITDB_ROOT_PASSWORD=password
     ports:
-      - "27037:27017"
+      - "27017:27017"
     volumes:
       - type: volume
         source: mongodb-volume-data
         target: /var/lib/mongodb
-  
-  sso-service:
-    image: sso-server-app
-    ports:
-      - "50052:50052"
-    depends_on:
-      - eventstore.db
-      - mongodb
-
+    
 volumes:
   mongodb-volume-data:
   eventstore-volume-data:
   eventstore-volume-logs:
-

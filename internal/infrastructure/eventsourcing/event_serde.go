@@ -1,7 +1,7 @@
 package eventsourcing
 
 import (
-	"SebStudy/internal/infrastructure"
+	"resume-server/internal/infrastructure"
 
 	"github.com/EventStore/EventStore-Client-Go/esdb"
 )
