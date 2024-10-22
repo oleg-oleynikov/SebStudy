@@ -51,8 +51,9 @@ func (m *InterceptorManager) AuthInterceptor(
 		return nil, status.Errorf(codes.Unauthenticated, "failed to get claims: %v", err)
 	}
 
-	accountId, err := claims.GetSubject()
-	if err != nil {
+	accountId, ok := claims["subjectId"].(string)
+	if !ok || accountId == "" {
+		m.log.Debugf("AuthInterceptor. Failed to get subjectId")
 		return nil, status.Error(codes.Unauthenticated, "missing subject")
 	}
 

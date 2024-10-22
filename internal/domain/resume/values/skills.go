@@ -1,6 +1,9 @@
 package values
 
-import "fmt"
+import (
+	"fmt"
+	"resume-server/pb"
+)
 
 type Skills struct {
 	Skills []Skill
@@ -30,4 +33,12 @@ func NewSkills(sk ...Skill) (*Skills, error) {
 	}
 
 	return s, nil
+}
+
+func (s *Skills) ToProto() []*pb.Skill {
+	skills := []*pb.Skill{}
+	for _, skill := range s.Skills {
+		skills = append(skills, &pb.Skill{Skill: skill.GetSkill()})
+	}
+	return skills
 }

@@ -38,6 +38,7 @@ func (s *resumeGrpcService) CreateResume(ctx context.Context, req *pb.CreateResu
 		s.log.Debugf("CreateResume. Failed to get AccountId from context")
 		return nil, fmt.Errorf("failed to get AccountId")
 	}
+	s.log.Debugf("AccountId: %s", AccountId)
 
 	query := queries.NewResumeExistsByAccountId(AccountId)
 	exists, err := s.rs.Queries.ResumeExistsByAccountId.Handle(ctx, query)
@@ -50,6 +51,7 @@ func (s *resumeGrpcService) CreateResume(ctx context.Context, req *pb.CreateResu
 		return nil, status.Error(codes.AlreadyExists, "resume already exists")
 	}
 
+	// res := &pb.ChangeResumeRes{}
 	aggregateId, _ := uuid.NewV7()
 
 	education, err := values.NewEducation(req.GetEducation())
@@ -114,7 +116,14 @@ func (s *resumeGrpcService) CreateResume(ctx context.Context, req *pb.CreateResu
 	}
 
 	return &pb.CreateResumeRes{
-		AggregateId: aggregateId.String(),
+		ResumeId:      aggregateId.String(),
+		Education:     education.GetEducation(),
+		AboutMe:       aboutMe.GetAboutMe(),
+		Skills:        skills.ToProto(),
+		BirthDate:     birthDate.GetBirthDate().Format("2006-01-15"),
+		Direction:     direction.GetDirection(),
+		AboutProjects: aboutProjects.GetAboutProjects(),
+		Portfolio:     portfolio.GetPortfolio(),
 	}, nil
 }
 
@@ -126,6 +135,18 @@ func (s *resumeGrpcService) ChangeResume(ctx context.Context, req *pb.ChangeResu
 	}
 
 	md := infrastructure.NewCommandMetadata(req.GetResumeId(), accountId)
+
+	query := queries.NewGetResumeByAccountIdQuery(accountId)
+	rp, err := s.rs.Queries.GetResumeByAccountId.Handle(ctx, query)
+	if err != nil {
+		s.log.Debugf("(GetResumeByAccountIdQuery) Error by query: %v", err)
+		return nil, fmt.Errorf("user and resume dont match")
+	} else {
+		if rp.Id != req.GetResumeId() {
+			s.log.Debugf("ChangeResume. Resume does not belong to the user")
+			return nil, fmt.Errorf("resume does not belong to the user")
+		}
+	}
 
 	education, err := values.NewEducation(req.GetEducation())
 	if err != nil {
@@ -190,7 +211,16 @@ func (s *resumeGrpcService) ChangeResume(ctx context.Context, req *pb.ChangeResu
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	return &pb.ChangeResumeRes{}, nil
+	return &pb.ChangeResumeRes{
+		ResumeId:      req.GetResumeId(),
+		Education:     education.GetEducation(),
+		AboutMe:       aboutMe.GetAboutMe(),
+		Skills:        skills.ToProto(),
+		BirthDate:     birthDate.BirthDate.Format("2006-01-15"),
+		Direction:     direction.GetDirection(),
+		AboutProjects: aboutProjects.GetAboutProjects(),
+		Portfolio:     portfolio.GetPortfolio(),
+	}, nil
 }
 
 func (s *resumeGrpcService) GetResumeByAccountId(ctx context.Context, empty *emptypb.Empty) (*pb.GetResumeByAccountIdRes, error) {
