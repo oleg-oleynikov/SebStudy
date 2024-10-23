@@ -211,7 +211,7 @@ func (s *resumeGrpcService) ChangeResume(ctx context.Context, req *pb.ChangeResu
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	return &pb.ChangeResumeRes{
+	res := &pb.ChangeResumeRes{
 		ResumeId:      req.GetResumeId(),
 		Education:     education.GetEducation(),
 		AboutMe:       aboutMe.GetAboutMe(),
@@ -220,7 +220,11 @@ func (s *resumeGrpcService) ChangeResume(ctx context.Context, req *pb.ChangeResu
 		Direction:     direction.GetDirection(),
 		AboutProjects: aboutProjects.GetAboutProjects(),
 		Portfolio:     portfolio.GetPortfolio(),
-	}, nil
+	}
+
+	s.log.Debugf("RESPONSE: %v", res)
+
+	return res, nil
 }
 
 func (s *resumeGrpcService) GetResumeByAccountId(ctx context.Context, empty *emptypb.Empty) (*pb.GetResumeByAccountIdRes, error) {
