@@ -33,36 +33,22 @@ message CreateResumeReq {
 }
 
 message CreateResumeRes {
-    string resumeId = 1;
-    string education = 2;
-    string aboutMe = 3;
-    repeated Skill skills = 4;
-    string birthDate = 5; // YYYY-MM-DD пример: 1990-05-15
-    string direction = 6;
-    string aboutProjects = 7;
-    string portfolio = 8;
+    Resume resume = 1;
 }
 
 message ChangeResumeReq {
-    string resumeId = 1;
-    string education = 2;
-    string aboutMe = 3;
+    optional string resumeId = 1;
+    optional string education = 2;
+    optional string aboutMe = 3;
     repeated Skill skills = 4;
-    string birthDate = 5; // YYYY-MM-DD пример: 1990-05-15
-    string direction = 6;
-    string aboutProjects = 7;
-    string portfolio = 8;
+    optional string birthDate = 5; // YYYY-MM-DD пример: 1990-05-15
+    optional string direction = 6;
+    optional string aboutProjects = 7;
+    optional string portfolio = 8;
 }
 
 message ChangeResumeRes {
-    string resumeId = 1;
-    string education = 2;
-    string aboutMe = 3;
-    repeated Skill skills = 4;
-    string birthDate = 5; // YYYY-MM-DD пример: 1990-05-15
-    string direction = 6;
-    string aboutProjects = 7;
-    string portfolio = 8;
+    Resume resume = 1;
 }
 
 message GetResumeByAccountIdRes{
@@ -80,6 +66,6 @@ message GetResumeByIdRes {
 service ResumeService {
     rpc CreateResume(CreateResumeReq) returns (CreateResumeRes){};
     rpc ChangeResume(ChangeResumeReq) returns (ChangeResumeRes){};
-    rpc GetResumeByAccountId(google.protobuf.Empty) returns (GetResumeByAccountIdRes){}; // Нужен токен
+    rpc GetResumeByAccountId(google.protobuf.Empty) returns (GetResumeByAccountIdRes){}; 
     rpc GetResumeById(GetResumeByIdReq) returns (GetResumeByIdRes){};
 }

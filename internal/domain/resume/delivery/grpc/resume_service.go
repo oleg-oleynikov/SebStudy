@@ -19,6 +19,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type resumeGrpcService struct {
@@ -115,15 +116,19 @@ func (s *resumeGrpcService) CreateResume(ctx context.Context, req *pb.CreateResu
 		return nil, err
 	}
 
-	return &pb.CreateResumeRes{
+	resume := &pb.Resume{
 		ResumeId:      aggregateId.String(),
 		Education:     education.GetEducation(),
 		AboutMe:       aboutMe.GetAboutMe(),
 		Skills:        skills.ToProto(),
-		BirthDate:     birthDate.GetBirthDate().Format("2006-01-15"),
+		BirthDate:     timestamppb.New(birthDate.BirthDate),
 		Direction:     direction.GetDirection(),
 		AboutProjects: aboutProjects.GetAboutProjects(),
 		Portfolio:     portfolio.GetPortfolio(),
+	}
+
+	return &pb.CreateResumeRes{
+		Resume: resume,
 	}, nil
 }
 
@@ -211,20 +216,20 @@ func (s *resumeGrpcService) ChangeResume(ctx context.Context, req *pb.ChangeResu
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	res := &pb.ChangeResumeRes{
+	resume := &pb.Resume{
 		ResumeId:      req.GetResumeId(),
 		Education:     education.GetEducation(),
 		AboutMe:       aboutMe.GetAboutMe(),
 		Skills:        skills.ToProto(),
-		BirthDate:     birthDate.BirthDate.Format("2006-01-15"),
+		BirthDate:     timestamppb.New(birthDate.BirthDate),
 		Direction:     direction.GetDirection(),
 		AboutProjects: aboutProjects.GetAboutProjects(),
 		Portfolio:     portfolio.GetPortfolio(),
 	}
 
-	s.log.Debugf("RESPONSE: %v", res)
-
-	return res, nil
+	return &pb.ChangeResumeRes{
+		Resume: resume,
+	}, nil
 }
 
 func (s *resumeGrpcService) GetResumeByAccountId(ctx context.Context, empty *emptypb.Empty) (*pb.GetResumeByAccountIdRes, error) {
