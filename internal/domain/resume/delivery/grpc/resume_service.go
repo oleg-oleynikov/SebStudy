@@ -33,7 +33,7 @@ func NewResumeGrpcService(log logger.Logger, rs *service.ResumeService) *resumeG
 	return &resumeGrpcService{log: log, rs: rs}
 }
 
-func (s *resumeGrpcService) CreateResume(ctx context.Context, req *pb.CreateResumeReq) (*pb.CreateResumeRes, error) {
+func (s *resumeGrpcService) CreateResume(ctx context.Context, req *pb.CreateResumeReq) (*pb.ResumeResponse, error) {
 	AccountId, ok := ctx.Value(interceptors.AccountIdKey).(string)
 	if !ok {
 		s.log.Debugf("CreateResume. Failed to get AccountId from context")
@@ -127,12 +127,12 @@ func (s *resumeGrpcService) CreateResume(ctx context.Context, req *pb.CreateResu
 		Portfolio:     portfolio.GetPortfolio(),
 	}
 
-	return &pb.CreateResumeRes{
+	return &pb.ResumeResponse{
 		Resume: resume,
 	}, nil
 }
 
-func (s *resumeGrpcService) ChangeResume(ctx context.Context, req *pb.ChangeResumeReq) (*pb.ChangeResumeRes, error) {
+func (s *resumeGrpcService) ChangeResume(ctx context.Context, req *pb.ChangeResumeReq) (*pb.ResumeResponse, error) {
 	accountId, ok := ctx.Value(interceptors.AccountIdKey).(string)
 	if !ok {
 		s.log.Debugf("ChangeResume. Failed to get AccountId from context")
@@ -227,12 +227,12 @@ func (s *resumeGrpcService) ChangeResume(ctx context.Context, req *pb.ChangeResu
 		Portfolio:     portfolio.GetPortfolio(),
 	}
 
-	return &pb.ChangeResumeRes{
+	return &pb.ResumeResponse{
 		Resume: resume,
 	}, nil
 }
 
-func (s *resumeGrpcService) GetResumeByAccountId(ctx context.Context, empty *emptypb.Empty) (*pb.GetResumeByAccountIdRes, error) {
+func (s *resumeGrpcService) GetResumeByAccountId(ctx context.Context, empty *emptypb.Empty) (*pb.ResumeResponse, error) {
 	accountId, ok := ctx.Value(interceptors.AccountIdKey).(string)
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "GetResumeByAccountId. Missing token")
@@ -244,19 +244,19 @@ func (s *resumeGrpcService) GetResumeByAccountId(ctx context.Context, empty *emp
 		return nil, err
 	}
 
-	return &pb.GetResumeByAccountIdRes{
+	return &pb.ResumeResponse{
 		Resume: models.ResumeProjectionToProto(rp),
 	}, nil
 }
 
-func (s *resumeGrpcService) GetResumeById(ctx context.Context, req *pb.GetResumeByIdReq) (*pb.GetResumeByIdRes, error) {
+func (s *resumeGrpcService) GetResumeById(ctx context.Context, req *pb.GetResumeByIdReq) (*pb.ResumeResponse, error) {
 	query := queries.NewGetResumeByIdQuery(req.GetResumeId())
 	rp, err := s.rs.Queries.GetResumeById.Handle(ctx, query)
 	if err != nil {
 		return nil, err
 	}
 
-	return &pb.GetResumeByIdRes{
+	return &pb.ResumeResponse{
 		Resume: models.ResumeProjectionToProto(rp),
 	}, nil
 }

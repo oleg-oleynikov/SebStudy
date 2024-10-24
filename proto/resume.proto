@@ -36,6 +36,10 @@ message CreateResumeRes {
     Resume resume = 1;
 }
 
+message ResumeResponse {
+    Resume resume = 1;
+}
+
 message ChangeResumeReq {
     optional string resumeId = 1;
     optional string education = 2;
@@ -47,25 +51,13 @@ message ChangeResumeReq {
     optional string portfolio = 8;
 }
 
-message ChangeResumeRes {
-    Resume resume = 1;
-}
-
-message GetResumeByAccountIdRes{
-    Resume resume = 1;
-}
-
 message GetResumeByIdReq {
     string resumeId = 1;
 }
 
-message GetResumeByIdRes {
-    Resume resume = 1;
-}
-
 service ResumeService {
-    rpc CreateResume(CreateResumeReq) returns (CreateResumeRes){};
-    rpc ChangeResume(ChangeResumeReq) returns (ChangeResumeRes){};
-    rpc GetResumeByAccountId(google.protobuf.Empty) returns (GetResumeByAccountIdRes){}; 
-    rpc GetResumeById(GetResumeByIdReq) returns (GetResumeByIdRes){};
+    rpc CreateResume(CreateResumeReq) returns (ResumeResponse){};
+    rpc ChangeResume(ChangeResumeReq) returns (ResumeResponse){};
+    rpc GetResumeByAccountId(google.protobuf.Empty) returns (ResumeResponse){}; 
+    rpc GetResumeById(GetResumeByIdReq) returns (ResumeResponse){};
 }

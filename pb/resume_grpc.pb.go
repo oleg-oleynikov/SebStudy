@@ -30,10 +30,10 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ResumeServiceClient interface {
-	CreateResume(ctx context.Context, in *CreateResumeReq, opts ...grpc.CallOption) (*CreateResumeRes, error)
-	ChangeResume(ctx context.Context, in *ChangeResumeReq, opts ...grpc.CallOption) (*ChangeResumeRes, error)
-	GetResumeByAccountId(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetResumeByAccountIdRes, error)
-	GetResumeById(ctx context.Context, in *GetResumeByIdReq, opts ...grpc.CallOption) (*GetResumeByIdRes, error)
+	CreateResume(ctx context.Context, in *CreateResumeReq, opts ...grpc.CallOption) (*ResumeResponse, error)
+	ChangeResume(ctx context.Context, in *ChangeResumeReq, opts ...grpc.CallOption) (*ResumeResponse, error)
+	GetResumeByAccountId(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ResumeResponse, error)
+	GetResumeById(ctx context.Context, in *GetResumeByIdReq, opts ...grpc.CallOption) (*ResumeResponse, error)
 }
 
 type resumeServiceClient struct {
@@ -44,9 +44,9 @@ func NewResumeServiceClient(cc grpc.ClientConnInterface) ResumeServiceClient {
 	return &resumeServiceClient{cc}
 }
 
-func (c *resumeServiceClient) CreateResume(ctx context.Context, in *CreateResumeReq, opts ...grpc.CallOption) (*CreateResumeRes, error) {
+func (c *resumeServiceClient) CreateResume(ctx context.Context, in *CreateResumeReq, opts ...grpc.CallOption) (*ResumeResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CreateResumeRes)
+	out := new(ResumeResponse)
 	err := c.cc.Invoke(ctx, ResumeService_CreateResume_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -54,9 +54,9 @@ func (c *resumeServiceClient) CreateResume(ctx context.Context, in *CreateResume
 	return out, nil
 }
 
-func (c *resumeServiceClient) ChangeResume(ctx context.Context, in *ChangeResumeReq, opts ...grpc.CallOption) (*ChangeResumeRes, error) {
+func (c *resumeServiceClient) ChangeResume(ctx context.Context, in *ChangeResumeReq, opts ...grpc.CallOption) (*ResumeResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ChangeResumeRes)
+	out := new(ResumeResponse)
 	err := c.cc.Invoke(ctx, ResumeService_ChangeResume_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -64,9 +64,9 @@ func (c *resumeServiceClient) ChangeResume(ctx context.Context, in *ChangeResume
 	return out, nil
 }
 
-func (c *resumeServiceClient) GetResumeByAccountId(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetResumeByAccountIdRes, error) {
+func (c *resumeServiceClient) GetResumeByAccountId(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ResumeResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetResumeByAccountIdRes)
+	out := new(ResumeResponse)
 	err := c.cc.Invoke(ctx, ResumeService_GetResumeByAccountId_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -74,9 +74,9 @@ func (c *resumeServiceClient) GetResumeByAccountId(ctx context.Context, in *empt
 	return out, nil
 }
 
-func (c *resumeServiceClient) GetResumeById(ctx context.Context, in *GetResumeByIdReq, opts ...grpc.CallOption) (*GetResumeByIdRes, error) {
+func (c *resumeServiceClient) GetResumeById(ctx context.Context, in *GetResumeByIdReq, opts ...grpc.CallOption) (*ResumeResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetResumeByIdRes)
+	out := new(ResumeResponse)
 	err := c.cc.Invoke(ctx, ResumeService_GetResumeById_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -88,10 +88,10 @@ func (c *resumeServiceClient) GetResumeById(ctx context.Context, in *GetResumeBy
 // All implementations must embed UnimplementedResumeServiceServer
 // for forward compatibility
 type ResumeServiceServer interface {
-	CreateResume(context.Context, *CreateResumeReq) (*CreateResumeRes, error)
-	ChangeResume(context.Context, *ChangeResumeReq) (*ChangeResumeRes, error)
-	GetResumeByAccountId(context.Context, *emptypb.Empty) (*GetResumeByAccountIdRes, error)
-	GetResumeById(context.Context, *GetResumeByIdReq) (*GetResumeByIdRes, error)
+	CreateResume(context.Context, *CreateResumeReq) (*ResumeResponse, error)
+	ChangeResume(context.Context, *ChangeResumeReq) (*ResumeResponse, error)
+	GetResumeByAccountId(context.Context, *emptypb.Empty) (*ResumeResponse, error)
+	GetResumeById(context.Context, *GetResumeByIdReq) (*ResumeResponse, error)
 	mustEmbedUnimplementedResumeServiceServer()
 }
 
@@ -99,16 +99,16 @@ type ResumeServiceServer interface {
 type UnimplementedResumeServiceServer struct {
 }
 
-func (UnimplementedResumeServiceServer) CreateResume(context.Context, *CreateResumeReq) (*CreateResumeRes, error) {
+func (UnimplementedResumeServiceServer) CreateResume(context.Context, *CreateResumeReq) (*ResumeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateResume not implemented")
 }
-func (UnimplementedResumeServiceServer) ChangeResume(context.Context, *ChangeResumeReq) (*ChangeResumeRes, error) {
+func (UnimplementedResumeServiceServer) ChangeResume(context.Context, *ChangeResumeReq) (*ResumeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ChangeResume not implemented")
 }
-func (UnimplementedResumeServiceServer) GetResumeByAccountId(context.Context, *emptypb.Empty) (*GetResumeByAccountIdRes, error) {
+func (UnimplementedResumeServiceServer) GetResumeByAccountId(context.Context, *emptypb.Empty) (*ResumeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetResumeByAccountId not implemented")
 }
-func (UnimplementedResumeServiceServer) GetResumeById(context.Context, *GetResumeByIdReq) (*GetResumeByIdRes, error) {
+func (UnimplementedResumeServiceServer) GetResumeById(context.Context, *GetResumeByIdReq) (*ResumeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetResumeById not implemented")
 }
 func (UnimplementedResumeServiceServer) mustEmbedUnimplementedResumeServiceServer() {}
