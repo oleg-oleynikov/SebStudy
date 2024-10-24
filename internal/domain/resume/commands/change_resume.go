@@ -36,7 +36,7 @@ func (c *changeResumeCommandHandler) Handle(ctx context.Context, command *Change
 
 	resume.Changed = false // TODO: по хорошему чет с этим сделать
 
-	resume.ChangeResume(command.Education, command.AboutMe, command.Skills, command.BirthDate, command.Direction, command.AboutProjects, command.Portfolio)
+	resume.ChangeResume(command.AboutMe, command.Skills, command.Direction, command.AboutProjects, command.Portfolio)
 
 	if !resume.Changed {
 		return fmt.Errorf("no changes detected")

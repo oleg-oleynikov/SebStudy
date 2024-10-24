@@ -31,7 +31,7 @@ func (c *createResumeCommandHandler) Handle(ctx context.Context, command *Create
 	resume := models.NewResume()
 	resume.Id = command.GetAggregateId()
 
-	if err := resume.CreateResume(command.Education, command.AboutMe, command.Skills, command.BirthDate, command.Direction, command.AboutProjects, command.Portfolio); err != nil {
+	if err := resume.CreateResume(command.AboutMe, command.Skills, command.Direction, command.AboutProjects, command.Portfolio); err != nil {
 		return err
 	}
 

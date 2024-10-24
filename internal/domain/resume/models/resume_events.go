@@ -7,22 +7,14 @@ import (
 
 func (r *Resume) ResumeCreated(e events.ResumeCreated) {
 	r.Id = e.ResumeId
-	r.education = e.Education
 	r.aboutMe = e.AboutMe
 	r.skills = e.Skills
-	r.birthDate = e.BirthDate
 	r.direction = e.Direction
 	r.aboutProjects = e.AboutProjects
 	r.portfolio = e.Portfolio
 }
 
 func (r *Resume) ResumeChanged(e events.ResumeChanged) {
-	education := e.Education.GetEducation()
-	if education != "" && r.education.GetEducation() != education {
-		r.education = e.Education
-		r.Changed = true
-	}
-
 	aboutMe := e.AboutMe.GetAboutMe()
 	if aboutMe != "" && r.aboutMe.GetAboutMe() != aboutMe {
 		r.aboutMe = e.AboutMe
@@ -32,12 +24,6 @@ func (r *Resume) ResumeChanged(e events.ResumeChanged) {
 	newSkills := e.Skills.GetSkills()
 	if len(newSkills) != 0 || !EqualSkills(newSkills, r.skills.GetSkills()) {
 		r.skills = e.Skills
-		r.Changed = true
-	}
-
-	birthDate := e.BirthDate.GetBirthDate()
-	if birthDate.Compare(r.birthDate.GetBirthDate()) != 0 {
-		r.birthDate = e.BirthDate
 		r.Changed = true
 	}
 

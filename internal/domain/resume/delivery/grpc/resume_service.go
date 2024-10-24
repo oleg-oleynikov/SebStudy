@@ -3,7 +3,6 @@ package grpc
 import (
 	"context"
 	"fmt"
-	"log"
 	"resume-server/internal/domain/resume/commands"
 	"resume-server/internal/domain/resume/models"
 	"resume-server/internal/domain/resume/queries"
@@ -13,13 +12,11 @@ import (
 	"resume-server/logger"
 	"resume-server/pb"
 	"resume-server/pkg/interceptors"
-	"time"
 
 	"github.com/gofrs/uuid"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type resumeGrpcService struct {
@@ -52,14 +49,7 @@ func (s *resumeGrpcService) CreateResume(ctx context.Context, req *pb.CreateResu
 		return nil, status.Error(codes.AlreadyExists, "resume already exists")
 	}
 
-	// res := &pb.ChangeResumeRes{}
 	aggregateId, _ := uuid.NewV7()
-
-	education, err := values.NewEducation(req.GetEducation())
-	if err != nil {
-		s.log.Debugf("Failed to create education: %v", err)
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
 
 	aboutMe, err := values.NewAboutMe(req.GetAboutMe())
 	if err != nil {
@@ -76,18 +66,6 @@ func (s *resumeGrpcService) CreateResume(ctx context.Context, req *pb.CreateResu
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 		skills.AppendSkills(*skill)
-	}
-
-	timeBirth, err := time.Parse("2006-01-02", req.GetBirthDate())
-	if err != nil {
-		s.log.Debugf("Failed to create timeBirth: %v", err)
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	birthDate, err := values.NewBirthDate(timeBirth)
-	if err != nil {
-		s.log.Debugf("Failed to create: %v", err)
-		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	direction, err := values.NewDirection(req.GetDirection())
@@ -108,7 +86,7 @@ func (s *resumeGrpcService) CreateResume(ctx context.Context, req *pb.CreateResu
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	command := commands.NewCreateResume(aggregateId.String(), *education, *aboutMe, *skills, *birthDate, *direction, *aboutProjects, *portfolio)
+	command := commands.NewCreateResume(aggregateId.String(), *aboutMe, *skills, *direction, *aboutProjects, *portfolio)
 
 	md := infrastructure.NewCommandMetadata(aggregateId.String(), AccountId)
 
@@ -118,10 +96,8 @@ func (s *resumeGrpcService) CreateResume(ctx context.Context, req *pb.CreateResu
 
 	resume := &pb.Resume{
 		ResumeId:      aggregateId.String(),
-		Education:     education.GetEducation(),
 		AboutMe:       aboutMe.GetAboutMe(),
 		Skills:        skills.ToProto(),
-		BirthDate:     timestamppb.New(birthDate.BirthDate),
 		Direction:     direction.GetDirection(),
 		AboutProjects: aboutProjects.GetAboutProjects(),
 		Portfolio:     portfolio.GetPortfolio(),
@@ -153,12 +129,6 @@ func (s *resumeGrpcService) ChangeResume(ctx context.Context, req *pb.ChangeResu
 		}
 	}
 
-	education, err := values.NewEducation(req.GetEducation())
-	if err != nil {
-		s.log.Debugf("Failed to create education: %v", err)
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
 	aboutMe, err := values.NewAboutMe(req.GetAboutMe())
 	if err != nil {
 		s.log.Debugf("Failed to create aboutMe: %v", err)
@@ -174,22 +144,6 @@ func (s *resumeGrpcService) ChangeResume(ctx context.Context, req *pb.ChangeResu
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 		skills.AppendSkills(*skill)
-	}
-
-	birthDate := &values.BirthDate{}
-	if req.GetBirthDate() != "" {
-		timeBirth, err := time.Parse("2006-01-02", req.GetBirthDate())
-		log.Println("timeBirth")
-		if err != nil {
-			s.log.Debugf("Failed to create timeBirth: %v", err)
-			return nil, status.Error(codes.InvalidArgument, err.Error())
-		}
-
-		birthDate, err = values.NewBirthDate(timeBirth)
-		if err != nil {
-			s.log.Debugf("Failed to create: %v", err)
-			return nil, status.Error(codes.InvalidArgument, err.Error())
-		}
 	}
 
 	direction, err := values.NewDirection(req.GetDirection())
@@ -210,7 +164,7 @@ func (s *resumeGrpcService) ChangeResume(ctx context.Context, req *pb.ChangeResu
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	command := commands.NewChangeResume(req.GetResumeId(), *education, *aboutMe, *skills, *birthDate, *direction, *aboutProjects, *portfolio)
+	command := commands.NewChangeResume(req.GetResumeId(), *aboutMe, *skills, *direction, *aboutProjects, *portfolio)
 
 	if err := s.rs.Commands.ChangeResume.Handle(ctx, command, md); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -218,10 +172,8 @@ func (s *resumeGrpcService) ChangeResume(ctx context.Context, req *pb.ChangeResu
 
 	resume := &pb.Resume{
 		ResumeId:      req.GetResumeId(),
-		Education:     education.GetEducation(),
 		AboutMe:       aboutMe.GetAboutMe(),
 		Skills:        skills.ToProto(),
-		BirthDate:     timestamppb.New(birthDate.BirthDate),
 		Direction:     direction.GetDirection(),
 		AboutProjects: aboutProjects.GetAboutProjects(),
 		Portfolio:     portfolio.GetPortfolio(),

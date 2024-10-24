@@ -9,10 +9,8 @@ import (
 type Resume struct {
 	eventsourcing.AggregateRootBase
 
-	education     values.Education
 	aboutMe       values.AboutMe
 	skills        values.Skills
-	birthDate     values.BirthDate
 	direction     values.Direction
 	aboutProjects values.AboutProjects
 	portfolio     values.Portfolio

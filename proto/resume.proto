@@ -1,7 +1,6 @@
 syntax = "proto3";
 
 import "google/protobuf/empty.proto";
-import "google/protobuf/timestamp.proto";
 
 package resume;
 
@@ -13,23 +12,19 @@ message Skill {
 
 message Resume {
     string resumeId = 1;
-    string education = 2;
-    string aboutMe = 3;
-    repeated Skill skills = 4;
-    google.protobuf.Timestamp birthDate = 5; // YYYY-MM-DD пример: 1990-05-15
-    string direction = 6;
-    string aboutProjects = 7;
-    string portfolio = 8;
+    string aboutMe = 2;
+    repeated Skill skills = 3;
+    string direction = 4;
+    string aboutProjects = 5;
+    string portfolio = 6;
 }
 
 message CreateResumeReq {
-    string education = 1;
-    string aboutMe = 2;
-    repeated Skill skills = 3;
-    string birthDate = 4; // YYYY-MM-DD пример: 1990-05-15
-    string direction = 5;
-    string aboutProjects = 6;
-    string portfolio = 7;
+    string aboutMe = 1;
+    repeated Skill skills = 2;
+    string direction = 3;
+    string aboutProjects = 4;
+    string portfolio = 5;
 }
 
 message CreateResumeRes {
@@ -42,13 +37,11 @@ message ResumeResponse {
 
 message ChangeResumeReq {
     optional string resumeId = 1;
-    optional string education = 2;
-    optional string aboutMe = 3;
-    repeated Skill skills = 4;
-    optional string birthDate = 5; // YYYY-MM-DD пример: 1990-05-15
-    optional string direction = 6;
-    optional string aboutProjects = 7;
-    optional string portfolio = 8;
+    optional string aboutMe = 2;
+    repeated Skill skills = 3;
+    optional string direction = 4;
+    optional string aboutProjects = 5;
+    optional string portfolio = 6;
 }
 
 message GetResumeByIdReq {

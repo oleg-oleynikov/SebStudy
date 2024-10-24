@@ -15,10 +15,8 @@ func (o *mongoProjection) onResumeCreate(ctx context.Context, event events.Resum
 
 	rp := &models.ResumeProjection{
 		Id:            event.ResumeId,
-		Education:     event.Education.GetEducation(),
 		AboutMe:       event.AboutMe.GetAboutMe(),
 		Skills:        skills,
-		BirthDate:     event.BirthDate.GetBirthDate(),
 		Direction:     event.Direction.GetDirection(),
 		AboutProjects: event.AboutProjects.GetAboutProjects(),
 		Portfolio:     event.Portfolio.GetPortfolio(),
@@ -36,10 +34,8 @@ func (o *mongoProjection) onResumeChanged(ctx context.Context, event events.Resu
 
 	rp := &models.ResumeProjection{
 		Id:            event.ResumeId,
-		Education:     event.Education.GetEducation(),
 		AboutMe:       event.AboutMe.GetAboutMe(),
 		Skills:        skills,
-		BirthDate:     event.BirthDate.GetBirthDate(),
 		Direction:     event.Direction.GetDirection(),
 		AboutProjects: event.AboutProjects.GetAboutProjects(),
 		Portfolio:     event.Portfolio.GetPortfolio(),

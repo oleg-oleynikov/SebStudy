@@ -25,10 +25,8 @@ func NewResumeCommands(log logger.Logger, cfg *config.Config, es eventsourcing.A
 type CreateResume struct {
 	infrastructure.BaseCommand
 
-	Education     values.Education
 	AboutMe       values.AboutMe
 	Skills        values.Skills
-	BirthDate     values.BirthDate
 	Direction     values.Direction
 	AboutProjects values.AboutProjects
 	Portfolio     values.Portfolio
@@ -36,20 +34,16 @@ type CreateResume struct {
 
 func NewCreateResume(
 	resumeId string,
-	education values.Education,
 	aboutMe values.AboutMe,
 	skills values.Skills,
-	birthDate values.BirthDate,
 	direction values.Direction,
 	aboutProjects values.AboutProjects,
 	portfolio values.Portfolio,
 ) *CreateResume {
 	return &CreateResume{
 		BaseCommand:   infrastructure.NewBaseCommand(resumeId),
-		Education:     education,
 		AboutMe:       aboutMe,
 		Skills:        skills,
-		BirthDate:     birthDate,
 		Direction:     direction,
 		AboutProjects: aboutProjects,
 		Portfolio:     portfolio,
@@ -58,10 +52,8 @@ func NewCreateResume(
 
 type ChangeResume struct {
 	infrastructure.BaseCommand
-	Education     values.Education
 	AboutMe       values.AboutMe
 	Skills        values.Skills
-	BirthDate     values.BirthDate
 	Direction     values.Direction
 	AboutProjects values.AboutProjects
 	Portfolio     values.Portfolio
@@ -69,20 +61,16 @@ type ChangeResume struct {
 
 func NewChangeResume(
 	resumeId string,
-	education values.Education,
 	aboutMe values.AboutMe,
 	skills values.Skills,
-	birthDate values.BirthDate,
 	direction values.Direction,
 	aboutProjects values.AboutProjects,
 	portfolio values.Portfolio,
 ) *ChangeResume {
 	return &ChangeResume{
 		BaseCommand:   infrastructure.NewBaseCommand(resumeId),
-		Education:     education,
 		AboutMe:       aboutMe,
 		Skills:        skills,
-		BirthDate:     birthDate,
 		Direction:     direction,
 		AboutProjects: aboutProjects,
 		Portfolio:     portfolio,

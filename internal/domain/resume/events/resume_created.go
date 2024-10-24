@@ -7,10 +7,8 @@ import (
 
 type ResumeCreated struct {
 	ResumeId      string
-	Education     values.Education
 	AboutMe       values.AboutMe
 	Skills        values.Skills
-	BirthDate     values.BirthDate
 	Direction     values.Direction
 	AboutProjects values.AboutProjects
 	Portfolio     values.Portfolio
@@ -19,10 +17,8 @@ type ResumeCreated struct {
 
 func NewResumeCreated(
 	ResumeId string,
-	Education values.Education,
 	AboutMe values.AboutMe,
 	Skills values.Skills,
-	BirthDate values.BirthDate,
 	Direction values.Direction,
 	AboutProjects values.AboutProjects,
 	Portfolio values.Portfolio,
@@ -30,10 +26,8 @@ func NewResumeCreated(
 ) ResumeCreated {
 	return ResumeCreated{
 		ResumeId:      ResumeId,
-		Education:     Education,
 		AboutMe:       AboutMe,
 		Skills:        Skills,
-		BirthDate:     BirthDate,
 		Direction:     Direction,
 		AboutProjects: AboutProjects,
 		Portfolio:     Portfolio,

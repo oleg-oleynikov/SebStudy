@@ -18,14 +18,10 @@ func RegisterResumeMappingTypes(tm *eventsourcing.TypeMapper) {
 				skills = append(skills, values.Skill{Skill: s.(string)})
 			}
 
-			birthDate, _ := time.Parse("2006-01-02T15:04:05Z", d["birthDate"].(string))
-
 			return events.ResumeCreated{
 				ResumeId:      d["resumeId"].(string),
-				Education:     values.Education{Education: d["education"].(string)},
 				AboutMe:       values.AboutMe{AboutMe: d["aboutMe"].(string)},
 				Skills:        values.Skills{Skills: skills},
-				BirthDate:     values.BirthDate{BirthDate: birthDate},
 				Direction:     values.Direction{Direction: d["direction"].(string)},
 				AboutProjects: values.AboutProjects{AboutProjects: d["aboutProjects"].(string)},
 				Portfolio:     values.Portfolio{Portfolio: d["portfolio"].(string)},
@@ -42,10 +38,8 @@ func RegisterResumeMappingTypes(tm *eventsourcing.TypeMapper) {
 			return "ResumeCreated",
 				map[string]interface{}{
 					"resumeId":      event.ResumeId,
-					"education":     event.Education.GetEducation(),
 					"aboutMe":       event.AboutMe.GetAboutMe(),
 					"skills":        skills,
-					"birthDate":     event.BirthDate.GetBirthDate(),
 					"direction":     event.Direction.GetDirection(),
 					"aboutProjects": event.AboutProjects.GetAboutProjects(),
 					"portfolio":     event.Portfolio.GetPortfolio(),
@@ -62,18 +56,10 @@ func RegisterResumeMappingTypes(tm *eventsourcing.TypeMapper) {
 				skills = append(skills, values.Skill{Skill: s.(string)})
 			}
 
-			var birthDate time.Time
-			birthDateStr := d["birthDate"].(string)
-			if birthDateStr != "" {
-				birthDate, _ = time.Parse("2006-01-02T15:04:05Z", d["birthDate"].(string))
-			}
-
 			return events.ResumeChanged{
 				ResumeId:      d["resumeId"].(string),
-				Education:     values.Education{Education: d["education"].(string)},
 				AboutMe:       values.AboutMe{AboutMe: d["aboutMe"].(string)},
 				Skills:        values.Skills{Skills: skills},
-				BirthDate:     values.BirthDate{BirthDate: birthDate},
 				Direction:     values.Direction{Direction: d["direction"].(string)},
 				AboutProjects: values.AboutProjects{AboutProjects: d["aboutProjects"].(string)},
 				Portfolio:     values.Portfolio{Portfolio: d["portfolio"].(string)},
@@ -90,10 +76,8 @@ func RegisterResumeMappingTypes(tm *eventsourcing.TypeMapper) {
 			return "ResumeChanged",
 				map[string]interface{}{
 					"resumeId":      event.ResumeId,
-					"education":     event.Education.GetEducation(),
 					"aboutMe":       event.AboutMe.GetAboutMe(),
 					"skills":        skills,
-					"birthDate":     event.BirthDate.GetBirthDate(),
 					"direction":     event.Direction.GetDirection(),
 					"aboutProjects": event.AboutProjects.GetAboutProjects(),
 					"portfolio":     event.Portfolio.GetPortfolio(),
