@@ -68,6 +68,10 @@ func (s *resumeGrpcService) CreateResume(ctx context.Context, req *pb.CreateResu
 		skills.AppendSkills(*skill)
 	}
 
+	if len(skills.Skills) == 0 {
+		return nil, status.Error(codes.InvalidArgument, "Skills doesnt be empty")
+	}
+
 	direction, err := values.NewDirection(req.GetDirection())
 	if err != nil {
 		s.log.Debugf("Failed to create direction: %v", err)

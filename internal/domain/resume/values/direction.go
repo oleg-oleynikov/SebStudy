@@ -2,6 +2,7 @@ package values
 
 import (
 	"errors"
+	"fmt"
 )
 
 type Direction struct {
@@ -9,7 +10,11 @@ type Direction struct {
 }
 
 func NewDirection(direction string) (*Direction, error) {
-	if len(direction) > 50 {
+	lengthDirection := len(direction)
+	if lengthDirection == 0 {
+		return nil, fmt.Errorf("direction doesnt be empty")
+	}
+	if lengthDirection > 50 {
 		return nil, errors.New("too much symbols (max: 50)")
 	}
 
